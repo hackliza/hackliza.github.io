@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Hackliza</title>
-    <link>http://example.org/</link>
+    <link>https://hackliza.github.io/</link>
     <description>Recent content on Hackliza</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>gl</language>
     <lastBuildDate>Sun, 04 Oct 2020 17:46:44 +0200</lastBuildDate>
     
-	<atom:link href="http://example.org/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://hackliza.github.io/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>E ti cantas vacas tes?</title>
-      <link>http://example.org/posts/vacas/</link>
+      <link>https://hackliza.github.io/posts/vacas/</link>
       <pubDate>Sun, 04 Oct 2020 17:46:44 +0200</pubDate>
       
-      <guid>http://example.org/posts/vacas/</guid>
+      <guid>https://hackliza.github.io/posts/vacas/</guid>
       <description>Ti amigo meu, de quen ves sendo?
   miña nai
   meu pai
@@ -27,10 +27,10 @@ def ola_neno(): print(&amp;#34;Ola neno&amp;#34;) ola_neno()   Non me negarás c
     
     <item>
       <title>Parto o chorizo neno</title>
-      <link>http://example.org/posts/chourizo/</link>
+      <link>https://hackliza.github.io/posts/chourizo/</link>
       <pubDate>Sun, 04 Oct 2020 17:46:44 +0200</pubDate>
       
-      <guid>http://example.org/posts/chourizo/</guid>
+      <guid>https://hackliza.github.io/posts/chourizo/</guid>
       <description>Que tal andas raparigo?</description>
     </item>
     

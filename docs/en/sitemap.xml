@@ -3,90 +3,90 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>http://example.org/en/</loc>
+    <loc>https://hackliza.github.io/en/</loc>
     <lastmod>2020-10-04T17:46:44+02:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="gl"
-                href="http://example.org/"
+                href="https://hackliza.github.io/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://example.org/en/"
+                href="https://hackliza.github.io/en/"
                 />
   </url>
   
   <url>
-    <loc>http://example.org/en/posts/vacas/</loc>
+    <loc>https://hackliza.github.io/en/posts/vacas/</loc>
     <lastmod>2020-10-04T17:46:44+02:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="gl"
-                href="http://example.org/posts/vacas/"
+                href="https://hackliza.github.io/posts/vacas/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://example.org/en/posts/vacas/"
+                href="https://hackliza.github.io/en/posts/vacas/"
                 />
   </url>
   
   <url>
-    <loc>http://example.org/en/posts/</loc>
+    <loc>https://hackliza.github.io/en/posts/</loc>
     <lastmod>2020-10-04T17:46:44+02:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="gl"
-                href="http://example.org/posts/"
+                href="https://hackliza.github.io/posts/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://example.org/en/posts/"
+                href="https://hackliza.github.io/en/posts/"
                 />
   </url>
   
   <url>
-    <loc>http://example.org/en/posts/chourizo/</loc>
+    <loc>https://hackliza.github.io/en/posts/chourizo/</loc>
     <lastmod>2020-10-04T17:44:52+02:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="gl"
-                href="http://example.org/posts/chourizo/"
+                href="https://hackliza.github.io/posts/chourizo/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://example.org/en/posts/chourizo/"
+                href="https://hackliza.github.io/en/posts/chourizo/"
                 />
   </url>
   
   <url>
-    <loc>http://example.org/en/categories/</loc>
+    <loc>https://hackliza.github.io/en/categories/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="gl"
-                href="http://example.org/categories/"
+                href="https://hackliza.github.io/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://example.org/en/categories/"
+                href="https://hackliza.github.io/en/categories/"
                 />
   </url>
   
   <url>
-    <loc>http://example.org/en/tags/</loc>
+    <loc>https://hackliza.github.io/en/tags/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="gl"
-                href="http://example.org/tags/"
+                href="https://hackliza.github.io/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://example.org/en/tags/"
+                href="https://hackliza.github.io/en/tags/"
                 />
   </url>
   

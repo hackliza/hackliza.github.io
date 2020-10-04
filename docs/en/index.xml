@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Hackliza</title>
-    <link>http://example.org/en/</link>
+    <link>https://hackliza.github.io/en/</link>
     <description>Recent content on Hackliza</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>gl</language>
     <lastBuildDate>Sun, 04 Oct 2020 17:46:44 +0200</lastBuildDate>
     
-	<atom:link href="http://example.org/en/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://hackliza.github.io/en/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>How many cows you have?</title>
-      <link>http://example.org/en/posts/vacas/</link>
+      <link>https://hackliza.github.io/en/posts/vacas/</link>
       <pubDate>Sun, 04 Oct 2020 17:46:44 +0200</pubDate>
       
-      <guid>http://example.org/en/posts/vacas/</guid>
+      <guid>https://hackliza.github.io/en/posts/vacas/</guid>
       <description> There are 3 types of cows:
   blond
   brunete
@@ -26,10 +26,10 @@
     
     <item>
       <title>I break my chorizo kid</title>
-      <link>http://example.org/en/posts/chourizo/</link>
+      <link>https://hackliza.github.io/en/posts/chourizo/</link>
       <pubDate>Sun, 04 Oct 2020 17:44:52 +0200</pubDate>
       
-      <guid>http://example.org/en/posts/chourizo/</guid>
+      <guid>https://hackliza.github.io/en/posts/chourizo/</guid>
       <description>hey, how are you?</description>
     </item>
     
