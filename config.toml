@@ -5,6 +5,8 @@ theme = "beautifulhugo"
 
 DefaultContentLanguage = "gl"
 
+publishDir = "docs"
+
 [Params]
 subtitle = "Hacking na Galiza"
 logo = "img/hackliza.png"
