@@ -1,0 +1,74 @@
+# Content
+- id: dateFormat
+  translation: "2 de xaneiro, 2006"
+- id: shortdateFormat
+  translation: "2 Jan, 2006 15:04:05"
+- id: postedOnDate
+  translation: "Publicado o {{ .Count }}"
+- id: lastModified
+  translation: "(Última modificación en {{ .Count }})"
+- id: translationsLabel
+  translation: "Outros idiomas: "
+- id: translationsSeparator
+  translation: ", "
+- id: readMore
+  translation: "Leer máis"
+- id: olderPosts
+  translation: "Artigos anteriores"
+- id: newerPosts
+  translation: "Artigos siguientes"
+- id: previousPost
+  translation: "Artigo anterior"
+- id: nextPost
+  translation: "Artigo siguiente"
+- id: readTime
+  translation: "minutos"
+- id: words
+  translation: "palabras"
+
+
+# 404 page
+- id: pageNotFound
+  translation: "¡Vaia! Esta páxina non existe (erro 404)"
+
+# Footer
+- id: poweredBy # Accepts HTML
+  translation: '<a href="https://gohugo.io">Hugo v{{ .Site.Hugo.Version }}</a> alimentada &nbsp;&bull;&nbsp; Tema <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adaptado de <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>'
+
+# Navigation
+- id: toggleNavigation
+  translation: "Conmuta navegación"
+- id: languageSwitcherLabel
+  translation: "Idioma"
+- id: gcseLabelShort
+  translation: "Buscar"
+- id: gcseLabelLong
+  translation: "Buscar en {{ .Site.Title }}"
+- id: gcseClose
+  translation: "Pechar"
+
+# Staticman
+- id: noComment
+  translation: "Sen comentarios"
+- id: oneComment
+  translation: "comentario"
+- id: moreComment
+  translation: "comentarios"
+- id: useMarkdown
+  translation: "Podes usar a sintaxis de Markdown"
+- id: yourName
+  translation: "Teu nome"
+- id: yourEmail
+  translation: "Teu correo electrónico"
+- id: yourWebsite
+  translation: "Teu sitio web"
+
+# Delayed Disqus
+- id: show
+  translation: "Amosar"
+- id: comments
+  translation: "comentarios" 
+  
+# Related posts
+- id: seeAlso
+  translation: "Ver tamén"

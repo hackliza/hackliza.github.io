@@ -1,0 +1,18 @@
+baseURL = "http://example.org/"
+languageCode = "gl"
+title = "Hackliza"
+theme = "beautifulhugo"
+
+DefaultContentLanguage = "gl"
+
+[Params]
+subtitle = "Hacking na Galiza"
+logo = "img/hackliza.png"
+favicon = "img/hackliza.png"
+
+[languages]
+[languages.gl]
+contentDir = "content/gl"
+
+[languages.en]
+contentDir = "content/en"
