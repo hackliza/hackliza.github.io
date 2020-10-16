@@ -1,4 +1,4 @@
-baseURL = "https://hackliza.github.io/"
+baseURL = "https://hackliza.gal/"
 languageCode = "gl"
 title = "Hackliza"
 theme = "beautifulhugo"
