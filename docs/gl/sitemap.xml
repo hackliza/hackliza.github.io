@@ -3,90 +3,118 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://hackliza.github.io/posts/vacas/</loc>
+    <loc>https://hackliza.gal/posts/vacas/</loc>
     <lastmod>2020-10-04T17:46:44+02:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://hackliza.github.io/en/posts/vacas/"
+                href="https://hackliza.gal/en/posts/vacas/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="gl"
-                href="https://hackliza.github.io/posts/vacas/"
+                href="https://hackliza.gal/posts/vacas/"
                 />
   </url>
   
   <url>
-    <loc>https://hackliza.github.io/</loc>
+    <loc>https://hackliza.gal/</loc>
     <lastmod>2020-10-04T17:46:44+02:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://hackliza.github.io/en/"
+                href="https://hackliza.gal/en/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="gl"
-                href="https://hackliza.github.io/"
+                href="https://hackliza.gal/"
                 />
   </url>
   
   <url>
-    <loc>https://hackliza.github.io/posts/chourizo/</loc>
+    <loc>https://hackliza.gal/posts/chourizo/</loc>
     <lastmod>2020-10-04T17:46:44+02:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://hackliza.github.io/en/posts/chourizo/"
+                href="https://hackliza.gal/en/posts/chourizo/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="gl"
-                href="https://hackliza.github.io/posts/chourizo/"
+                href="https://hackliza.gal/posts/chourizo/"
                 />
   </url>
   
   <url>
-    <loc>https://hackliza.github.io/posts/</loc>
+    <loc>https://hackliza.gal/posts/</loc>
     <lastmod>2020-10-04T17:46:44+02:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://hackliza.github.io/en/posts/"
+                href="https://hackliza.gal/en/posts/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="gl"
-                href="https://hackliza.github.io/posts/"
+                href="https://hackliza.gal/posts/"
                 />
   </url>
   
   <url>
-    <loc>https://hackliza.github.io/categories/</loc>
+    <loc>https://hackliza.gal/page/about/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://hackliza.github.io/en/categories/"
+                href="https://hackliza.gal/en/page/about/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="gl"
-                href="https://hackliza.github.io/categories/"
+                href="https://hackliza.gal/page/about/"
                 />
   </url>
   
   <url>
-    <loc>https://hackliza.github.io/tags/</loc>
+    <loc>https://hackliza.gal/categories/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://hackliza.github.io/en/tags/"
+                href="https://hackliza.gal/en/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="gl"
-                href="https://hackliza.github.io/tags/"
+                href="https://hackliza.gal/categories/"
+                />
+  </url>
+  
+  <url>
+    <loc>https://hackliza.gal/page/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://hackliza.gal/en/page/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="gl"
+                href="https://hackliza.gal/page/"
+                />
+  </url>
+  
+  <url>
+    <loc>https://hackliza.gal/tags/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://hackliza.gal/en/tags/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="gl"
+                href="https://hackliza.gal/tags/"
                 />
   </url>
   
