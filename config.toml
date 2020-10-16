@@ -11,6 +11,7 @@ publishDir = "docs"
 subtitle = "Hacking na Galiza"
 logo = "img/hackliza.png"
 favicon = "img/hackliza.png"
+rss = true
 
 [languages]
 [languages.gl]
@@ -18,3 +19,8 @@ contentDir = "content/gl"
 
 [languages.en]
 contentDir = "content/en"
+
+
+[[menu.main]]
+name = "About"
+url = "page/about/"
