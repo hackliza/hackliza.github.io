@@ -3,6 +3,7 @@ languageCode = "gl"
 title = "Hackliza"
 theme = "beautifulhugo"
 
+disqusShortname = "hackliza"
 DefaultContentLanguage = "gl"
 
 [Params]
@@ -11,6 +12,7 @@ logo = "img/hackliza.png"
 favicon = "img/hackliza.png"
 rss = true
 readingTime = true
+comments = true
 
 
 [Author]
