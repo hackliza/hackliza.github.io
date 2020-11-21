@@ -1,6 +1,6 @@
 #+title: Análise do heap con radare2
 #+author: Eloy Pérez González
-#+date: 2020-11-15
+#+date: 2020-11-21
 #+tags[]: pwn heap radare2
 
 Boas xente.
