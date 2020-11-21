@@ -6,10 +6,15 @@ theme = "beautifulhugo"
 DefaultContentLanguage = "gl"
 
 [Params]
-subtitle = "Hacking na Galiza"
+subtitle = "Unha comunidade en galego sobre software libre, programación, (in)seguridade informática e outras herbas."
 logo = "img/hackliza.png"
 favicon = "img/hackliza.png"
 rss = true
+
+
+[Author]
+github = "hackliza"
+twitter = "hackliza"
 
 [languages]
 [languages.gl]
