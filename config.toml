@@ -10,6 +10,7 @@ subtitle = "Hacking na Galiza"
 logo = "img/hackliza.png"
 favicon = "img/hackliza.png"
 rss = true
+readingTime = true
 
 [languages]
 [languages.gl]
