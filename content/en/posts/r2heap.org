@@ -1349,7 +1349,6 @@ You can verify if the /heap/ is there looking for ~[heap]~ with ~dm~:
 
 If the heap was not created, the previous command will not display any output.
 
-
 ** Safe-Linking protection in tcaches and fastbins
 
 When you check the /tcaches/ you can get something similar to the following
@@ -1406,6 +1405,8 @@ bin : 3, items : 7, fd :0x55d1c5dfc530->0x55d1c5dfc4c0->0x55d1c5dfc450->0x55d1c5
    0x55d1c5dfc8b0->fd = 0x55d1c5dfc840->fd = 0x55d1c5dfc7d0->fd = 0x55d1c5dfc760->fd = 0x55d1c5dfc6f0->fd = 0x55d1c5dfc680->fd = 0x55d1c5dfc610->fd = 0x55d1c5dfc5a0
   }
 #+end_example
+
+I would like to thank [[https://github.com/meowmeowxw][@meowmeowxw]] for [[https://github.com/radareorg/radare2/issues/17915#issuecomment-729799640][showing me the solution to this problem]].
 
 * Conclusion
 

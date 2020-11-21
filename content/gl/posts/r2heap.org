@@ -1385,7 +1385,7 @@ estalo, o comando anterior non xeraría saída.
 
 ** tcaches e fastbins protexidas con Safe-Linking
 
-Ao consultar unha /tcache/ podeste atopar co seguinte:
+Ao consultar unha /tcache/ pódeste atopar co seguinte:
 #+begin_example
 [0x7f9694a1b8cb]> dmht
 Tcache main arena @ 0x7f9694bbdba0
