@@ -18,7 +18,3 @@ contentDir = "content/gl"
 [languages.en]
 contentDir = "content/en"
 
-
-[[menu.main]]
-name = "About"
-url = "page/about/"
