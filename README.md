@@ -1,6 +1,6 @@
 # hackliza.github.io
 
-This is the website of hackliza. You can view it https://hackliza.gal/ .
+This is the website of hackliza. You can check it in [hackliza.gal](https://hackliza.gal/).
 
 ## Building
 
