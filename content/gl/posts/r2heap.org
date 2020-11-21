@@ -1,0 +1,1460 @@
+#+title: Análise do heap con radare2
+#+author: Eloy Pérez González
+#+date: 2020-11-21
+#+tags[]: pwn heap radare2
+
+Boas xente.
+
+Neste post, vou mostrar como se pode utilizar [[https://github.com/radareorg/radare2][radare2]] para facer análises do
+heap da glibc. A miña intención é crear unha referencia con exemplos, que
+permita coñecer que se pode levar a cabo con radare2. Fago isto xa que non
+atopei moito ao respecto en internet, soamente a [[https://www.youtube.com/watch?v=Svm5V4leEho][presentación do módulo de heap
+feita por n4x0r]] na r2con 2016. 
+
+Sen embargo, eu son un amante do texto, así que deixarei aquí plasmados os
+comandos de radare2 con exemplos, listos para ser consultados e
+copipasteados.
+
+Se so ves polos comandos, podes velos na [[https://gist.github.com/Zer1t0/9a1d6108148e862dd61065ec8ae0c03c][chuleta]] que preparei baseada no contido
+deste artigo.
+
+Nota: Para unha maior inmersión, recoméndase leer este post con gheada.
+
+* Intro á glibc heap
+
+Antes de meternos en radare2, vou introducir unha serie de conceptos de /heap/ que
+serán necesarios manexar en conxunto no resto do post. De tódolos xeitos,
+ampliarei máis cada un na súa respectiva sección.
+
+- Allocator :: Un /allocator/ é un módulo que se encarga de xestionar o /heap/
+               dun programa. Este permite a un programador facer un uso fácil do
+               mesmo, normalmente a través das funcións ~malloc~ e ~free~. Nesta
+               ocasión imos revisar o /allocator/ da glibc, que é unha
+               modificación do /allocator/ [[http://www.malloc.de/en/][ptmalloc2]]. Pero ten en conta que
+               existen máis /allocators/ como [[http://jemalloc.net/][jemalloc]] ou [[https://github.com/google/tcmalloc][tcmalloc]].
+
+- Chunks :: Os /chunks/ son pedazos de memoria que se poden usar para almacenar
+            calquera tipo de datos. Estes son reservados para o programa usando
+            as funcións ~malloc~, ~calloc~ ou ~realloc~ e liberados con
+            ~free~. Os /chunks/ atópanse na rexión de memoria coñecida como
+            /heap/.
+
+- Heap :: Un /heap/ é unha rexión de memoria contigua que se divide para xerar
+          trozos de memoria chamados /chunks/, usados polo programa para
+          almacenar todo tipo de información. Un /heap/ pertence a unha /arena/ e
+          pode haber varios, sendo o principal a rexión de memoria chamada
+          ~[heap]~.
+
+- Arena :: Unha /arena/ está formada por unha estructura [[https://sourceware.org/git/?p=glibc.git;a=blob;f=malloc/malloc.c;h=5b87bdb081f819c9d2b765b2f8e888e4d749c911;hb=HEAD#l1670][malloc_state]], onde se
+           almacenan as /bins/, e un ou varios /heaps/. Un programa pode ter
+           varias /arenas/, que se xeran coa creación de novos fíos. A /arena/
+           principal chámase /main_arena/.
+
+- Bins :: Unha /bin/ é unha lista de /chunks/ que está libres para ser
+         usados. Existen varios tipos de /bins/, que son usadas segundo a
+         situación. Estas son:
+  + **Unsorted bin** -> /Bin/ para insertar /chunks/ de forma rápida, antes de ser
+                    insertados noutras /bins/.
+  + **Small bins** -> Para /chunks/ de pouco tamaño. 
+  + **Large bins** -> Para /chunks/ de gran tamaño.
+  + **Fast bins** -> /Bins/ de cache para /chunks/ de moi pequeno tamaño.
+  + **Tcaches** -> /Bins/ de cache que permiten a diferentes fíos acceder a
+               /chunks/ de pequeno tamaño sen ter que bloquear a /arena/.
+
+
+Deixo tamén a explicación dalgúns fenómenos interesantes que ocorren na xestión
+da memoria:
+
+- Consolidación  :: Prodúcese cando un proceso solicita un /chunk/ dun tamaño
+                    maior do que poden albergar as /small bins/ (e tamén as
+                    /fast bins/). Na consolidación os /chunks/ das /fast 
+                    bins/ móvense á /unsorted bin/, xa que se considera que o
+                    programa vai a precisar /chunks/ de gran tamaño e polo tanto
+                    sería beneficioso fusionar os /chunks/ que se atopaban nas
+                    /fast bins/, evitando a fragmentación.
+
+- Recarga das tcaches :: Cando o /allocator/ anda buscando /chunks/ nunha /fast
+     bin/ ou nunha /small bin/, aproveita para pasar tódolos /chunks/ que poida
+     ás /tcaches/. Isto tamén ocorre cando se descartan /chunks/ da /unsorted
+     bin/. Deste xeito as /tcaches/ teñen máis /chunks/ e non fai falta bloquear
+     as /arenas/ tan frecuentemente.
+
+
+Neste artigo, darei máis información de cada un de estes entes, pero se non che
+queda claro que é cada un, sempre lle podes botar unha ollada a estes recursos:
+- [[https://sourceware.org/glibc/wiki/MallocInternals][glibc wiki: MallocInternals]]
+- [[https://heap-exploitation.dhavalkapil.com/][Heap exploitation book]]
+- [[https://azeria-labs.com/heap-exploitation-part-1-understanding-the-glibc-heap-implementation/][Azeria Labs: Understanding the glibc heap implementation]]
+- [[https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/][Understanding glibc malloc]]
+
+E para prácticar, podes revisar o repo [[https://github.com/shellphish/how2heap][how2heap]], que amosa diferentes técnicas
+de explotación do heap. Moi recomendable.
+
+Por outra parte, tamén me gustaría aclarar que os datos que aparecen neste
+artigo foron obtidos fruto da miña experimentación e revisión do código de
+diferentes versións da [[https://www.gnu.org/software/libc/][glibc]]. Para as probas empíricas, usei as versións da
+glibc 2.32, 2.28 e 2.19, nunha arquitectura x86, con programas tanto en 64 coma
+32 bits.
+
+Sen embargo, a glibc permite o [[https://www.gnu.org/software/libc/manual/html_node/Tunables.html][axuste de varios parámetros]] que poden
+cambiar o seu comportamento, polo que usa isto como unha orientación e non como
+unha verdade absoluta. Se tes algunha dúbida, o mellor sempre é que fagas os
+teus propios experimentos. ;)
+
+Bueno, ao asunto.
+
+* Iniciando radare2
+
+O primeiro é o primeiro, haberá que encender radare2 non?
+
+Aviso a navegantes: Inda que sexas principiante con radare2, non creo que teñas
+problemas cos comandos deste artigo, senon sempre podes ver algún tutorial coma
+[[https://www.megabeets.net/a-journey-into-radare-2-part-1/][este de Megabeets]]. 
+
+O primeiro, para analizar o heap, precisamos iniciar radare2 co depurador. Para
+iso temos que usar o flag ~-d~:
+#+begin_example
+r2 -d ./heapshow
+#+end_example
+
+Tras iniciar radare2 cun programa (e analizar o código se o precisas), podes
+poñerlle un breakpoint nalgún punto con ~db~ para interrumpir a execución e
+explorar a memoria. Tamén podes pulsar ~Ctrl-c~ no medio da execución do
+programa para pasarlle o control a radare2.
+
+Unha vez tes a execución do programa detida, para explorar o /heap/ podes usar
+os comandos do grupo ~dmh~. Para quedar mellor coa referencia, os supergrupos
+son:
+
+- ~d~ -> Comandos de debug.
+- ~dm~ -> Comandos relacionados cos mapas de memoria.
+- ~dmh~ -> Comandos de heap. 
+
+Ademais, para ver a axuda dos comandos de heap, podes executar ~dmh?~:
+#+begin_example
+[0x5624802e1193]> dmh?
+Usage:  dmh   # Memory map heap
+| dmh                                          List chunks in heap segment
+| dmh @[malloc_state]                          List heap chunks of a particular arena
+| dmha                                         List all malloc_state instances in application
+| dmhb @[malloc_state]                         Display all parsed Double linked list of main_arena's or a particular arena bins instance
+| dmhb [bin_num|bin_num:malloc_state]          Display parsed double linked list of bins instance from a particular arena
+| dmhbg [bin_num]                              Display double linked list graph of main_arena's bin [Under developemnt]
+| dmhc @[chunk_addr]                           Display malloc_chunk struct for a given malloc chunk
+| dmhf @[malloc_state]                         Display all parsed fastbins of main_arena's or a particular arena fastbinY instance
+| dmhf [fastbin_num|fastbin_num:malloc_state]  Display parsed single linked list in fastbinY instance from a particular arena
+| dmhg                                         Display heap graph of heap segment
+| dmhg [malloc_state]                          Display heap graph of a particular arena
+| dmhi @[malloc_state]                         Display heap_info structure/structures for a given arena
+| dmhm                                         List all elements of struct malloc_state of main thread (main_arena)
+| dmhm @[malloc_state]                         List all malloc_state instance of a particular arena
+| dmht                                         Display all parsed thread cache bins of all arena's tcache instance
+| dmh?                                         Show map heap help
+#+end_example
+
+A descripción da unha idea do que se pode facer con cada un, pero para un mellor
+entendemento vou mostrar exemplos de uso.
+
+Nota: podes usar ~?~ tras un comando para ver a axuda.
+
+* Arenas
+
+Como dixen antes, unha arena ten un /malloc_state/, e un ou varios
+/heaps/. Ademais, un proceso pode ter unha ou varias /arenas/, dependendo se é
+multifio ou non. E cada /arena/ pode ser compartida por varios fíos no caso de ser
+necesario. A /arena/ principal dun programa chámase /main_arena/.
+
+Para identificar as /arenas/ dun proceso é preciso localizar as estructuras
+/malloc_state/ na memoria. Isto pódese facer co comando ~dmha~:
+#+begin_example
+[0x55e517c4f1da]> dmha
+main_arena @ 0x7f393d58fc40
+thread arena @ 0x7f3938000020
+#+end_example
+
+A saída móstranos as direccións de memoria dos /malloc_state/ das
+/arenas/. Neste proceso pódese observar que ademais da /main_arena/, existe
+outra /arena/ a maiores, posiblemente utilizada por un segundo fío.
+
+Coas as /arenas/ localizadas, podes usar radare2 para ver máis
+detalles de cada unha. E como veremos, no caso de querer examinar a
+/main_arena/, nin sequera é preciso coñecer a súa dirección de memoria, radare2
+xa se encarga de atopala.
+
+* malloc_state
+
+Como dixemos, cada /arena/ ten unha estructura /malloc_state/. A súa definición é a
+seguinte:
+
+#+caption: /malloc_state/ en glibc 2.32. 
+#+BEGIN_SRC c
+# define INTERNAL_SIZE_T size_t
+typedef struct malloc_chunk* mchunkptr;
+typedef struct malloc_chunk *mfastbinptr;
+
+struct malloc_state
+{
+  /* Serialize access.  */
+  __libc_lock_define (, mutex);
+
+  /* Flags (formerly in max_fast).  */
+  int flags;
+
+  /* Set if the fastbin chunks contain recently inserted free blocks.  */
+  /* Note this is a bool but not all targets support atomics on booleans.  */
+  int have_fastchunks;
+
+  /* Fastbins */
+  mfastbinptr fastbinsY[NFASTBINS];
+
+  /* Base of the topmost chunk -- not otherwise kept in a bin */
+  mchunkptr top;
+
+  /* The remainder from the most recent split of a small request */
+  mchunkptr last_remainder;
+
+  /* Normal bins packed as described above */
+  mchunkptr bins[NBINS * 2 - 2];
+
+  /* Bitmap of bins */
+  unsigned int binmap[BINMAPSIZE];
+
+  /* Linked list */
+  struct malloc_state *next;
+
+  /* Linked list for free arenas.  Access to this field is serialized
+     by free_list_lock in arena.c.  */
+  struct malloc_state *next_free;
+
+  /* Number of threads attached to this arena.  0 if the arena is on
+     the free list.  Access to this field is serialized by
+     free_list_lock in arena.c.  */
+  INTERNAL_SIZE_T attached_threads;
+
+  /* Memory allocated from the system in this arena.  */
+  INTERNAL_SIZE_T system_mem;
+  INTERNAL_SIZE_T max_system_mem;
+};
+#+END_SRC
+
+Pódese ver que amosa bastante información da /arena/. Tal vez os membros que
+máis nos interesan son os seguintes:
+
+- ~fastbinsY~ -> As /fast bins/, que son 10. Para cada unha contén un punteiro
+  que apunta ao primeiro /chunk/ da /fast bin/. Se non hai /chunks/ o punteiro
+  ponse a 0 (~NULL~). 
+- ~top~ -> A dirección do /top chunk/ do /heap/.
+- ~last_remainder~ -> A dirección do /chunk/ /last remainder/. Cando se divide
+  un /chunk/ de gran tamaño en 2 para crear un /chunk/ máis pequeno que devolver
+  ao programa, o /chunk/ que sobra é o /last remainder/. Seica se referencia por
+  temas de rendemento.
+- ~bins~ -> As /bins/, que son 127, inda que a primeira non se utiliza. Dentro
+  deste atributo están contidas a /unsorted bin/, as /small bins/ e as /large
+  bins/. Por cada /bin/, úsanse 2 punteiros, ~fd~ e ~bk~, que indican o
+  primeiro é o último /chunk/ da /bin/. No caso de estar baleira a /bin/, estes
+  punteiros apuntan á propia entrada.
+- ~next~ -> Indica a dirección do seguinte /malloc_state/.
+- ~system_mem~ -> O tamaño actual do /heap/.
+
+Para ver o /malloc_state/ dunha /arena/, úsase o comando ~dmhm~. Se non se lle
+indica unha dirección, amosa a información da /arena/ principal
+(/main_arena/):
+#+begin_example
+[0x55e517c4f1da]> dmhm
+malloc_state @ 0x7f3938000020
+
+struct malloc_state main_arena {
+  mutex = 0x00000000
+  flags = 0x00000002
+  fastbinsY = {
+ Fastbin 01
+ chunksize: == 0032 0x0,
+ Fastbin 02
+ chunksize: == 0048 0x0,
+ Fastbin 03
+ chunksize: == 0064 0x0,
+ Fastbin 04
+ chunksize: == 0080 0x0,
+ Fastbin 05
+ chunksize: == 0096 0x0,
+ Fastbin 06
+ chunksize: == 0112 0x0,
+ Fastbin 07
+ chunksize: == 0128 0x0,
+ Fastbin 08
+ chunksize: == 0144 0x0,
+ Fastbin 09
+ chunksize: == 0160 0x0,
+ Fastbin 10
+ chunksize: == 0176 0x0,
+}
+  top = 0x7f3938000f00,
+  last_remainder = 0x0,
+  bins {
+ Bin 001: Unsorted Bin [ chunksize: undefined 0x7f3938000020->fd = 0x7f3938000080, 0x7f3938000020->bk = 0x7f3938000080, 
+ Bin 002:              ┌ chunksize: == 000032  0x7f3938000030->fd = 0x7f3938000090, 0x7f3938000030->bk = 0x7f3938000090, 
+ Bin 003:              │ chunksize: == 000048  0x7f3938000040->fd = 0x7f39380000a0, 0x7f3938000040->bk = 0x7f39380000a0, 
+ ......................│....
+ Bin 031:              │ chunksize: == 000496  0x7f3938000200->fd = 0x7f3938000260, 0x7f3938000200->bk = 0x7f3938000260, 
+ Bin 032:   Small Bins │ chunksize: == 000512  0x7f3938000210->fd = 0x7f3938000270, 0x7f3938000210->bk = 0x7f3938000270, 
+ Bin 033:              │ chunksize: == 000528  0x7f3938000220->fd = 0x7f3938000280, 0x7f3938000220->bk = 0x7f3938000280, 
+ ......................│....
+ Bin 063:              │ chunksize: == 001008  0x7f3938000400->fd = 0x7f3938000460, 0x7f3938000400->bk = 0x7f3938000460, 
+ Bin 064:              └ chunksize: == 001024  0x7f3938000410->fd = 0x7f3938000470, 0x7f3938000410->bk = 0x7f3938000470, 
+ Bin 065:              ┌ chunksize: >= 001088  0x7f3938000420->fd = 0x7f3938000480, 0x7f3938000420->bk = 0x7f3938000480, 
+ Bin 066:              │ chunksize: >= 001152  0x7f3938000430->fd = 0x7f3938000490, 0x7f3938000430->bk = 0x7f3938000490, 
+ ......................│....
+ Bin 095:              │ chunksize: >= 003008  0x7f3938000600->fd = 0x7f3938000660, 0x7f3938000600->bk = 0x7f3938000660, 
+ Bin 096:   Large Bins │ chunksize: >= 003072  0x7f3938000610->fd = 0x7f3938000670, 0x7f3938000610->bk = 0x7f3938000670, 
+ Bin 097:              │ chunksize: >= 003136  0x7f3938000620->fd = 0x7f3938000680, 0x7f3938000620->bk = 0x7f3938000680, 
+ ......................│....
+ Bin 126:              │ chunksize: >= 524288  0x7f39380007f0->fd = 0x7f3938000850, 0x7f39380007f0->bk = 0x7f3938000850, 
+ Bin 127:              └ chunksize: remaining 0x7f3938000800->fd = 0x7f3938000860, 0x7f3938000800->bk = 0x7f3938000860, 
+  }
+  binmap = {0x0,0x0,0x0,0x0}
+  next = 0x7f393d58fc40,
+  next_free = 0x0,
+  system_mem = 0x21000,
+  max_system_mem = 0x21000,
+}
+#+end_example
+(A saída do comando esta truncada para non ocupar demasiado espazo)
+
+Na saída xa podemos ver que, por exemplo, non hai /chunks/ nas
+/fast bins/, que o /heap/ ocupa 0x21000 bytes ou que non hai /last remainder/.
+
+E onde andan as /tcaches/? Pois están aparte, xa que a súa finalidade é evitar que os
+fíos bloqueen o acceso ao /malloc_state/. A súa información almacénase
+noutra estructura, /tcache_perthread_struct/, que se pode atopar no /heap/ (a
+partir da glibc 2.26).
+
+* Chunks
+
+Os /chunks/ son os pedazos de memoria do /heap/ que se van creando mediante chamadas
+á [[https://linux.die.net/man/3/malloc][malloc e familia]] e liberando usando ~free~, cando o programa o require.
+
+Inicialmente o /heap/ so conta cun so /chunk/ denominado /top chunk/, pero a
+medida que novos /chunks/ se van pedido, este vaise dividindo para crear
+/chunks/ do tamaño necesario. Tamén pode darse o caso de que o /chunk/ pedido
+sexa demasiado grande para o /heap/, nese caso o /chunk/ é reservado utilizando
+[[https://man7.org/linux/man-pages/man2/mmap.2.html][mmap]].
+
+Por outra parte, por temas de eficiencia, os /chunks/ do /heap/ atópanse
+alineados na memoria a 8 bytes en programas de 32 bits e a 16 bytes en 64
+bits. Isto quere decir que en 32 bits a dirección de memoria dun /chunk/ é
+sempre un múltiplo de 8 e no caso de programas de 32 é un múltiplo de 16. Sen
+embargo, existe unha excepción. A partires da glibc 2.26, 
+na arquitectura i386 ou x86, usada na maioría de ordenadores persoais e
+servidores, os /chunks/ pasaron a [[https://sourceware.org/git/?p=glibc.git;a=commit;h=4e61a6be446026c327aa70cef221c9082bf0085d][estar sempre alineados a 16]], tanto en
+programas de 64 como 32 bits.
+
+Por outra parte, que os /chunks/ estén alineados a certas posicións de memoria
+implica que non se pode crear un /chunk/ de calquera tamaño, senón que
+chamadas a ~malloc~ con diferentes tamaños nun rango derivan nun /chunk/
+do mesmo tamaño. 
+
+Por exemplo, tanto ~malloc(100)~ como ~malloc(101)~ reservarían un /chunk/ do mesmo
+tamaño, 112 bytes no caso de 64 bits. Se queres calcular o tamaño dun /chunk/
+que vai a crear unha chamada a /malloc/, podes usar [[https://gist.github.com/Zer1t0/279c1b585960c7af84746fac196eabb6][o seguinte snippet]] ou a
+ferramenta [[https://github.com/hackliza/gmcalc#malloc-to-chunk][gmcalc]].
+
+Para ver a arquitectura e os bits do programa en radare2 podes usar ~i~:
+#+begin_example
+[0x7f8491e94090]>i~machine[1-]
+AMD x86-64 architecture
+[0x7f8491e94090]> i~bits[1]
+64
+#+end_example
+Podes ver que neste caso temos programa x86 de 64 bits.
+
+E para consultar a versión da glibc, podes ver os mapas con ~dm~ e buscar ~libc~.
+Normalmente no nome xa se indica a versión. Por exemplo:
+#+begin_example
+[0x557602f15189]> dm~libc:0[9]
+/usr/lib/x86_64-linux-gnu/libc-2.32.so
+#+end_example
+Pódese ver que está mapeado a arquivo ~libc-2.32.so~, o qué indica que estamos a usar
+a glibc versión 2.32.
+
+Volvendo ao tema, cada /chunk/ segue a estructura /malloc_chunk/:
+
+#+caption: /malloc_chunk/ en glibc 2.32.
+#+BEGIN_SRC c
+# define INTERNAL_SIZE_T size_t
+
+struct malloc_chunk {
+
+  INTERNAL_SIZE_T      mchunk_prev_size;  /* Size of previous chunk (if free).  */
+  INTERNAL_SIZE_T      mchunk_size;       /* Size in bytes, including overhead. */
+
+  struct malloc_chunk* fd;         /* double links -- used only if free. */
+  struct malloc_chunk* bk;
+
+  /* Only used for large blocks: pointer to next larger size.  */
+  struct malloc_chunk* fd_nextsize; /* double links -- used only if free. */
+  struct malloc_chunk* bk_nextsize;
+};
+typedef struct malloc_chunk* mchunkptr;
+#+END_SRC
+
+Nota: O tipo ~INTERNAL_SIZE_T~ é un alias de ~size_t~, que ocupa 8 bytes en 64 bits e 4
+bytes en 32 bits.
+
+Nota: O membro ~mchunk_prev_size~ chámase ~prev_size~ en versions anteriores da
+glibc, polo que usuarei este último nome, xa que é máis curto. O mesmo para
+~mchunk_size~, que se chamaba ~size~.
+
+O campo ~prev_size~ (~mchunk_prev_size~) serve para indicar o tamaño de /chunk/
+anterior cando está libre. No caso de estar en uso, o /chunk/ pode usar o campo
+~prev_size~ do /chunk/ seguinte para almacenar datos.
+
+#+begin_example
+       .-----------.
+       | prev_size |
+       | size      | free chunk
+ chunk | fd        |
+       | bk        |
+    ---|-----------|---
+       | prev_size | <- previous chunk size
+       | size      | allocated chunk
+ chunk | prevdata  |
+       | prevdata  |
+    ---|-----------|---  
+       | prevdata  | <- previous chunk data
+ chunk | size      |     
+       | ....      |     
+       '-----------'     
+#+end_example
+
+Cando o /chunk/ anterior é liberado, entón a glibc escribe no campo ~prev_size~
+o tamaño do /chunk/. E como veremos a continuación, tamén pon a 0 a flag
+PREV_INUSE que se atopa no campo ~size~.
+
+O campo ~size~ (~mchunk_size~) indica o tamaño do /chunk/ actual, incluíndo a
+cabeceira (~prev_size~ + ~size~).
+
+En 32 bits o tamaño mínimo dun /chunk/ é de 16 bytes, e en 64 bits, 32
+bytes. Polo que incluso as chamadas a ~malloc(0)~ che devolverán un /chunk/
+destes tamaños:
+
+- 32 bits: ~malloc(0)~ -> 16 bytes. 8 bytes de datos e 8 de cabeceira.
+- 64 bits: ~malloc(0)~ -> 32 bytes. 16 bytes de datos e 16 de cabeceira.
+
+Ademais, como tódolos /chunks/ son múltiplos de 8, os 3 bits menos
+significativos non se usan para indicar o tamaño. Estes bits utilízanse como
+flags con significados especiais:
+
+- **P** (PREV_INUSE) -> O primer bit ponse a 1 (0x1) se o /chunk/ anterior se atopa
+     libre.
+- **M** (IS_MMAPPED) -> O segundo bit ponse a 1 (0x2) se o /chunk/ foi creado
+     usando ~mmap~.
+- **N** ou **A** (NON_MAIN_ARENA) -> O tercer bit ponse a 1 (0x4) se o /chunk/
+     non se atopa na arena principal.
+
+#+begin_example
+      chunk
+ .--------------.
+ | prev_size     |
+ | size  |N|M|P| | <-- special flags
+ | fd            |
+ | bk            |
+ | fd_nextsize   |
+ | bk_nextsize   |
+ '---------------'
+#+end_example
+
+
+Os seguintes campos, ~fd~ e ~bk~, son punteiros usados polos /chunks/ libres nas
+/bins/ para crear enlaces apuntando ao seguinte e anterior /chunk/ da mesma
+/bin/, respectivamente.
+
+#+caption: Esquema dunha /small bin/.
+#+begin_example
+                 .----------------------------------------------------------.
+                 |   entry               chunk                  chunk       |
+                 |   .----.          .-----------.          .-----------.   |
+                 '-> | XX | <-.  .-> | prev_size | <-.  .-> | prev_size | <-|--.
+                     | YY |   |  |   | size      |   |  |   | size      |   |  |
+malloc_state.bins[i] | fd |---|--'   | fd -------|---|--'   | fd -------|---'  |
+                   .-| bk |   '------| bk        |   '------| bk        |      |
+                   | '----'          '-----------'          '-----------'      |
+                   '-----------------------------------------------------------'
+#+end_example 
+
+Se pola contra, o /chunk/ está en uso, estes punteiros non fan falta e o seu
+espazo pode ser usado para escribir datos arbitrarios do programa. De feito,
+cando se reserva un /chunk/ usando ~malloc~, o punteiro devolto non apunta ao
+comezo do /chunk/, senón á dirección de ~fd~.
+
+#+begin_example
+                  chunk
+              .-----------.
+              | prev_size |
+              | size      |
+malloc(x) --> | fd        |
+              | bk        |
+              '-----------'
+#+end_example
+
+Por último, están ~fd_nextsize~ e ~bk_nextsize~, que so se usan nas /large bins/
+,que conteñen /chunks/ de diferentes tamaños, para indicar onde está o próximo
+ou anterior /chunk/ dun tamaño maior e menor, respectivamente.
+
+#+caption: Esquema dunha /large bin/.
+#+begin_example
+    .------------<-------------------<-----------------------<----------------------<---.
+    |   entry               chunk                  chunk                    chunk       |
+    |   .----.        .-------------.         .------------.          .-------------.   |
+    '-> | XX |<-.  .->| prev_size   |<--. .-> | prev_size   |<-.  .-->| prev_size   | <-|--.
+        | YY |  |  |  | size (0x520)|   | |   | size (0x520)|  |  |   | size (0x510)|   |  |
+bins[i] | fd |--|->'  | fd ---------|>--|-'   | fd          |>-|--|   | fd ---------|>--'  |
+      .-| bk |  '----<| bk          |   |----<| bk          |  '--|--<| bk          |      |
+      | '----'        | fd_nextsize |>. |     | fd_nextsize |     |   | fd_nextsize |>-.   |
+      |             .<| bk_nextsize | | |     | bk_nextsize |     | .<| bk_nextsize |  |   |
+      |             | '-------------' | |     '-------------'     | | '-------------'  |   |
+      |             '----------->-----'-|->--------->---------->--' |                  |   |
+      |                                 |                           |                  |   |
+      |                                 '---<---------------<-------'---<-------<------'   |
+      |                                                                                    |
+      '------>--------->----------------->------------------>----------------->------------'
+#+end_example
+
+Ao final, podemos ter diferentes datos no mesmo /chunk/ en función do seu
+estado:
+#+begin_example
+
+   allocated           free               free
+                                       (large bin)
+ .-----------.     .-----------.     .-------------.
+ | prev_size |     | prev_size |     | prev_size   |
+ | size      |     | size      |     | size        |
+ | userdata  |     | fd        |     | fd          |
+ | userdata  |     | bk        |     | bk          |
+ | userdata  |     | userdata  |     | fd_nextsize |
+ | userdata  |     | userdata  |     | bk_nextsize |
+ | userdata  |     | userdata  |     | userdata    |
+ | userdata  |     | userdata  |     | userdata    |
+ '-----------'     '-----------'     '-------------'
+#+end_example
+
+Debe terse en conta que cando un /chunk/ é liberado usando ~free~, os datos que
+contiña permanecen inalterados, a excepción daqueles sobreescritos polos
+punteiros das /bins/. É responsabilidade do programador borrar estes datos e/ou
+asumir que os /chunks/ poden ter datos "aleatorios" escritos neles ao serén
+reservados.
+
+
+Para ver un /chunk/ en radare2, podes usar o comando ~dmhc~ indicando a sua
+dirección de memoria, precedida por ~@~. Por exemplo ~dmhc @0x5583f1f1f270~:
+#+begin_example
+[0x5583f0e61282]> dmhc @0x5583f1f1f270
+struct malloc_chunk @ 0x5583f1f1f270 {
+  prev_size = 0x0,
+  size = 0x20,
+  flags: |N:0 |M:0 |P:1,
+  fd = 0x5583f1f1f2a0,
+  bk = 0x5583f1f1f010,
+}
+chunk data = 
+0x5583f1f1f280  0x00005583f1f1f2a0  0x00005583f1f1f010   .....U.......U..
+#+end_example
+
+Neste caso o /chunk/ ésta nunha /bin/ (non o pon no /chunk/, pero xa
+cho digo eu), polo que ~fd~ e ~bk~ apuntan a outros /chunks/ da /bin/ (ou á
+entrada da /bin/ no /malloc_state/).
+
+Pódese observar que ~chunk data~ amosa os mesmos bytes que ~fd~ e ~bk~ , xa que
+como dixen antes, é en ~fd~ onde se comezan a escribir os datos de usuario cando
+o /chunk/ está sendo usado.
+
+No seguinte exemplo amósase un /chunk/ que está en uso:
+#+begin_example
+[0x5624802e1193]> dmhc @0x562482199250
+struct malloc_chunk @ 0x562482199250 {
+  prev_size = 0x0,
+  size = 0x410,
+  flags: |N:0 |M:0 |P:1,
+  fd = 0x6f77206f6c6c6568,
+  bk = 0xa646c72,
+  fd-nextsize = 0x0,
+  bk-nextsize = 0x0,
+}
+chunk data = 
+0x562482199260  0x6f77206f6c6c6568  0x000000000a646c72   hello world.....
+0x562482199270  0x0000000000000000  0x0000000000000000   ................
+...
+...
+#+end_example
+
+Neste último caso, pódese observar que ~fd~ e ~bk~ teñen uns valores un tanto
+extraños para estar nunha /bin/, e ~chunk data~ amosa que estes datos representan
+a cadea ~hello world~, polo que, inda que o /chunk/ non indique se está libre ou
+non (habería que consultar a flag ~P~ do seguinte /chunk/), xa se pode intuir
+que está en uso.
+
+
+En caso de non especificar ningún argumento, ~dmhc~ intentará parsear a
+dirección actual de radare2 coma un /chunk/. E poden pasar cousas extrañas coma
+a seguinte:
+#+begin_example
+[0x55cb6f22e1cc]> dmhc
+struct malloc_chunk @ 0x55cb6f22e1cc {
+  prev_size = 0xbf00000e7f358d48,
+  size = 0xfffe73e800000000,
+  flags: |N:0 |M:0 |P:1,
+  fd = 0xc3c900000000b8ff,
+  bk = 0x80c48348e5894855,
+  fd-nextsize = 0x358d480000001dba,
+  bk-nextsize = 0x1bf00000e72,
+}
+chunk too big to be displayed
+#+end_example
+
+Podemos ver que o ~size~ do /chunk/ e ridículamente grande, polo que un xa se
+imaxina un que nesa dirección de memoria non hai un /chunk/.
+
+* Heap
+
+Os /heap/ son grandes rexións continuas de memoria, onde se crean os /chunks/
+que van a ser usados polo proceso. O /heap/ principal crease usando
+a chamada ao sistema [[https://linux.die.net/man/2/sbrk][sbrk]] e a rexión de memoria que se crea chámase ~[heap]~.
+O resto de /heaps/ creanse mediante [[https://man7.org/linux/man-pages/man2/mmap.2.html][mmap]].
+
+Como comentei antes, cando se crea, un /heap/ so ten un gran /chunk/ denominado
+/top chunk/, que se vai dividindo para crear novos /chunks/ segundo se
+precise.
+
+Ademais no caso de ser necesario, o tamaño do /heap/ pode ser
+aumentado, ben usando [[https://linux.die.net/man/2/sbrk][sbrk]] ou [[https://man7.org/linux/man-pages/man2/mmap.2.html][mmap]], dependendo de como se crease o /heap/.
+
+#+begin_example
+
+    initial heap                 heap                       heap
+   .-----------.             .-----------.             .-----------.
+   |           |   malloc    |   chunk   |             |   chunk   |
+   |           | ----------> |           |             |           |
+   |           |             |-----------|             |-----------|
+   |           |   malloc    |   chunk   |             |   chunk   |
+   |           | ----------> |           |             |           |
+   | top_chunk |             |-----------|             |-----------|
+   |           |             |           |   malloc    |   chunk   |
+   |           |             | top_chunk | ----------> |           |
+   |           |             |           |             |-----------|
+   |           |             |           |   malloc    |   chunk   |
+   '-----------'             '-----------' ----------> |           |
+                                              |        |-----------|
+                                              | sbrk   |           |
+                                              '------> | top_chunk |
+                                                       |           |
+                                                       '-----------'
+#+end_example
+
+O esquema amosa como se vai fragmentando o /top_chunk/ con sucesivas chamadas a
+~malloc~ e como [[https://linux.die.net/man/2/sbrk][sbrk]] é invocado cando se necesita máis /heap/.
+
+Tamén debemos saber que os /chunks/ de gran tamaño será directamente reservados
+con [[https://man7.org/linux/man-pages/man2/mmap.2.html][mmap]], sen usar os /heaps/.
+
+Podes comprobar se existe o /heap/ principal examinando os mapas de memoria con
+~dm~:
+#+begin_example
+[0x5614183471c2]> dm~heap]
+0x0000561418c3f000 - 0x0000561418c60000 - usr   132K s rw- [heap] [heap]
+#+end_example
+
+Para listar os chunks do /heap/ podes usar o comando ~dmh~:
+#+begin_example
+[0x5564c637d1dd]> dmh
+
+  Malloc chunk @ 0x5564c76f9250 [size: 0x3f0][free]
+  Malloc chunk @ 0x5564c76f9640 [size: 0x120][allocated]
+  Top chunk @ 0x5564c76f9760 - [brk_start: 0x5564c76f9000, brk_end: 0x5564c771a000]
+#+end_example
+
+En teoría este comando permite ver o /heap/ de diferentes arenas, sen embargo,
+ao executalo coa dirección da /arena/ dun fío, soamente me devolve que o /heap/
+está corrupto: 
+#+begin_example
+[0x56159e0e21d8]> dmha
+main_arena @ 0x7f6066b3fc40
+thread arena @ 0x7f6060000020
+[0x56159e0e21d8]> dmh 0x7f6060000020
+
+  Malloc chunk @ 0x7f6060000b50 [corrupted]
+   size: 0x0
+   fd: 0x0, bk: 0x0
+
+  Top chunk @ 0x7f6060000f00 - [brk_start: 0x7f6060000000, brk_end: 0x7f6060021000]
+#+end_example
+
+Abrín un [[https://github.com/radareorg/radare2/issues/17849][issue en github]] para reportar este erro, así que confío en que se
+solucione. Ademais, en binarios de 32 bits experimentei o efecto contrario, o
+/heap/ da /main_arena/ non se da parseado, mentres que os /heaps/ dos fíos
+sí. Manda carallo.  ¯\_(ツ)_/¯ 
+
+Por outra parte, os /heaps/ creados con ~mmap~ (todos salvo o principal) inclúen
+ao principio unha estructura /heap_info/:
+#+begin_src c
+typedef struct _heap_info
+{
+  mstate ar_ptr; /* Arena for this heap. */
+  struct _heap_info *prev; /* Previous heap. */
+  size_t size;   /* Current size in bytes. */
+  size_t mprotect_size; /* Size in bytes that has been mprotected
+                           PROT_READ|PROT_WRITE.  */
+  /* Make sure the following data is properly aligned, particularly
+     that sizeof (heap_info) + 2 * SIZE_SZ is a multiple of
+     MALLOC_ALIGNMENT. */
+  char pad[-6 * SIZE_SZ & MALLOC_ALIGN_MASK];
+} heap_info;
+#+end_src
+
+Esta estructura indica, entre outros, a dirección de memoria da /arena/ do
+/heap/ ao que pertence a estructura no membro ~ar_ptr~.
+
+Para ver os /heap_info/ dos /heaps/ dunha /arena/ pódese usar ~dmhi~:
+#+begin_example
+[0x559dfb80022e]> dmhi @0x7f3bd8000020
+malloc_info @ 0x7f3bd8000000 {
+  ar_ptr = 0x7f3bd8000020
+  prev = 0x0
+  size = 0x21000
+  mprotect_size = 0x21000
+}
+#+end_example
+
+Pero recorda que a [[https://sourceware.org/git/?p=glibc.git;a=blob;f=malloc/malloc.c;h=5b87bdb081f819c9d2b765b2f8e888e4d749c911;hb=HEAD#l1757][/main_arena/ xa se atopa nunha posición predefinida]], polo que
+non lle fai falta un /heap_info/ que indique a súa posición. Así que recibirías
+o seguinte erro se consultas o /heap_info/ da /main_arena/:
+#+begin_example
+[0x559dfb80022e]> dmhi @0x7f3bdd14cba0
+main_arena does not have an instance of malloc_info
+#+end_example
+
+Qué por que pon /malloc_info/ no canto de /heap_info/? Pois non che sabería dicir...
+
+* Bins
+
+As /bins/ son listas de /chunks/ que non están en uso polo proceso. Un /chunk/ so pode
+estar nunha /bin/ ao mesmo tempo. A /bin/ na que se inserta un /chunk/ é un tema
+complexo, que depende en gran medida do tamaño do /chunk/, pero tamén de outros
+factores de optimización.
+
+De feito, os algoritmos utilizados para insertar e remover os /chunks/ nas /bins/
+están deseñados para ser eficientes e poden levar a comportamentos
+contraintuitivos e impredecibles a primeira vista. O mellor sempre é
+experimentar cun programa para habituarse ao comportamento das /bins/.
+
+Existen 5 tipos de /bins/, que se poden separar en 2 grupos. As /bins/ "normais"
+ou de dobre enlace e as /bins/ de cache ou de enlace único.
+
+As /bins/ de dobre enlace usan os punteiros ~fd~ e ~bk~. Son colas FIFO (First In
+First Out), nas que se insertan os /chunks/ ao principio da cola e se empezan a
+buscar polo final. Estas /bins/ son:
+- **Unsorted bin** -> Unha /bin/ na que se insertan /chunks/ sen orden
+                  antes de meterse nas /large bins/ ou nas /small bins/.
+- **Small bins** -> Para os /chunks/ de pequeno tamaño. Tódolos
+                /chunks/ son do mesmo tamaño.
+- **Large bins** -> Para os /chunks/ de maior tamaño. Admiten /chunks/ de distintos
+                tamaños que se ordenan en función deste. 
+
+Por outra banda as /bins/ de enlace único usan so ~fd~ e son colas LIFO (Last In
+First Out) xa que os /chunks/ se insertan e se empezan a buscar pola
+cabeceira. Estas /bins/ son:
+- **Fast bins** -> Son /bins/ de cache para os /chunks/ máis pequenos.
+- **Tcaches** (Thread Caches) -> Son /bins/ especiais que permiten a varios fíos
+     acceder a /chunks/ de pequeno tamaño ao mesmo tempo.
+
+Outra cousa a ter en conta é que se un /chunk/ podese meter en varias /bins/,
+normalmente en /tcaches/, /fast bins/ e /small bins/ o orde é o seguinte:
+
+1. Tcaches -> Cando é posible, os /chunks/ métense nas /tcaches/, tanto nas
+   chamadas a ~free~ como na recarga de /tcaches/.
+2. Fast bins -> Métense os /chunks/ nas /fast bins/ cando as /tcaches/ están cheas.
+3. Small bins -> Os /chunks/ van ás /small bins/ cando as /tcaches/ están cheas
+   e estes son demasiado grandes para as /fast bins/.
+
+
+** Bins de dobre enlace
+
+As /bins/ de dobre enlace (~fd~ e ~bk~) son:
+- Unsorted Bin
+- Small bins
+- Large bins
+
+Estas /bins/ atópanse no atributo ~bins~ da estructura /malloc_state/. Este
+atributo contén un punteiro ~fd~ e ~bk~ para cada /bin/, que apuntan ao primeiro
+e último /chunk/ da mesma, respectivamente. No caso de non haber /chunks/, estes
+punteiros apuntan cara a o propio attributo ~bins~.
+
+Para mostrar as /bins/ de dobre enlace podemos usar o comando ~dmhb~:
+#+begin_example
+[0x7f8491e94090]> dmhb
+  Bin 001:
+  double linked list unsorted bin {
+    0x7f8491df1ca0->fd = 0x7f8491df1ca0
+    0x7f8491df1ca0->bk = 0x7f8491df1ca0
+  }
+  Bin 002:
+  double linked list small bin {
+    0x7f8491df1cb0->fd = 0x7f8491df1cb0
+    0x7f8491df1cb0->bk = 0x7f8491df1cb0
+  }
+  Bin 003:
+  double linked list small bin {
+    0x7f8491df1cc0->fd = 0x7f8491df1cc0
+    0x7f8491df1cc0->bk = 0x7f8491df1cc0
+  }
+..............| Stripped Output |...................
+  Bin 064:
+  double linked list small bin {
+    0x7f8491df2090->fd = 0x5637a11c0030->fd = 0x7f8491df2090
+    0x7f8491df2090->bk = 0x5637a11c0030->bk = 0x7f8491df2090
+  }
+  Bin 065:
+  double linked list large bin {
+    0x7f8491df20a0->fd = 0x7f8491df20a0
+    0x7f8491df20a0->bk = 0x7f8491df20a0
+  }
+..............| Output stripped |...................
+ Bin 126:
+  double linked list large bin {
+    0x7f8491df2470->fd = 0x7f8491df2470
+    0x7f8491df2470->bk = 0x7f8491df2470
+  }
+ Bin 127:
+  double linked list large bin {
+    0x7f8491df2480->fd = 0x7f8491df2480
+    0x7f8491df2480->bk = 0x7f8491df2480
+  }
+
+}
+#+end_example
+(A saída está truncada para non ocupar excesivo espacio)
+
+Para mostrar soamente as /bins/ dobres que conteñen algún /chunk/, podemos usar
+~dmhb~ e filtrar con ~grep~:
+#+begin_example
+[0x7f8491e94090]> dmhb | grep -E 'fd =.+=' -C 2
+ Bin 064:
+  double linked list small bin {
+    0x7f8491df2090->fd = 0x5637a11c0030->fd = 0x7f8491df2090
+    0x7f8491df2090->bk = 0x5637a11c0030->bk = 0x7f8491df2090
+  }
+#+end_example
+
+
+Se queres ver unha /bin/ dobremente enlazada en concreto, podes usar ~dmhb~ e
+pasarlle o índice do atributo ~bins~:
+#+begin_example
+[0x7f8491e94090]> dmhb 64
+ Bin 064:
+  double linked list small bin {
+    0x7f8491df2090->fd = 0x5637a11c0030->fd = 0x7f8491df2090
+    0x7f8491df2090->bk = 0x5637a11c0030->bk = 0x7f8491df2090
+  }
+#+end_example
+
+*** Unsorted bin
+
+A /unsorted bin/ é unha /bin/ dobremente enlazada, que se pode percorrer cara
+adiante e cara atrás usando os punteiros ~fd~ e ~bk~ dos /chunks/,
+respectivamente. É unha cola FIFO (First In First Out), onde os /chunks/ se
+insertan ao principio, no punteiro ~fd~ da entrada da /bin/, e se buscan dende o
+final, empezando polo punteiro ~bk~.
+
+#+caption: Esquema /unsorted bin/.
+#+begin_example
+                 .----------------------------------------------------------.
+                 |   entry               chunk                  chunk       |
+                 |   .----.          .-----------.          .-----------.   |
+                 '-> | XX | <-.  .-> | prev_size | <-.  .-> | prev_size | <-|--.
+                     | YY |   |  |   | size      |   |  |   | size      |   |  |
+malloc_state.bins[1] | fd |---|--'   | fd -------|---|--'   | fd -------|---'  |
+                   .-| bk |   '------| bk        |   '------| bk        |      |
+                   | '----'          '-----------'          '-----------'      |
+                   '-----------------------------------------------------------'
+#+end_example
+
+É a primeira /bin/ do membros ~bins~ da estructura /malloc_state/ da /arena/, e
+ten a peculiaridade de que os /chunks/ contidos nela non están ordenados. Isto
+permite que as insercións sexan rápidas e sen gran coste computacional. Polo que
+o modo de actuar da glibc é insertar primeiramente os /chunks/ na /unsorted
+bin/. Logo, cando esta é percorrida na procura dun /chunk/ dun tamaño
+específico, tódolos /chunks/ que se van examinando e descartando vanse
+insertando na /bin/ que lles corresponda, /small/ ou /large/.
+
+Sen embargo, normalmente os /chunks/ destinados ás /small bins/ non pasan pola
+/unsorted bin/, senón que son insertadas directamente no seu destino, xa que é
+doado calcular a /small bin/ á que pertence un /chunk/ concreto e ademais ao
+serén tódolos /chunks/ do mesmo tamaño, non fai falta ordenalos. Nos meus
+experimentos os /chunks/ destinados ás /small bins/ soamente eran insertados
+primeiro na /unsorted bin/ cando se producía unha consolidación.
+
+Para ver a /unsorted bin/ podes usar o comando ~dmhb 1~:
+#+begin_example
+[0x55b3cb19b27d]> dmhb 1
+  Bin 001:
+  double linked list unsorted bin {
+    0x7ff8f1a9eca0->fd = 0x55b3cce31370->fd = 0x55b3cce31f90->fd = 0x7ff8f1a9eca0
+    0x7ff8f1a9eca0->bk = 0x55b3cce31f90->bk = 0x55b3cce31370->bk = 0x7ff8f1a9eca0
+  }
+#+end_example
+Neste exemplo a /unsorted bin/ ten 2 /chunks/ (0x55b3cce31370 e 0x55b3cce31f90).
+
+
+Tamén podes consultar a /unsorted bin/ doutra /arena/ indicando a dirección do
+/malloc_state/ correspondente, seguindo o formato ~dmhb 1:malloc_state~:
+#+begin_example
+[0x55f3489b8250]> dmhb 1:0x7fbd44000020
+  Bin 001:
+  double linked list unsorted bin {
+    0x7fbd44000080->fd = 0x7fbd44000080
+    0x7fbd44000080->bk = 0x7fbd44000080
+  }
+
+#+end_example
+Neste caso atopamos vacía a /unsorted bin/.
+
+*** Small bins
+
+As /small bins/ son colas FIFO (First In First Out), dobremente enlazadas con
+~fd~ e ~bk~, destinadas a /chunks/ de pequeno tamaño. Os /chunks/ insertanse no
+comezo da /bin/, e recupéranse no final.
+
+#+caption: Esquema dunha /small bin/.
+#+begin_example
+                 .----------------------------------------------------------.
+                 |   entry               chunk                  chunk       |
+                 |   .----.          .-----------.          .-----------.   |
+                 '-> | XX | <-.  .-> | prev_size | <-.  .-> | prev_size | <-|--.
+                     | YY |   |  |   | size      |   |  |   | size      |   |  |
+malloc_state.bins[i] | fd |---|--'   | fd -------|---|--'   | fd -------|---'  |
+                   .-| bk |   '------| bk        |   '------| bk        |      |
+                   | '----'          '-----------'          '-----------'      |
+                   '-----------------------------------------------------------'
+#+end_example
+
+En 64 bits existen un total de 62 /small bins/, que abarcan /chunks/ de tamaños
+dende 32 ata 1008 (0x3f0) bytes.
+
+Por outra parte, en 32 bits o tamaño soportado e o número de /small bins/ varía en
+función do aliñamento dos /chunks/, sendo sempre o menor tamaño 16 bytes. 
+
+No caso de que os /chunks/ se aliñen a 8, existen 62 /small bins/ que poden
+aloxar /chunks/ de ata 504 bytes. 
+
+Pola contra, se os /chunks/ están aliñados a 16 (no caso de x86 a partires de
+libc 2.26), os /chunks/ almacenados nas /small bins/ abarcan ata 1008 bytes,
+igual que en 64 bits, inda que nesta configuración existen 63 /small bins/.
+
+#+caption:  Tamaños das /small bins/ (bytes).
+| small bin (bins index) | 64 bits | 32 bits (align 16) | 32 bits (align 8) |
+|------------------------+---------+--------------------+-------------------|
+| 1 (2)                  |    0x20 |               0x10 |              0x10 |
+| 2 (3)                  |    0x30 |               0x20 |              0x18 |
+| 3 (4)                  |    0x40 |               0x30 |              0x20 |
+| ...                    |     ... |                ... |               ... |
+| 62 (63)                |   0x3f0 |              0x3e0 |             0x1f8 |
+| 63 (64)                |     N/A |              0x3f0 |               N/A |
+
+Tamén podes calcular o tamaño dun /chunk/ para unha /small bin/ con [[https://github.com/hackliza/gmcalc#bin-to-size][gmcalc]].
+
+Para ver as /small bins/, podes usar o comando ~dmhb~, cun pouco de axuda de
+~grep~:
+#+begin_example
+[0x7f8491e94090]> dmhb | grep 'small bin' -B 1 -A 3
+ Bin 002:
+  double linked list small bin {
+    0x7f87dc2d77c8->fd = 0x202f000->fd = 0x202f040->fd = 0x7f87dc2d77c8
+    0x7f87dc2d77c8->bk = 0x202f040->bk = 0x202f000->bk = 0x7f87dc2d77c8
+  }
+ Bin 003:
+  double linked list small bin {
+    0x7f87dc2d77d8->fd = 0x7f87dc2d77d8
+    0x7f87dc2d77d8->bk = 0x7f87dc2d77d8
+  }
+..............| Output stripped |...................
+ Bin 062:
+  double linked list small bin {
+    0x7f87dc2d7b88->fd = 0x7f87dc2d7b88
+    0x7f87dc2d7b88->bk = 0x7f87dc2d7b88
+  }
+ Bin 063:
+  double linked list small bin {
+    0x7f87dc2d7b98->fd = 0x7f87dc2d7b98
+    0x7f87dc2d7b98->bk = 0x7f87dc2d7b98
+  }
+ Bin 064:
+  double linked list small bin {
+    0x7f87dc2d7ba8->fd = 0x7f87dc2d7ba8
+    0x7f87dc2d7ba8->bk = 0x7f87dc2d7ba8
+  }
+#+end_example
+(A saída está truncada para non ocupar excesivo espacio)
+
+Deste xeito podemos ver que a /small bin/ número 2 ten 2 /chunks/. 
+
+Tamén podemos aplicar un filtro para mostrar soamente as /small bins/ que
+conteñen /chunks/:
+#+begin_example
+[0x7f87dbf4bc37]> dmhb | grep 'small bin' -B 1 -A 3 | grep -E 'fd =.+=' -C 2
+ Bin 002:
+  double linked list small bin {
+    0x7f87dc2d77c8->fd = 0x202f000->fd = 0x202f040->fd = 0x7f87dc2d77c8
+    0x7f87dc2d77c8->bk = 0x202f040->bk = 0x202f000->bk = 0x7f87dc2d77c8
+  }
+#+end_example
+
+*** Large bins
+
+As /large bins/ son /bins/ destinadas a conter o os /chunks/ de maior
+tamaño. Son colas FIFO (First In First Out) dobremente enlazadas, mediante os
+punteiros ~fd~ e ~bk~. 
+
+Ademais, as /large bins/ poden conter /chunks/ de diferente
+tamaño, ordenados de maior a menor. E para aumentar a velocidade ao recorrer a
+/bin/, os /chunks/ das /large bins/ fan uso dos punteiros ~fd_nextsize~ e
+~bk_nextsize~, que sinalan ós /chunks/ do seguinte ou anterior tamaño,
+respectivamente. Inda que so o primeiro /chunk/ de cada tamaño usa estes punteiros.
+
+
+#+caption: Esquema dunha /large bin/.
+#+begin_example
+    .------------<-------------------<-----------------------<----------------------<---.
+    |   entry               chunk                  chunk                    chunk       |
+    |   .----.        .-------------.         .------------.          .-------------.   |
+    '-> | XX |<-.  .->| prev_size   |<--. .-> | prev_size   |<-.  .-->| prev_size   | <-|--.
+        | YY |  |  |  | size (0x520)|   | |   | size (0x520)|  |  |   | size (0x510)|   |  |
+bins[i] | fd |--|->'  | fd ---------|>--|-'   | fd          |>-|--|   | fd ---------|>--'  |
+      .-| bk |  '----<| bk          |   |----<| bk          |  '--|--<| bk          |      |
+      | '----'        | fd_nextsize |>. |     | fd_nextsize |     |   | fd_nextsize |>-.   |
+      |             .<| bk_nextsize | | |     | bk_nextsize |     | .<| bk_nextsize |  |   |
+      |             | '-------------' | |     '-------------'     | | '-------------'  |   |
+      |             '----------->-----'-|->--------->---------->--' |                  |   |
+      |                                 |                           |                  |   |
+      |                                 '---<---------------<-------'---<-------<------'   |
+      |                                                                                    |
+      '------>--------->----------------->------------------>----------------->------------'
+#+end_example
+
+Os rangos de tamaño que abarcan as /large bins/ é o que se atopa o final das /small
+bins/ ata os /chunks/ reservados con ~mmap~.
+
+Cada /large bin/ ten un rango de tamaños que pode almacenar, empezando as
+primeiras con rangos de 64 (0x40) bytes, e aumentando nas últimas. Na seguinte
+táboa amosanse os tamaños de /chunk/ que albergan as diferentes /large bins/ en
+diferentes entornos. Tamén se indican os rangos que abarca cada /bin/.
+
+#+caption:  Tamaños das /large bins/ (bytes).
+| large bin | 64 bits                  | 32 bits (align 16)      | 32 bits (align 8)        |
+|           | glibc 2.32               | glibc 2.32              | glibc 2.19               |
+|-----------+--------------------------+-------------------------+--------------------------|
+| 0 (64)    | 0x400-0x430 (0x40)       | N/A                     | 0x200-0x238  (0x40)      |
+| 1 (65)    | 0x440-0x470              | 0x400-0x430 (0x40)      | 0x240-0x278              |
+| 2 (66)    | 0x480-0x4b0              | 0x400-0x470             | 0x280-0x2b8              |
+| ...       | ...                      | ...                     | ...                      |
+| 30 (94)   | 0xb80-0xbb0              | 0xb40-0xb70             | 0x980-0x9b8              |
+| 31 (95)   | 0xbc0-0xbf0              | - (0x0)                 | 0x9c0-0x9f8              |
+| 32 (96)   | 0xc00-0xc30              | 0xb80-0xbf0 (0x80)      | 0xa00-0xbf8 (0x200)      |
+| 33 (97)   | 0xc40-0xdf0 (0x1c0)      | 0xc00-0xdf0 (0x200)     | 0xc00-0xdf8              |
+| 34 (98)   | 0xe00-0xff0 (0x200)      | 0xe00-0xff0             | 0xe00-0xff8              |
+| 35 (99)   | 0x1000-0x11f0            | 0x1000-0x11f0           | 0x1000-0x11f8            |
+| ...       | ...                      | ...                     | ...                      |
+| 47 (111)  | 0x2800-0x29f0            | 0x2800-0x29f0           | 0x2800-0x29f8            |
+| 48 (112)  | 0x2a00-0x2ff0 (0x600)    | 0x2a00-0x2ff0 (0x600)   | 0x2a00-0x2ff8 (0x600)    |
+| 49 (113)  | 0x3000-0x3ff0 (0x1000)   | 0x3000-0x3ff0 (0x1000)  | 0x3000-0x3ff8 (0x1000)   |
+| 50 (114)  | 0x4000-0x4ff0            | 0x4000-0x4ff0           | 0x4000-0x4ff8            |
+| ...       | ...                      | ...                     | ...                      |
+| 55 (119)  | 0x9000-0x9ff0            | 0x9000-0x9ff0           | 0x9000-0x9ff8            |
+| 56 (120)  | 0xa000-0xfff0 (0x6000)   | 0xa000-0xfff0 (0x6000)  | 0xa000-0xfff8 (0x6000)   |
+| 57 (121)  | 0x10000-0x17ff0 (0x8000) | 0x1000-0x17ff0 (0x8000) | 0x10000-0x17ff8 (0x8000) |
+| 58 (122)  | 0x18000-0x1fff0          | 0x18000-0x1fff0         | 0x18000-0x1fff8          |
+| 59 (123)  | 0x20000-???              | 0x20000-???             | 0x20000-???              |
+| ...       | ...                      | ...                     | ...                      |
+
+O máis curioso son as /bins/ entre a 95 e 98, que varían en cada entorno. Parece
+que se introduce algunhas /bins/ con rangos non estándar para conseguir
+homoxenizar os rangos nas /bins/ posteriores. Podes usar [[https://github.com/hackliza/gmcalc#bin-to-size][gmcalc]] para obter os
+tamaños dunha /large bin/ se o precisas.
+
+E inda que existen 126 /bins/, a partires da bin /123/ foime complicado facer a medición.
+Débese a que moitos /chunks/ son reservados mediante ~mmap~ e non se aloxan nas
+/bins/, posiblemente por falta de espazo no /heap/. Sen embargo o tamaño a partir
+do cal un /chunk/ é reservado mediante ~mmap~ é difuso, xa que en diferentes
+probas que fixen obtiven diferentes tamaños, pero parece que os /chunks/ poden empezar
+a ser reservados con ~mmap~ a partires de 0x20000 bytes.
+ 
+En radare2, para ver as large bins podes usar ~dmbh~ e filtrar con ~grep~:
+#+begin_example
+[0x5583f0e61282]> dmhb | grep 'large' -B 1 -A 3
+ Bin 065:
+  double linked list large bin {
+    0x7f981ba440a0->fd = 0x7f981ba440a0
+    0x7f981ba440a0->bk = 0x7f981ba440a0
+  }
+ Bin 066:
+  double linked list large bin {
+    0x7f981ba440b0->fd = 0x7f981ba440b0
+    0x7f981ba440b0->bk = 0x7f981ba440b0
+  }
+..........................................
+ Bin 110:
+  double linked list large bin {
+    0x7f981ba44370->fd = 0x5583f1f1ff90->fd = 0x7f981ba44370
+    0x7f981ba44370->bk = 0x5583f1f1ff90->bk = 0x7f981ba44370
+  }
+..........................................
+ Bin 126:
+  double linked list large bin {
+    0x7f981ba44470->fd = 0x7f981ba44470
+    0x7f981ba44470->bk = 0x7f981ba44470
+  }
+ Bin 127:
+  double linked list large bin {
+    0x7f981ba44480->fd = 0x7f981ba44480
+    0x7f981ba44480->bk = 0x7f981ba44480
+  }
+#+end_example
+
+
+Para ver as /large bins/ que teñen al menos un chunk, podes filtrar os
+resultados de ~dmhb~ con ~grep~:
+#+begin_example
+[0x5583f0e61282]> dmhb | grep 'large' -B 1 -A 3 | grep -E 'fd =.+=' -C 2
+ Bin 110:
+  double linked list large bin {
+    0x7f981ba44370->fd = 0x5583f1f1ff90->fd = 0x7f981ba44370
+    0x7f981ba44370->bk = 0x5583f1f1ff90->bk = 0x7f981ba44370
+  }
+#+end_example
+
+** Fast bins
+
+As /fast bins/ son unhas /bins/ de cache para /chunks/ de pouco tamaño. É común
+nun proceso estar allocateando e liberando pequenos /chunks/ de memoria
+continuamente. E ahí entran as /fast bins/.
+
+Existen un total de 10 /fast bins/ por /arena/, inda que na práctica so se usan
+as 7 primeiras (as 7 de menor tamaño). Cada /fast bin/, ao igual que as /small
+bins/ contén /chunks/ dun so tamaño.
+
+En 64 bits, as /fast bins/ poden almacenar /chunks/ dende 32 bytes ata 128
+bytes. Chegarían ata /chunks/ de 168 no caso de usarse tódalas /fast bins/.
+
+Por outra parte, en 32 bits, almacenan /chunks/ cun tamaño mínimo de 16 bytes, e
+dependendo da alineación dos /chunks/, 16 ou 8, poden chegar ata os 112 ou 64
+bytes, respectivamente.
+
+#+caption:  Tamaños dos /chunks/ das /fast bins/.
+|      fast bin | 64 bits | 32 bits (align 16) | 32 bits (align 8) |
+|---------------+---------+--------------------+-------------------|
+|             1 |    0x20 |               0x10 |              0x10 |
+|             2 |    0x30 |               0x20 |              0x18 |
+|             3 |    0x40 |               0x30 |              0x20 |
+|             4 |    0x50 |               0x40 |              0x28 |
+|             5 |    0x60 |               0x50 |              0x30 |
+|             6 |    0x70 |               0x60 |              0x38 |
+|             7 |    0x80 |               0x70 |              0x40 |
+| (not used)  8 |    0x90 |               0x80 |              0x48 |
+| (not used)  9 |    0xa0 |               0x90 |              0x50 |
+| (not used) 10 |    0xb0 |               0xa0 |              0x58 |
+
+Tamén podes calcular o tamaño dun /chunk/ para unha /fast bin/ con [[https://github.com/hackliza/gmcalc#bin-to-size][gmcalc]].
+
+
+As /fast bins/ son colas LIFO (Last In First Out) cun único enlace, que usa o
+punteiro ~fd~ dos /chunks/ para apuntar ao seguinte /chunk/. Tanto a inserción
+como a obtención de /chunks/ realízase pola cabeceira, seguindo o punteiro
+correspondente do membro ~fastbinsY~ do /malloc_state/.
+
+#+CAPTION: Esquema dunha /fast bin/.
+#+begin_example
+                               .-----------.     .-----------.
+                           .-> | prev_size | .-> | prev_size | .-> 0x0
+                           |   | size      | |   | size      | |
+malloc_state.fastbinsY[i] -'   | fd -------|-'   | fd -------|-'
+                               | bk        |     | bk        |
+                               '-----------'     '-----------'
+#+end_example
+
+
+Por outra parte, os /chunk/ insertados nunha /fast bin/ non se marcan como
+libres (flag ~P~ na cabeceira do chunk seguinte). Polo que os /chunks/
+insertados nunha /fast bin/ quedan ahí sen ser fusionados ata que son reusados
+de novo, ou ata que se produce unha consolidación. Deste xeito evítase que un
+/chunk/ que é probable que volva ser usado en breves se poida fusionar con
+outros para crear /chunks/ máis grandes.
+
+Para consultar as /fast bins/, pódese usar o comando ~dmhf~:
+#+begin_example
+[0x5627a3a97306]> dmhf
+fastbinY {
+ Fastbin 01
+  fastbin 1 @ 0x7f6e9df65c50 {
+   0x5627a47d9760->fd = 0x5627a47d9740->fd = 0x5627a47d9720
+  }
+ Fastbin 02
+  Empty bin  0x0
+ Fastbin 03
+  Empty bin  0x0
+ Fastbin 04
+  Empty bin  0x0
+ Fastbin 05
+  Empty bin  0x0
+ Fastbin 06
+  Empty bin  0x0
+ Fastbin 07
+  Empty bin  0x0
+ Fastbin 08
+  Empty bin  0x0
+ Fastbin 09
+  Empty bin  0x0
+ Fastbin 10
+  Empty bin  0x0
+}
+#+end_example
+
+
+Se queres ver soamente /fast bins/ con chunks podes usar 
+~dmhf | grep -w 'fastbin' -A 2~:
+#+begin_example
+[0x56173d3ee355]> dmhf | grep -w 'fastbin' -A 2
+  fastbin 1 @ 0x7fcf8b64ec50 {
+   0x56173f36d760->fd = 0x56173f36d740->fd = 0x56173f36d720
+  }
+--
+  fastbin 4 @ 0x7fcf8b64ec68 {
+   0x56173f36d9b0
+  }
+#+end_example
+
+** Tcaches
+
+As /tcaches/ (thread caches) son un tipo de /bins/ de cache especial, agregadas na
+glibc 2.26. Poden ser accedidas por un fío sen necesidade de bloquear o
+/malloc_state/ da /arena/, aumentando o rendemento. Para acadar iso, as entradas
+das /tcaches/ almacénanse nunha estructura externa ao /malloc_state/. Dita
+estructura é [[https://sourceware.org/git/?p=glibc.git;a=blob;f=malloc/malloc.c;h=5b87bdb081f819c9d2b765b2f8e888e4d749c911;hb=HEAD#l2919][/tcache_perthread_struct/]]:
+
+#+caption: 
+#+begin_src c
+typedef struct tcache_entry
+{
+  struct tcache_entry *next;
+  /* This field exists to detect double frees.  */
+  struct tcache_perthread_struct *key;
+} tcache_entry;
+
+typedef struct tcache_perthread_struct
+{
+  uint16_t counts[TCACHE_MAX_BINS];
+  tcache_entry *entries[TCACHE_MAX_BINS];
+} tcache_perthread_struct;
+#+end_src
+
+En ~entries~ atopamos un array de /tcache_entry/, onde cada entrada contén un
+punteiro ~next~ ao primeiro /chunk/ da /tcache/ e co campo ~key~ usado como
+mecanismo de protección fronte a [[https://heap-exploitation.dhavalkapil.com/attacks/double_free][double frees]]. Por outro lado, o membro ~count~ é
+usado para levar a conta dos /chunks/ dispoñibles en cada /tcache/ dunha forma
+eficiente.
+
+As /tcaches/, como as /fast bins/ están enlazadas por un único enlace, usando
+soamente o punteiro ~fd~ dos /chunks/, que neste caso se interpreta como
+~next~. Son colas LIFO (Last In First Out), na que tanto as insercións como
+obtención de /chunks/ danse na cabeceira da /bin/.
+
+E ao contrario co resto das /bins/, ~fd~ (~next~) apunta ao membro ~fd~ (~next~)
+do seguinte /chunk/ da lista, en vez de ao inicio do /chunk/. E o último /chunk/
+apunta a ~NULL~ (~fd~ = 0x0). O punteiro ~bk~ actúa como ~key~, apuntando á
+estructura /tcache_perthread_struct/.
+
+O seguinte diagrama amosa unha /tcache/ con 2 /chunks/:
+#+begin_example
+                                            .-----------.        .-----------.
+                                            | prev_size |        | prev_size |
+                                            | size      |        | size      |
+tcache_perthread_struct.entries[i].next --> | fd (next) |------->| fd (next) |---> 0x0
+            ^     ^             .----------<| bk (key)  |  .----<| bk (key)  |
+            |     '-------------'           '-----------'  |     '-----------'
+            '----------------------------------------------'
+#+end_example
+
+Existen 64 /tcaches/ por fío, e cada unha pode conter ata 7 /chunks/ do mesmo
+tamaño.
+
+En 64 bits, poden conter /chunks/ dende 32 bytes ata 1040 bytes. Por outra
+banda, en 32 bits, o tamaño mínimo do /chunk/ que se almacena é 16. Despois,
+dependendo se os /chunks/ están alineados a 16 (en x86) ou a 8, as /tcaches/
+poden conter ata 1024 ou 520 bytes, respectivamente.
+
+
+#+caption:  Tamaños dos /chunks/ das /tcaches/ (en bytes).
+| tcache | 64 bits | 32 bits (align 16) | 32 bits (align 8) |
+|--------+---------+--------------------+-------------------|
+|      0 |    0x20 |               0x10 |              0x10 |
+|      1 |    0x30 |               0x20 |              0x18 |
+|      2 |    0x40 |               0x30 |              0x20 |
+|    ... |     ... |                ... |               ... |
+|     62 |   0x400 |              0x3f0 |             0x200 |
+|     63 |   0x410 |              0x400 |             0x208 |
+
+No mesmo ca outras /bins/, podes calcular o tamaño dun /chunk/ para unha
+/tcache/ con [[https://github.com/hackliza/gmcalc#bin-to-size][gmcalc]].
+
+
+Outra cousa a ter en conta é que, ao igual que nas /fast bins/, os /chunks/ que
+se atopan nunha /tcache/ non se marcan como libres, se non que permanecen como
+usados. Isto evita que se fusionen con outros /chunks/.
+
+Para ver as /tcaches/ que conteñen /chunks/ podes usar ~dmht~:
+#+begin_example
+[0x7f8491e94090]> dmht
+Tcache main arena @ 0x7f8491df1c40
+bin : 1, items : 3, fd :0x5637a11c0000->0x5637a11be830->0x5637a11bffd0
+bin : 2, items : 2, fd :0x5637a11bd910->0x5637a11bfd30
+bin : 3, items : 2, fd :0x5637a11c0430->0x5637a11bfd70
+bin : 5, items : 1, fd :0x5637a11bfb20
+bin :33, items : 1, fd :0x5637a11bd620
+bin :59, items : 1, fd :0x5637a11bf6c0
+#+end_example
+Neste exemplo pode verse tcaches que conteñen 1, 2 ou 3 /chunks/.
+
+Se non houbese /chunks/ o output sería algo como o seguinte:
+#+begin_example
+[0x563d885dc2e4]> dmht
+Tcache main arena @ 0x7f4222dfbba0
+#+end_example
+* Erros
+
+Vou recoller, aparte dos exemplos, algúns erros que poden darse ao executar os
+comandos mencionados.
+
+** Non se atopa glibc
+Por exemplo, pode ser que mentres executes un comando dos anteriores che salte
+un erro coma o seguinte.
+#+begin_example
+[0x7f94f6c29090]> dmha?
+Warning: Can't find glibc mapped in memory (see dm)
+#+end_example
+
+Isto pode deberse a varios motivos:
+- O proceso non está correndo. Proba a executar ~dc~.
+- O proceso está executandose, pero a glibc inda non está mapeanda. Pon un
+  breakpoint con ~db main~ e entón ~dc~.
+- O programa non usa a glibc. Non estarás en Windows, non?
+
+De calquera xeito, podes comprobar se a glibc está mapeanda con ~dm~ (como che
+di radare2):
+#+begin_example
+[0x557602f15189]> dm~libc:0[9]
+/usr/lib/x86_64-linux-gnu/libc-2.32.so
+#+end_example
+
+** Non se atopa arena
+
+Podes atoparte con este erro:
+#+begin_example
+[0x000010c0]> dmha
+dbg.glibc.tcache = 1
+Warning: Can't find arena mapped in memory (see om)
+#+end_example
+
+Este erro apareceume cando me esquecera da flag ~-d~ (debug) no comando ~r2~. 
+
+** Non se atopa heap
+Outro erro que pode devolver r2 é o seguinte:
+#+begin_example
+[0x55b07c433207]> dmha
+No Heap section
+#+end_example
+
+Este erro dase cando inda non hai ningunha /arena/, e por tanto non hai /heap/.
+A creación da /arena/ e /heap/ ocorre cando se invoca por primeira vez ~malloc~
+(ou ~realloc~, ~calloc~).
+
+Para verificar que existe o /heap/, podes buscar o mapa de memoria chamado
+~[heap]~. Para iso podes usar o comando ~dm~:
+#+begin_example
+[0x55b07c433221]> dm~heap]
+0x000055b07da3b000 - 0x000055b07da5c000 - usr   132K s rw- [heap] [heap]
+#+end_example
+
+A saída mostra que o mapa de memoria ~[heap]~ está creado. No caso de non
+estalo, o comando anterior non xeraría saída.
+
+** tcaches e fastbins protexidas con Safe-Linking
+
+Ao consultar unha /tcache/ podeste atopar co seguinte:
+#+begin_example
+[0x7f9694a1b8cb]> dmht
+Tcache main arena @ 0x7f9694bbdba0
+bin : 3, items : 7, fd :0x55d1c5dfc530->0x55d498c3991c->0xffffffffffffffef
+#+end_example
+
+Ou no caso dunha /fast bin/:
+#+begin_example
+[0x7f9694a1b8cb]> dmhf | grep -w 'fastbin' -A 2
+  fastbin 4 @ 0x7f9694bbdbc8 {
+   0x55d1c5dfc8b0->fd = 0x55d498c395bc Linked list corrupted
+
+#+end_example
+
+En ámbolos dous casos pódese ver que a lista está corrupta (na /tcache/ dedúcese
+dese punteiro 0xffffffffffffffef tan extraño). Isto débese a que na **glibc 2.32** (a
+última no momento de escribir isto) implementouse o mecanismo [[https://sourceware.org/git/?p=glibc.git;a=blob;f=malloc/malloc.c;h=5b87bdb081f819c9d2b765b2f8e888e4d749c911;hb=75a193b7611bade31a150dfcc528b973e3d46231#l330][Safe-Linking]] para
+protexer os punteiros das /tcaches/ e as /fast bins/.
+
+Safe-Linking fai uso das seguintes rutinas:
+#+begin_src c
+#define PROTECT_PTR(pos, ptr) \
+  ((__typeof (ptr)) ((((size_t) pos) >> 12) ^ ((size_t) ptr)))
+#define REVEAL_PTR(ptr)  PROTECT_PTR (&ptr, ptr)
+#+end_src
+
+Como se pode observar, para ocultar e revelar o verdadeiro valor do punteiro con
+~PROTECT_PTR~ e ~REVEAL_PTR~ faise un XOR entre valor do punteiro é a dirección
+do propio punteiro. Para máis info podes botarlle unha ollada [[https://research.checkpoint.com/2020/safe-linking-eliminating-a-20-year-old-malloc-exploit-primitive/][ao post de
+CheckPoint]], os autores desta técnica.
+
+Para que radare2 calcule o valor verdadeiro dos punteiros temos que por a ~true~
+a variable ~dbg.glibc.demangle~:
+#+begin_example
+[0x7f9694a1b8cb]> e dbg.glibc.demangle = true
+#+end_example
+
+Despois disto, as /bins/ móstranse correctamente:
+#+begin_example
+[0x7f9694a1b8cb]> dmht
+Tcache main arena @ 0x7f9694bbdba0
+bin : 3, items : 7, fd :0x55d1c5dfc530->0x55d1c5dfc4c0->0x55d1c5dfc450->0x55d1c5dfc3e0->0x55d1c5dfc370->0x55d1c5dfc300->0x55d1c5dfc290
+#+end_example
+
+#+begin_example
+[0x7f9694a1b8cb]> dmhf | grep -w 'fastbin' -A 2
+  fastbin 4 @ 0x7f9694bbdbc8 {
+   0x55d1c5dfc8b0->fd = 0x55d1c5dfc840->fd = 0x55d1c5dfc7d0->fd = 0x55d1c5dfc760->fd = 0x55d1c5dfc6f0->fd = 0x55d1c5dfc680->fd = 0x55d1c5dfc610->fd = 0x55d1c5dfc5a0
+  }
+#+end_example
+
+Gustaríame agradecerlle a [[https://github.com/meowmeowxw][@meowmeowxw]] por amosarme a [[https://github.com/radareorg/radare2/issues/17915#issuecomment-729799640][solución a este problema]].
+
+* Conclusión
+
+Bueno, espero que este paseiño polo heap con radare2 che axude a facer análises
+do heap no futuro.
+
+Veña, a pasalo ben.
+
+* Recursos
+
+- [[https://github.com/radareorg/radare2][radare2]]
+- [[https://www.youtube.com/watch?v=Svm5V4leEho][r2con 2016 - n4x0r Heap Analysis]]
+- [[https://sourceware.org/glibc/wiki/MallocInternals][glibc wiki: MallocInternals]]
+- [[https://heap-exploitation.dhavalkapil.com/][Heap exploitation book]]
+- [[https://azeria-labs.com/heap-exploitation-part-1-understanding-the-glibc-heap-implementation/][Azeria Labs]]
+- [[https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/][Understanding glibc malloc]]
+- [[https://github.com/shellphish/how2heap][how2heap]]
+- [[https://www.megabeets.net/a-journey-into-radare-2-part-1/][tutorial de Megabeets]]
+- [[https://research.checkpoint.com/2020/safe-linking-eliminating-a-20-year-old-malloc-exploit-primitive/][Safe-Linking]]
+- [[https://gist.github.com/Zer1t0/9a1d6108148e862dd61065ec8ae0c03c][cheatsheet]]

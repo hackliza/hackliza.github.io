@@ -10,6 +10,7 @@ subtitle = "Unha comunidade en galego sobre software libre, programación, (in)s
 logo = "img/hackliza.png"
 favicon = "img/hackliza.png"
 rss = true
+readingTime = true
 
 
 [Author]
@@ -23,7 +24,3 @@ contentDir = "content/gl"
 [languages.en]
 contentDir = "content/en"
 
-
-[[menu.main]]
-name = "About"
-url = "page/about/"
