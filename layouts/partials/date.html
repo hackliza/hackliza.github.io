@@ -1,5 +1,5 @@
 {{ if eq "gl" .language.Lang }}
-    {{ .date.Day }}. {{ index .months_gl (printf "%d" .date.Month) }} {{ .date.Year }}
+    {{ .date.Day }} de {{ index .months_gl (printf "%d" .date.Month) }} do {{ .date.Year }}
 {{ else }}
     {{ .date.Format "January 2, 2006" }}
 {{ end }}
