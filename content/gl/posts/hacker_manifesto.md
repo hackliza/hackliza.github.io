@@ -4,7 +4,15 @@ author: Hackliza
 date: 2020-12-06
 ---
 
-Tradución do [manifesto hacker](http://phrack.org/issues/7/3.html).
+Boas xente,
+
+Hoxe traemos a tradución dun dos textos máis icónicos da cultura hacker, o
+[manifesto hacker](http://phrack.org/issues/7/3.html), publicado orixinalmente
+na revista Phrack en 1986. Inda que xa choveu dende aquela, ideas como a 
+liberdade de coñecemento e a curiosidade insaciable seguen moi presentes 
+na comunidade hacker hoxe en día. 
+
+Esperamos que vos guste esta homenaxe.
 
 ```
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
