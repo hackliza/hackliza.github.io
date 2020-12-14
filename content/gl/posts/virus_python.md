@@ -47,7 +47,7 @@ comportamento observado. Algunhas destas técnicas son:
 **Comprobación da integridade dos arquivos**. Nesta técnica comprobase se se modificou un arquivo comprobando o hash 
 cada certo tempo.
 
-# Técnicas ant-antivirus
+# Técnicas anti-antivirus
 Este tipo de técnicas empréganse para evitar que un antivirus detecte un código malicioso. Algunhas delas son:
 
 **Técnicas de sixilo**: son un conxunto de técnicas cuxo obxectivo é convencer ao usuario de que non está pasando nada 
