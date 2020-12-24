@@ -35,7 +35,7 @@ O primeiro é facer que o programa esté dispoñible nun repositorio dunha forxa
 como [[https://github.com/][Github]] ou [[https://about.gitlab.com/][Gitlab]].
 
 Unha vez a ferramenta está dispoñible para a descarga, debería ser fácil de
-instalar/compilar. É común que os programes se compile e instalen facendo uso
+instalar/compilar. É común que os programas se compilen e instalen facendo uso
 dun makefile. Por exemplo:
 
 #+caption: Proceso de instalación típico
