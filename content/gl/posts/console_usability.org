@@ -1,0 +1,521 @@
+#+title: Truquiños para mellorar a usabilidade de programas de consola
+#+author: Eloy Pérez González
+#+date: 2020-12-24
+#+tags[]: linux unix programming
+
+Boas xente,
+
+Neste post vouvos amosar unha serie de truquiños que, pola miña experiencia,
+son cremita para aumentar a usabilidade das utilidades de consola. Vounos
+deixar aquí plasmados para non esquecelos e coa esperanza de que tamén lle
+poidan servir a máis xente.
+
+Ao final a clave e facer os programas simples, o que non é tan fácil como
+parece, pero agardo que estes truquiños che axuden.
+
+Eu polo xeral programo pequenas ferramentas/scripts en Linux, polo que estes
+consellos enfocanse nesa plataforma, pero deberían funcionar noutras.
+
+Ademais, decir que moito ven inspirado polo libro 
+[[http://www.catb.org/~esr/writings/taoup/html/][The Art of Unix Programming]], que che recomendo se che cunde a programación en
+Unix/Linux.
+
+Vou a asumir un coñecemento básico de Linux. Se non sabes usar Linux,
+recoméndoche encarecidamente que [[http://www.catb.org/~esr/faqs/hacker-howto.html#skills2][aprendas a utilizalo]].
+
+Veña, ao choio.
+
+* Facer programas fáciles de instalar
+
+Isto pode ser tedioso a primeira vez que se fai, xa que non necesariamente
+implica programar, senon preparar o programa para que se poida desplegar
+fácilmente. Sen embargo, cunde moito cando se precisa usar o programa.
+
+O primeiro é facer que o programa esté dispoñible nun repositorio dunha forxa
+como [[https://github.com/][Github]] ou [[https://about.gitlab.com/][Gitlab]].
+
+Unha vez a ferramenta está dispoñible para a descarga, debería ser fácil de
+instalar/compilar. É común que os programes se compile e instalen facendo uso
+dun makefile. Por exemplo:
+
+#+caption: Proceso de instalación típico
+#+begin_src shell
+user@debian:~$ cd myprogram/
+user@debian:myprogram$ make
+user@debian:myprogram$ make install
+#+end_src
+
+Esta práctica é común en programas en C, onde o comando ~make~ se usa para
+compilar e ~make install~ para instalar. Inda que o teu programa non estea en C,
+eu recomendoche crear un [[https://www.gnu.org/software/make/manual/make.html][makefile]] para facer a instalación dun xeito estándar e
+facilitarlle a vida a outras usuarias.
+
+Por exemplo, no caso de ter un programa en Python, que non precisa ser
+compilado, podes usar o comando ~make~ para instalar as dependencias executando 
+~pip install -r requirements.txt~, mentres que ~make install~ pode instalalo no
+sistema con ~pip install .~.
+
+#+caption: Exemplo de Makefile
+#+begin_src makefile
+.PHONY: deps, install
+
+deps:
+	pip3 install -r requirements.txt
+
+install:
+	pip3 install .
+#+end_src
+
+
+Pode ser que no teu caso o programa sexa soamente un script, entón abondaría con
+que ~make~ executase algo como ~cp ./myscript.py /usr/bin/myscript~ (recorda
+facer o teu scrip executable (~chmod +x~) e engadirlle un [[https://en.wikipedia.org/wiki/Shebang_(Unix)][shebang]]).
+
+Nota: No caso de que queiras instalar o programa a nivel de usuaria (porque non
+tes privilexios de root ou o que sexa), podes copialo en [[https://www.freedesktop.org/software/systemd/man/file-hierarchy.html#~/.local/bin/][=~/.local/bin=]] (teste
+que lembrar de engadir este directorio ao the PATH, e crealo de ser necesario).
+
+Para programas en Python, eu recoméndoche crear un ficheiro [[https://packaging.python.org/tutorials/packaging-projects/][=setup.py=]] para
+instalalo dun xeito sinxelo, incluso sen un makefile. Ou polo menos crear un
+=requirements.txt= para indicar as dependencias. Non indiques as dependencias no
+readme, é moi molesto ter que instalalas manualmente.
+
+De feito, a instalación debería ser tan sinxela como sexa posible. Se pensas que
+a túa ferramenta é útil dabondo, podes metela nun rexistro de paquetes para que
+sexa fácil de instalar por calquera.
+
+Por exemplo, as ferramentas de Python pódense rexistrar en [[https://pypi.org/][pypi]] para poder
+instalalas con ~pip install mytool~. No caso de Rust, podes metela no [[https://crates.io/][rexistro
+de crates]], para instalala con ~cargo install mytool~. Ademais, podes crear un
+paquete para unha distribución de Linux de xeito que se poida instalar con ~apt~
+ou ~yum~.
+
+En resumo, incluso os pequenos programas son creados para usarse, e o primeiro
+paso é instalalos. Facer que sexa fácil, incluso se é tedioso, afórralle moitas
+dores de cabeza ás usuarias.
+* Parámetros
+
+As opcións da liña de comandos ou parámetros son unha parte crucial de cada
+programa de consola. Para eles, gústame usar as [[http://www.catb.org/~esr/writings/taoup/html/ch10s05.html][seguintes regras]]:
+
+Nota: Os argumentos son os valores que o usuario lle pasa aos parámetros.
+
+** Parámetros longos/curtos
+
+Os parámetros deberían ter sempre un nome longo fácil de recordar, que empeza
+por dous guións =--=. Por exemplo, ~--help~, ~--out-file~, etc.
+
+Ás veces e complicado elexir un nome. Por exemplo, debería escoller =pass=,
+=password= or =passwd=? Eu prefiro escoller o máis descriptivo, neste caso
+=password= e poñer o resto como alias.
+
+Ademais, os parámetros máis usados deberían ter un nome curto, que debería ser
+unha letra ou un número, precedido por un guión =-=. O normal é usar letras en
+minúscula. As letras maiúsculas utilizanse no caso de que a letra en minúscula
+máis intuitiva esté ocupada. Por exemplo, curl usa ~-H~ para indicar unha
+cabeceira (header) HTTP xa que ~-h~ é usado para a axuda (help).
+
+As flags (opcións booleanas sen valor) poden usarse xuntas soamente cun un único
+guión =-=. Por exemplo, ~ls -lah~ é o mesmo que ~ls -l -a -h~. Hai programas que
+usan nomes curtos de 2 o máis letras, como =-out=, pero isto impide o unir flags.
+
+En entornos Windows soiase usar unha barra =/= en vez dun guión. Pero
+actualmente hai moitas ferramentas que usan guións, así que prefiro manter os
+guións. Ademais, o uso de guións evita confusións con arguments que
+sexan rutas de arquivos en estilo Unix, que poden empezar cunha barra.
+
+** Segue as convencións para os parámetros
+
+Existen certos parámetros que teñen un uso común en tódolos programas e no se
+deberían usar para outra cousa (sen unha razón). Os máis importantes son os
+seguintes:
+
+- ~-h/--help~ -> Amosa a axuda do programa. Debería ser implementado por tódolos
+  programas.
+- ~-v/--verbose~ -> Usado para que o programa mostre unha saída máis
+  detallada. Soe ser un parámetro que fai que o programa aumente o
+  nivel de detalle canto máis se indique. Por exemplo, ~-v~ para un detalle
+  pequeno e ~-vvv~ para un gran nivel de detalle.
+- ~-V/--version~ -> Amosa a versión do programa.
+
+Ademais, as ferramentas con funcionamentos parecidos ou relacionados deberían
+usar os mesmo nome para os parámetros. É boa idea usar como nome de parámetro os
+usados por ferramentas coñecidas. 
+
+Por exemplo, se creas un programa que serve principalmente para facer peticións
+HTTP, deberías usar parámetros similares aos usados por ~curl~ ou ~wget~. Nese
+caso poderías usar ~-H~ para que o usuario poida especificar unha cabeceira
+personalizada ou ~-A~ para indicar o user agent, como ~curl~. Deste xeito eche
+máis fácil escoller nome para os parámetros e reducir a curva de aprendizaxe das
+usuarias.
+
+** Ten parámetros flexibles
+
+Unha característica que atopo moi cómoda nos proogramas é que para un mesmo
+parámetro se acepten diferentes tipos de argumentos ou se deduza o tipo de
+argumento sen necesidade que ser especificado. Deixame amosarche un exemplo:
+
+Por exemplo, imaxina un programa para facer forza bruta que acepta unha lista de
+usuarios e contrasinais. Sería moi cómodo ter un parametro ~-u/--user~ que
+acepte tanto un nome de usuario como un ficheiro con nomes de usuario (e o mesmo
+para os contrasinais). Deste xeito no tes que andar recordando 2 parámetros coma
+~-u/--user~ e ~-U/--user-list~ para diferentes argumentos, e podes facer algo
+como o seguinte:
+
+#+caption: Comproba un usuario e contrasinal
+#+begin_example
+$ ./bruteleaks -u foo -p p4ss
+Valid credentials: foo:p4ss
+#+end_example
+
+#+caption: Comproba un so contrasinal para moitos usuarios (password spraying)
+#+begin_example
+$ ./bruteleaks -u users.txt -p p4ss
+Valid credentials: jack:p4ss
+Valid credentials: john:p4ss
+Valid credentials: samuel:p4ss
+#+end_example
+
+#+caption: Comproba unha combinación de usuarios e contrasinais especificados en ficheiros
+#+begin_example
+$ ./bruteleaks -u users.txt -p passwords.txt
+Valid credentials: jack:p4ss
+Valid credentials: Batman:Bruc3
+Valid credentials: Flash:1mf4st
+#+end_example
+
+Quédaste co tema? Podes lanzar diferentes tipos de ataque sen ter que andando a
+recordar un montón de parámetros porque o programa comproba se lle estás a
+indicar un ficheiro ou non.
+
+Isto a min paréceme tan útil, que incluso teño unha [[https://gitlab.com/-/snippets/2002279][plantilla de python]] para
+coller a entrada do programa dun ficheiro, do argumento ou de [[https://man7.org/linux/man-pages/man3/stdin.3.html][stdin]].
+
+Outro exemplo é o programa ~tar~ que descomprime un ficheiro sen
+necesidade de que lle indiques o formato. Por exemplo podes executar ~tar -xf
+file.tgz~ ou ~tar -xf file.tar.xz~ e xa comproba que formato é e descomprime o
+ficheiro. Moi cómodo.
+
+A clave é que o programa debería deducir o máximo de información posible dunha
+entrada mínima do usuario, aforrandolle o ter que introducir datos que moitas
+veces poden ser redundantes.
+
+Pero ten en conta que a flexibilidade debe ser intuitiva, xa que procesar
+parámetros de maneiras extrañas pode confundir ao usuario e levar a
+comportamentos inesperados.
+** Usa unha libraría para manexar os parámetros
+
+As linguaxes de programación soen ter alomenos unha libraría para o manexo de
+parámetros. Usaá. É máis fácil, máis rápido e máis limpo que parsear os
+parámetros por ti mesmo. Deixote exemplos de librarías que manexan parámetros:
+
+- C -> [[https://www.gnu.org/software/libc/manual/html_node/Argp.html][argp]]
+- Haskell -> [[https://hackage.haskell.org/package/base-4.14.0.0/docs/System-Console-GetOpt.html][GetOpt]]
+- Python -> [[https://docs.python.org/3/library/argparse.html][argparse]]
+- Powershell -> Built-In
+- Rust -> [[https://github.com/clap-rs/clap][clap]]
+
+Ás veces é necesario procesar os argumentos a man, pero sempre que poidas trata
+de manexalos dende a libraría. Estas soen traer opcións para moitas situacións:
+
+- Auto xeración de axuda co parámetro ~-h/--help~
+- Uso de flags (parámetros booleanos que non aceptan valor)
+- Parámetros que so aceptan un grupo de opcións
+- Parámetros que poden ser usados moitas veces (como verbose)
+- Parámetros que non poden ser usados xuntos (exclusivos)
+- Definir o tipo de valor dun argumento, se é un número, unha cadea de
+  caracteres ou un ficheiro, etc
+- Hooks para engadir rutinas de procesado dos parámetros personalizadas (moi
+  útiles)
+
+* Ficheiros de configuración
+
+Os ficheiros de configuración son moi usados por programas,
+especialmente servidores (nginx, ssh) e daemons (cron), pero tamén clientes
+(git, proxychains) ou programas interactivos (i3, emacs).
+
+No caso de ter que usar ficheiros de configuración, o seguir unhas pautas pode
+facilitarllela vida ás usuarias.
+
+** Usa ficheiros de configuración fácilmente editables
+
+Unha das cousas a ter en conta é o formato de ficheiro de configuración. Existen
+varios formatos que foron deseñados para este propósito, como [[https://toml.io/en/][TOML]], [[https://en.wikipedia.org/wiki/INI_file][INI]] ou [[https://yaml.org/][YAML]],
+así que non fai falta que inventes un. Estes formatos son fáciles de entender e
+editar con calquera editor de texto e ademais moitos linguaxes teñen librarías
+para procesalos (ten coidado con [[https://blogs.embarcadero.com/yaml-and-remote-code-execution/][YAML xa que pode levar á execución de código
+arbitrario]]).
+
+Inda que existen ferramentas que usan formatos [[https://en.wikipedia.org/wiki/XML][XML]] ou [[https://en.wikipedia.org/wiki/JSON][JSON]] para os ficheiros de
+configuración, por experiencia non os recomendo, xa que son máis liosos de
+editar e leer para un humano. Penso que o seu uso máis apropiado é o intercambio
+de datos entre programas, como no caso das APIs [[https://en.wikipedia.org/wiki/Representational_state_transfer][REST]]/[[https://en.wikipedia.org/wiki/SOAP][SOAP]] ou bases de datos.
+
+** Pon os ficheiros de configuración no seu sitio
+
+En Linux existen [[http://www.catb.org/~esr/writings/taoup/html/ch10s02.html][determinados lugares]] onde é común almacenar os ficheiros de
+configuración.
+
+Os ficheiros de configuración que conteñen configuracións para todo o sistema
+soense gardar no directorio =/etc=. E dentro deste directorio almacénanse nos
+seguintes sitios:
+- Ficheiro co nome do programa seguido de .conf =<program>.conf=, como
+  =/etc/krb5.conf)=.
+- Directorio co nome do programa, como =/etc/nginx/=.
+- Directorio co nome do programa seguido de .d =<program>.d=, como
+  =/etc/cron.d=.
+
+Por outro parte, os ficheiros con configuracións específicas para un usuario
+almacénanse no directorio deste. Normalmente son ficheiros ocultos (que empezan
+por .) que se atopan nos seguintes lugares:
+
+- Ficheiro con nome do programa =.<program>=, como =~/.ssh=.
+- Directorio co nome do programa seguido de .d =.<program>.d=, como
+  =~/.emacs.d/=.
+- No directorio .config, nun directorio ou ficheiro co nome do programa
+  =.config/<program>=, como =~/.config/i3/=. 
+
+Adicionalmente, os programas teñen un parámetro que permite indicar na liña de
+comandos a ruta do ficheiro de configuración, por se o temos nun sitio non
+estándar.
+
+* Saída
+
+A saída do programa é un dos principais medios de interacción co usuario e
+outros programas, polo que ter unha saída limpa que proporcione información útil
+é crucial á hora de crear un programa.
+
+Aquí van uns consellos a ter en conta para mellorar a saída.
+
+** Usa stdout e stderr
+
+Tódolos programas están conectados a 2 streams de saída: stdout e stderr.
+
+Stdout debe usarse para escribir os datos útiles da saída do programa, mentres
+que stderr debe usarse para escribir información adicional como erros,
+advertencias, mensaxes de depuración, etc.
+
+Nos entornos Unix, o uso de pipes =|= para conectar a saída dun programa
+(stdout) á entrada do seguinte (stdin) é unha práctica común. Polo tanto, se
+toda a saída se envía a stdout, incluíndo o logo do programa ou as advertencias,
+é máis difícil, e en ocasións ata inviable, procesar o resultado con ferramnentas
+como ~grep~ ou ~cut~.
+
+Por exemplo, mira este programa para comprobar credenciais de usuario:
+#+begin_example
+$ credbrute -u /tmp/users.txt -p superman -v
+>>> Credbrute: The fastest credential checker <<<
+[INFO] Testing admin:superman -> Fail
+[INFO] Testing bar:superman -> Success
+bar:superman
+[INFO] Testing foo:superman -> Success
+foo:superman
+#+end_example
+
+Se todo se escribe a stdout e nos queremos obter o nome de usuario das probas
+exitosas, o procesado pode acabar mal:
+#+begin_example
+$ credbrute -u /tmp/users.txt -p superman -v | cut -d ':' -f 1 > superman_users.txt
+
+$ cat superman_users.txt
+>>> Credbrute
+[INFO] Testing admin
+[INFO] Testing bar
+bar
+[INFO] Testing foo
+foo
+#+end_example
+
+
+Sen embargo, se soamente escribimos o resultado a stdout e o resto a stderr, a
+cousa vai mellor:
+#+begin_example
+$ credbrute -u /tmp/users.txt -p superman -v | cut -d ':' -f 1 > superman_users.txt
+>>> Credbrute: The fastest credential checker <<<
+[INFO] Testing admin:superman -> Fail
+[INFO] Testing bar:superman -> Success
+[INFO] Testing foo:superman -> Success
+
+$ cat superman_users.txt
+bar
+foo
+#+end_example
+
+
+Como podes observar, unha saída ben redirixida a stdout e stderr pode mellorar a
+usabilidade dun programa, especialmente cando é [[http://www.catb.org/~esr/writings/taoup/html/ch01s06.html#id2877684][usado con outros programas]].
+** Saída grepable
+
+Como vimos, normalmente a saída dun programa úsase como [[http://www.catb.org/~esr/writings/taoup/html/ch07s02.html#plumbing][entrada doutros]], e iso
+é algo cos hackers de Unix saben. Esa é a razón pola que existen tantas
+ferramentas para o procesado de liñas de texto coma ~grep~, ~cut~, ~sed~,
+etc. Se a saída dun programa se formatea de xeito que poida ser usado polo
+resto de ferramentas a través de pipes =|=, a usabilidade mellora.
+
+Por exemplo, imaxina que queres obter os usuarios que teñen "superman" como
+contrasinal:
+#+begin_example
+$ credbrute -u /tmp/users.txt -p superman
+>>> Credbrute: The fastest credential checker <<<
+Fail: Incorrect password for user admin -> superman
+Success!! 
+The password of user foo is superman
+
+Success!! 
+The password of user bar is superman
+
+$ credbrute -u /tmp/users.txt -p superman | grep "The password of" | cut -d ' ' -f 6
+foo
+bar
+#+end_example
+
+
+Pódese mellorar a usabilidade cunha saída máis concisa:
+#+begin_example
+$ credbrute -u /tmp/users.txt -p superman
+foo:superman
+bar:superman
+
+$ credbrute -u /tmp/users.txt -p superman | cut -d ':' -f 1
+foo
+bar
+#+end_example
+
+
+E no caso de precisar máis detalles, podes escribilos en stderr:
+#+begin_example
+$ credbrute -u /tmp/users.txt -p superman | cut -d ':' -f 1
+[INFO] Testing admin:superman -> Fail
+[INFO] Testing foo:superman -> Success
+foo
+[INFO] Testing bar:superman -> Success
+bar
+#+end_example
+
+Por outra parte, tamén poderías contar ou número de usuarios co contrasinal
+"superman":
+#+begin_example
+$ credbrute -u /tmp/users.txt -p superman | wc -l
+2
+#+end_example
+
+
+Deste xeito, podes usar outras ferramentas para procesar fácilmente a saída,
+permitindo ao usuario manipular fácilmente os resultados se necesidad que teñas
+que incorporar novas funcionalidades ao teu programa.
+
+Por outro lado está a consola de Powershell, que a diferencia coas consolas sh,
+é unha experta en manexar obxetos en vez de texto. Polo que, no caso dos
+scripts/cmdlets de Powershell, é preferible devolver obxetos en vez de texto.
+
+** Saída estructurada
+
+Algúns programas devolven datos complexos (ou non tan complexos) que pode ser
+útil estructurar nun formato coma JSON ou XML, para que poder procesalos con
+outros programas.
+
+Por exemplo, [[https://nmap.org/][nmap]] permite gardar os resultados dos escaneos nun ficheiro XML, o
+que pode facilitar o procesado de moitos escaneos distintos cun so programa.
+
+Personalmente prefiro JSON, xa que é máis simple que XML. Ademais, pode
+procesarse con ferramentas como [[https://stedolan.github.io/jq/][jq]] ou [[https://github.com/tomnomnom/gron][gron]].
+
+De calquera xeito, se o teu programa produce unha saída estructurada, non
+olvides indicar o seu formato nun esquema. En XML pode facerse con DTDs, e en
+JSON con un [[https://json-schema.org/][JSON Schema]].
+
+** Uso de cores
+
+Cando a saída está deseñada para ser leída por persoas, o uso de cores pode
+mellorar a lectura e á identificación, especialmente nos programas con saídas de
+centos de liñas.
+
+Cando se usan, inda que o significado das cores dependen do programa, é
+importante ser consistente e dar so un significado a cada cor, de xeito que o
+cerebro do usuario poda relacionar a cor cun evento na execución do programa.
+
+Por exemplo, vermello para erros, verde para boas novas, amarelo para mensaxes
+de información e azul para mensaxes de depuración.
+** Detalle da saída
+
+Para permitir que o usuario se centre no importante, a saída [[http://www.catb.org/~esr/writings/taoup/html/ch11s09.html][debería ser
+mínima]]. Sen embargo, o programa tamén debería permitir incrementar o nivel de
+detalle das mensaxes por se o usuario desexa saber que está acontecendo para
+entender ou depurar o programa.
+
+Por exemplo, a utilidade ~cp~ non mostra saída se non se require, soamente copia
+os ficheiros que usuario indica, mais o nivel de detalle pode aumentarse se se
+precisa:
+#+begin_example
+$ cp /tmp/a /tmp/b
+$ cp /tmp/a /tmp/b -v
+'/tmp/a' -> '/tmp/b'
+#+end_example
+
+Depende do programa, pero unha regla que me gusta seguir é, por defecto,
+soamente amosar o resultado do programa e posibles erros (se hai algún), e usar
+o parámetro =-v= para aumentar o nivel de detalle e amosar ao usuario mensaxes
+informativos ou de depuración.
+
+Respecto deste tema, unha práctica que atopo molesta é mostrar un logo na
+execución do programa. Un logo é unha peza de información irrelevante que
+desplaza a saída dos comandos anteriores, aumentando a necesidade de facer
+scroll para revisar os resultados dos comandos anteriores e as veces facendo
+imposible facer capturas da terminal con toda a información relevante.
+
+#+caption: Annoying banner
+#+begin_example
+$ programaincrible
+__________                                                   
+\______   \_______  ____   ________________    _____ _____   
+ |     ___/\_  __ \/  _ \ / ___\_  __ \__  \  /     \\__  \  
+ |    |     |  | \(  <_> ) /_/  >  | \// __ \|  Y Y  \/ __ \_
+ |____|     |__|   \____/\___  /|__|  (____  /__|_|  (____  /
+                        /_____/            \/      \/     \/ 
+.___                    ._____.   .__                        
+|   | ____   ___________|__\_ |__ |  |   ____                
+|   |/    \_/ ___\_  __ \  || __ \|  | _/ __ \               
+|   |   |  \  \___|  | \/  || \_\ \  |_\  ___/               
+|___|___|  /\___  >__|  |__||___  /____/\___  >              
+         \/     \/              \/          \/               
+
+Boas, son a información útil do programa, podes verme?
+
+#+end_example
+
+Sei que queda súper cool deseñár e mostrar un logo, fíxeno algunha vez, pero é
+unha práctica que ocupa demasiado espazo. Por favor, non mostredes o logo na
+execución. Se iso pódese crear unha funcionalidade específica para amosalo.
+
+* Documentación: Pon exemplos
+
+Documentar é duro e aburrido. Todo o mundo o sabe. Sen embargo, un truquiño para
+facer útil a documentación é incluir exemplos do uso do programa. A xente é
+preguiceira, polo que se temos un exemplo, podemos copialo, pegalo e modificalo
+para os nosos propósitos.
+
+Polo menos deberías ter exemplos do uso común da ferramenta, incluindo a entrada
+e a saída, de xeito que os usuarios poidan facerse unha idea do que esperar no
+resultado. Por exemplo, o readme de [[https://github.com/GhostPack/Rubeus][Rubeus]] contén un exemplo de cada comando
+para saber que se pode facer.
+
+Ademais, se engades casos de uso da túa ferramenta no que se combina con outras,
+isto pode dar aos usuarios unha idea de que modo pode ser útil.
+
+Do mesmo xeito, amosa exemplos dos ficheiros empregados polo programa. Por un
+lado podes dar plantillas dos ficheiros de configuración, como a [[https://github.com/lgandx/Responder/blob/master/Responder.conf][configuración
+do Responder]]. E por outra parte amosar exemplos e esquemas dos ficheiros de
+resultados (JSON, XML, etc) producidos polo programa, para que outra xente sexa
+consciente do formato destes e poida construir outros programas para procesalos.
+
+Outro conselliño é non poñer no readme a saída da axuda do programa
+(~-h/--help~), xa que se pode ver co propio programa e é díficil de manter
+actualizada. Pero isto non significa que non se poidan explicar os parámetros (
+e dar exemplos de uso).
+
+* Conclusión
+
+Bueno xente, espero que estas prácticas che axuden a facer programas máis útiles
+para ti e para todos. No caso de coñecer outros trucos, por favor compárteos!!
+
+Veña, a pasalo ben!!

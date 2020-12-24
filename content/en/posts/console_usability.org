@@ -1,0 +1,520 @@
+#+title: Tricks to improve console programs usability
+#+author: Eloy Pérez González
+#+date: 2020-12-24
+#+tags[]: linux unix programming
+
+Hi folks.
+
+In this post I goint to present you some tricks that, in my experience, allow
+to greatly improve the usability of the console programs. I write them down here
+to avoid to forget them and in the hope that they can be useful to other
+people.
+
+The key is to make the programs simple, which normally is not as easy as it
+sounds, but I hope these tricks will help you to achieve that.
+
+I usually program small tools/scripts in Linux, so these advices
+are focused on that platform, but also can be applied to others.
+
+Besides, many of these practices were inspired by
+[[http://www.catb.org/~esr/writings/taoup/html/][The Art of Unix Programming]], so if you like programming and Unix/Linux, you
+should check it.
+
+I will asume basic knowledge of Linux systems. If you don't know Linux, I
+strongly recommend you to [[http://www.catb.org/~esr/faqs/hacker-howto.html#skills2][learn how to use it]].
+
+Now, let's go to the topic.
+
+* Make programs easy to install
+
+Maybe this can be tedious the first time you do cause many times doesn't imply
+to program, but to prepare your program to be easily deployed. However, it is
+incredibly comfortable when you or other people need to use the program.
+
+The first step should be to make available the program by storing it in a
+repository of a forge like [[https://github.com/][Github]] or [[https://about.gitlab.com/][Gitlab]].
+
+Once your tool is available to download, it should be easy to
+install/compile. It is a common practice that programs are compiled and
+installed by using makefiles. For example:
+
+#+caption: Common installation process
+#+begin_src shell
+user@debian:~$ cd myprogram/
+user@debian:myprogram$ make
+user@debian:myprogram$ make install
+#+end_src
+
+This is a common practice in C programs, where the ~make~ command compiles the
+program and the ~make install~ command installs it. Even if your program is not
+a C program, I recommend you to create a [[https://www.gnu.org/software/make/manual/make.html][makefile]] for it in order to standarize
+the program installation and make it more comfortable to other users.
+
+For example, if your program is a Python program, it doesn't need to be
+compiled, but the ~make~ command could install the dependencies by executing
+~pip install -r requirements.txt~ and ~make install~ could execute 
+~pip install .~ to install your program in the system. 
+
+#+caption: Makefile example
+#+begin_src makefile
+.PHONY: deps, install
+
+deps:
+	pip3 install -r requirements.txt
+
+install:
+	pip3 install .
+#+end_src
+
+Maybe your tool is not a python package but a simply python script, then ~make
+install~ could execute ~cp ./myscript.py /usr/bin/myscript~ (remember to make
+your script executable (~chmod +x~) and adding a [[https://en.wikipedia.org/wiki/Shebang_(Unix)][shebang]] to it).
+
+Note: In case you want to install a program for the user (cause you don't have
+root privileges or whatever), you can copy it to [[https://www.freedesktop.org/software/systemd/man/file-hierarchy.html#~/.local/bin/][=~/.local/bin=]] (remember to add
+this folder to your PATH, and create it if it is necessary).
+
+For Python programs, I recommend you to create a [[https://packaging.python.org/tutorials/packaging-projects/][=setup.py=]] file to allow
+install it easily, even without a makefile. Or, at least, to create a
+=requirements.txt= file to indicate your dependencies. Do not specify
+your dependencies in your readme, it is incredibly annoying to have to install
+them manually.
+
+Actually, the installation of a program should be as simple as possible. In case
+you think that your tool is useful, you can include it in a package registry to
+make it easy to install for anyone.
+
+For example, with Python tools you can registry them in [[https://pypi.org/][pypi]] to be able to
+install then with ~pip install mytool~. In case of Rust, you can register it in
+the [[https://crates.io/][crate registry]], to install it with ~cargo install mytool~. Moreover, you
+also can create a package for a Linux distro and install it with ~apt~ or ~yum~.
+
+To sum up, even little programs are created to being used, and first step is to
+install them. Make them easy to install, even if it is tedious, saves users a
+lot of headaches.
+
+* Parameters
+
+The command line options or parameters are a crucial part of every console
+program. They are one of the main input methods, so it is important to handle
+them correctly. For parameters I like to use the [[http://www.catb.org/~esr/writings/taoup/html/ch10s05.html][following rules]]:
+
+Note: The argument is the value that user pass to the parameter.
+
+** Short/long parameters
+
+Command line options should always have a long mnemotechnic name easy to
+remember that starts by two hyphens =--= . For example, ~--help~, ~--out-file~,
+etc.
+
+Sometimes is difficult to choose a name. For example, should I use =pass=,
+=password= or =passwd=? I personally like to choose the more descriptive, in this
+case =password=, and set the rest as alias.
+
+For the most used command line options and flags a short option should be
+created. The sort option should be only a letter or number, preceded by one
+hyphen =-=. Usually lowercase letters are used. Uppercase letters are used in
+the case that the intuitive lowercase letter is used. For example, curl uses
+~-H~ to indicate an HTTP header since ~-h~ is used for help. 
+
+The flags (boolean options without value) normally can be used together with
+just one hyphen =-=. For example, ~ls -lah~ is the same as ~ls -l -a -h~. Some
+programs use short options of two or more letters, like =-out=, but this limits
+the capacity of joining short flags. 
+
+In Windows environments, the slash =/= used to be used instead of
+hyphen. However, nowadays there are many tools that use hyphens, so I prefer to
+maintain hyphens. Use hyphens also avoid problems with path arguments that
+follows the Unix format, that can begin with an slash.
+
+** Follow paremeters conventions
+
+There are certain parameters that have a common meaning known by the
+community and should not be used for other purposes (without a reason). The most
+important are the following:
+
+- ~-h/--help~ -> Show the help of the program. Every program should
+  implement this.
+- ~-v/--verbose~ -> Use to increase the program verbosity. Usually it is
+  accumulative, allowing to specify the detail level by using it many times. For
+  example, ~-v~ for a low detail and ~-vvv~ for a high level of detail.
+- ~-V/--version~ -> Show the version of the program.
+
+Moreover, the tools with similar or related behaviours should use the same name
+for parameters. It is a good practice to use as parameter name those used by
+famous tools. 
+
+For example, if you are programming a tool that performs HTTP requests as it
+main functionality, you should use parameters similar to those used by ~curl~ or
+~wget~. In this case, you could use ~-H~ to add a custom header as curl or ~-A~
+for setting the user agent. This way it is easier to pick parameter names and also
+helps to reduce the user learning curve.
+
+** Have flexible parameters
+
+A feature that I have found incredibly comfortable in programs is when those
+have parameters that are flexible and accept many different argument types or
+deduce the type of argument without being specified.
+
+For instance, imagine a bruteforcing program that accepts list of users and
+passwords. It would be very comfortable that the same parameter ~-u/--user~
+could accept both an username or a file with usernames (and same for
+passwords). This way you don't have to remember 2 different parameters such as
+~-u/--user~ and ~-U/--user-list~ for different type of arguments, and you can do
+something like the following:
+
+#+caption: Check one user/password
+#+begin_example
+$ ./bruteleaks -u foo -p p4ss
+Valid credentials: foo:p4ss
+#+end_example
+
+#+caption: Password spraying attack, using users in a file
+#+begin_example
+$ ./bruteleaks -u users.txt -p p4ss
+Valid credentials: jack:p4ss
+Valid credentials: john:p4ss
+Valid credentials: samuel:p4ss
+#+end_example
+
+#+caption: Check combination of users and passwords, using both users and passwords files
+#+begin_example
+$ ./bruteleaks -u users.txt -p passwords.txt
+Valid credentials: jack:p4ss
+Valid credentials: Batman:Bruc3
+Valid credentials: Flash:1mf4st
+#+end_example
+
+Do you see? Many different attack posibilities without having to remember different
+parameters since the program checks if the arguments are files or not. 
+
+I found this so useful, that I have created an sample [[https://gitlab.com/-/snippets/2002279][python snippet]] that allows
+to get the input for a parameter from a file, argument or [[https://man7.org/linux/man-pages/man3/stdin.3.html][stdin]]. 
+
+Other example is the ~tar~ utility that decompress file without needing to
+specify the format of the target file. E.g ~tar -xf file.tgz~ or 
+~tar -xf file.tar.xz~. Pretty comfortable.
+
+The main idea is that the program should deduce the most from the minimum
+input, saving the user from specifying to much information that could be
+redundant.
+
+Notwithstanding, this flexibility must be intuitive for the user. Be careful
+with parsing parameters in extrange ways that leads to unpredictable
+behaviours.
+
+** Use a library for handling parameters
+
+Every programming language has at least one known library to handle
+parameters. Use it. It is easier, faster and cleaner than parse the command line
+by yourself. I let you some examples of libraries that parse parameters:
+
+- C -> [[https://www.gnu.org/software/libc/manual/html_node/Argp.html][argp]]
+- Haskell -> [[https://hackage.haskell.org/package/base-4.14.0.0/docs/System-Console-GetOpt.html][GetOpt]]
+- Python -> [[https://docs.python.org/3/library/argparse.html][argparse]]
+- Powershell -> Built-In
+- Rust -> [[https://github.com/clap-rs/clap][clap]]
+
+
+Sometimes you have to parse some arguments manually, but try to handle as much
+as you can from command line from inside of the library. They usually include
+many options such as: 
+
+- Auto generated usage for ~-h/--help~
+- Use of flags (boolean parameters that doesn't accept a value)
+- Parameters that only accept a group of choices
+- Parameters that can be used many times (like verbose)
+- Parameters that cannot be used together (exclusive)
+- Define the value type accepted for a parameter, if it is a number, string,
+  file, etc
+- Hooks for adding custom routines to parse parameters (very useful)
+
+* Configuration files
+
+Configuration files are widely used by programs, specially by servers
+(nginx, ssh) or daemons (cron), but also clients (git, proxychains) or
+interactive programs (i3, emacs).
+
+In case of using configuration files, following certain rules can improve their
+usability.
+
+
+** Use easily editable configuration files
+
+In case you use a configuration file, instead of invent a custom
+format, you can use one of following:  [[https://toml.io/en/][TOML]], [[https://en.wikipedia.org/wiki/INI_file][INI]] or [[https://yaml.org/][YAML]]. They were designed to
+be human friendly and are perfect for configuration files. They are easy to
+read and to edit with any text editor, and many languages have libraries to parse
+them (be careful parsing [[https://blogs.embarcadero.com/yaml-and-remote-code-execution/][YAML since it can lead to arbitrary code
+execution]]).
+
+There are tools that use [[https://en.wikipedia.org/wiki/XML][XML]] or [[https://en.wikipedia.org/wiki/JSON][JSON]] formats for configuration files, but I
+don't recommend to use them because of my experience, since to edit and read
+them can be a little cumbersome for a human. I think they are more appropiate to
+be used to exchange data between programs, like in the case of [[https://en.wikipedia.org/wiki/Representational_state_transfer][REST]]/[[https://en.wikipedia.org/wiki/SOAP][SOAP]] APIs or
+databases.
+
+** Configuration files default places
+
+When reading configuration files in Linux is a common practice to look in some
+[[http://www.catb.org/~esr/writings/taoup/html/ch10s02.html][default places]]. 
+
+The configuration files that contains system configurations are usually stored
+in the =/etc= directory, where they can be placed in the following places:
+
+- File with the program name following by .conf =<program>.conf=, like
+  =/etc/krb5.conf=.
+- Directory with the program name, like =/etc/nginx/=
+- Directory with the program name following by .d =<program>.d=, like
+  =/etc/cron.d=. 
+
+On the other side, the files with specific user configurations are stored in the
+user directory. Usually these are hidden files (that start with .) that can be
+found in the following places:
+- File with program name =.<program>=, like =~/.ssh/=.
+- Directory with program name following by .d =.<program>.d=, like
+  =~/.emacs.d/=. 
+- In the .config directory, with a directory/file with the program name
+  =.config/<program>=, like =~/.config/i3/=.
+
+Additionally, many programs also contain a parameter that allows to specify a
+custom location for a configuration file/directory.
+
+* Output
+
+The program output is one the main channels to interact with the user and other
+programs. Thus, having a clear output that gives useful information is essential
+when creating a program.
+
+Here are some tips about output.
+
+** Use stdout and stderr
+
+Each program is connected to two output streams: stdout and stderr.
+
+Stdout should be used to write the useful output data of the program, whereas
+stderr should be used to show other additional information like the program
+errors, warnings, debug messages, etc.
+
+In Unix environments, the use of pipes =|= to connect the program output
+(stdout) to the input of the following (stdin) is a common practice. Therefore,
+if all the output is sent to stdout, including the program banner or warning
+messages, parsing the result with utilities like ~grep~ or ~cut~ can be more
+difficult or even infeasible. 
+
+For example, check this program to test user credentials:
+#+begin_example
+$ credbrute -u /tmp/users.txt -p superman -v
+>>> Credbrute: The fastest credential checker <<<
+[INFO] Testing admin:superman -> Fail
+[INFO] Testing bar:superman -> Success
+bar:superman
+[INFO] Testing foo:superman -> Success
+foo:superman
+#+end_example
+
+If everything is written to stdout and we only want to get the name of the
+successful accounts, things can get ugly: 
+#+begin_example
+$ credbrute -u /tmp/users.txt -p superman -v | cut -d ':' -f 1 > superman_users.txt
+
+$ cat superman_users.txt
+>>> Credbrute
+[INFO] Testing admin
+[INFO] Testing bar
+bar
+[INFO] Testing foo
+foo
+#+end_example
+
+Notwithstanding, if only the result is written to stdout, and the rest to
+stderr, then the result is the expected one:
+#+begin_example
+$ credbrute -u /tmp/users.txt -p superman -v | cut -d ':' -f 1 > superman_users.txt
+>>> Credbrute: The fastest credential checker <<<
+[INFO] Testing admin:superman -> Fail
+[INFO] Testing bar:superman -> Success
+[INFO] Testing foo:superman -> Success
+
+$ cat superman_users.txt
+bar
+foo
+#+end_example
+
+As you can see, an output well redirected to stdout and stderr can improve the
+program usability, specially when [[http://www.catb.org/~esr/writings/taoup/html/ch01s06.html#id2877684][is used with other programs]].
+
+** Grepable output
+
+As we have seen, usually the output of a program can be used as the [[http://www.catb.org/~esr/writings/taoup/html/ch07s02.html#plumbing][input of
+others]], and this is something that Unix hackers know. That's the reason there are
+so many tools to parse text line such as ~grep~, ~cut~, ~sed~, etc. If you
+format the output of your program in a way that can interact with the rest of
+tools through pipes =|=, the usability raises.
+
+For example, imagine that you want to get the users that use "superman" as
+password:
+#+begin_example
+$ credbrute -u /tmp/users.txt -p superman
+>>> Credbrute: The fastest credential checker <<<
+Fail: Incorrect password for user admin -> superman
+Success!! 
+The password of user foo is superman
+
+Success!! 
+The password of user bar is superman
+
+$ credbrute -u /tmp/users.txt -p superman | grep "The password of" | cut -d ' ' -f 6
+foo
+bar
+#+end_example
+
+You can increase the effectivity with a more concise output:
+#+begin_example
+$ credbrute -u /tmp/users.txt -p superman
+foo:superman
+bar:superman
+
+$ credbrute -u /tmp/users.txt -p superman | cut -d ':' -f 1
+foo
+bar
+#+end_example
+
+And, in case you want more detailed, you could print it to stderr:
+#+begin_example
+$ credbrute -u /tmp/users.txt -p superman | cut -d ':' -f 1
+[INFO] Testing admin:superman -> Fail
+[INFO] Testing foo:superman -> Success
+foo
+[INFO] Testing bar:superman -> Success
+bar
+#+end_example
+
+You could also count the number of users that has the password "superman":
+#+begin_example
+$ credbrute -u /tmp/users.txt -p superman | wc -l
+2
+#+end_example
+
+This way you can use other tools to process your output easily, which leads to
+user to manipulate your data without the need to add new functionalities to your
+program.
+
+Other case is the Powershell console, that in contrast to sh consoles, is an
+expert managing objects instead of text. Then, in Powershell scripts/cmdlets is
+preferable to return objects instead of text.
+
+** Structured output
+Some programs returns complex (or not so complex) data that can be useful to
+structure in a format like XML or JSON, in order to be parsed by other programs.
+
+For example, [[https://nmap.org/][nmap]] allows to save the results of the scans in a XML file, which
+is very useful to parse the results of many different scans many times with a
+single program.
+
+I personally prefer to use the JSON format, since it is simpler than
+XML. Besides, it can be filtered/tranformed with tools like [[https://stedolan.github.io/jq/][jq]] or [[https://github.com/tomnomnom/gron][gron]].
+
+Anyway, if your program produces a structured format output, don't forget to
+indicate an schema of the output data and types. In XML can be done by using
+DTDs, and [[https://json-schema.org/][JSON Schema]] in case of JSON.
+
+** Use colors
+
+When the output is intended to be read by humans, the use of colors can improve
+the reading and identification of important data, specially in programs with
+hundreds of lines.
+
+When used, even if the meaning of the colors depends on the program, it is
+important to be consistent and give only one meaning to each color, so the user
+mind can map the color to an event in the program execution.
+
+For example, red for program errors, green for good news, yellow for
+informational messages and blue for debug.
+
+** Output detail
+
+In order to let the user to focus in the important details, the output of a
+program [[http://www.catb.org/~esr/writings/taoup/html/ch11s09.html][should be minimum]]. However, the program also should allow to increase
+its verbosity in case a user want to know what is happening in order to
+understand or debug the program.
+
+For example, the ~cp~ utility doesn't display output if not is requested, it
+just copy files that user indicates. But the verbosity level can be increased
+if required:
+#+begin_example
+$ cp /tmp/a /tmp/b
+$ cp /tmp/a /tmp/b -v
+'/tmp/a' -> '/tmp/b'
+#+end_example
+
+In depends on the program, but a rule I like to follow is, by default, to only
+show the program result and the error messages (if any), and use the verbose
+parameter =-v= to allow user to see informational or debug messages.
+
+Besides, a practice that I found annoying is to shown a banner.
+A banner is an irrelevant piece of information that and displaces the previous
+command outputs, thus increasing the necessary scrolling to review the previous
+command results and sometimes making impossible to take decent screenshots of
+the terminal with all the relevant information.
+
+#+caption: Annoying banner
+#+begin_example
+$ awesomeprogram
+   _____                                              
+  /  _  \__  _  __ ____   __________   _____   ____   
+ /  /_\  \ \/ \/ // __ \ /  ___/  _ \ /     \_/ __ \  
+/    |    \     /\  ___/ \___ (  <_> )  Y Y  \  ___/  
+\____|__  /\/\_/  \___  >____  >____/|__|_|  /\___  > 
+        \/            \/     \/            \/     \/  
+__________                                            
+\______   \_______  ____   ________________    _____  
+ |     ___/\_  __ \/  _ \ / ___\_  __ \__  \  /     \ 
+ |    |     |  | \(  <_> ) /_/  >  | \// __ \|  Y Y  \
+ |____|     |__|   \____/\___  /|__|  (____  /__|_|  /
+                        /_____/            \/      \/ 
+
+
+Hey, I'm the useful output, do you see me?
+
+#+end_example
+
+I know it is super cool to design and show a banner, I have did this in the
+past, but it occuppies too much terminal space. Please, do not show banners. Or
+at least create an specific functionality to show it.
+
+* Documentation: Give examples
+
+Documentation is hard and bored. Everyone knows that. However, a trick to
+make the documentation useful is to provide examples of the program use.
+People is lazy, so if we have an example of use, we can just simply copy,
+paste and modify it for our purposes.
+
+At least you should have examples for the common use of the tool, where you can
+show both the input and output of the tool, allowing the users to know what to
+expect from the result. For instance, the readme of [[https://github.com/GhostPack/Rubeus][Rubeus]] contains many
+examples of what can be done. 
+
+Moreover, if you add examples of uses of your in combination with other tools it
+can be give the users an idea of when to use it.
+
+Likewise, give examples of the files used by your program. On one hand, you can
+show templates of the configuration files, like the [[https://github.com/lgandx/Responder/blob/master/Responder.conf][configuration of
+Responder]]. On the other hand, you can give examples and schemas for the
+structured files (JSON, XML, etc) produced by the program, in order to make
+other people aware of the format and thus allowing them to create another
+programs to parse your results.
+
+Other advice in order to make your readme is to not include the output of the
+help command (~-h/--help~), it can be seen by using the help command and it is
+hard to maintain. This doesn't mean that you can't explain the options in Readme
+(and provide examples of use).
+
+* Conclusion
+
+Well, that's all. I hope this practices allow you to make your programs more
+useful for you and the others. In case you know other tricks, please share
+them!!
+
+Enjoy!!
+
