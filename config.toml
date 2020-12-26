@@ -26,3 +26,7 @@ contentDir = "content/gl"
 [languages.en]
 contentDir = "content/en"
 
+[[menu.main]]
+    name = "About"
+    url = "about/"
+    weight = 3
