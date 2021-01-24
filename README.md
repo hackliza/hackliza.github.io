@@ -11,7 +11,4 @@ git pull --recurse-submodules
 
 ## Publishing
 
-To build the website and publish it, you have to execute:
-```
-bash publish.sh
-```
+The changes pushed to the main branch will be published automatically.
