@@ -5,4 +5,4 @@ Hackliza é unha comunidade de xente galega interesada en infórmatica e cultura
 
 Se che cunde e queres colaborar, a idea é publicar en galego, a nosa lingua (e opcionalmente en inglés, a lingua [dos hackers](http://www.catb.org/~esr/faqs/hacker-howto.html#skills4)), para isto podes contactar connosco a través de twitter ([@hackliza](https://twitter.com/hackliza)) ou por correo electrónico hackliza@hackliza.gal .
 
-Se atopas algun erro nalgún post, podes deixar un comentario ou abrir un issue no [repositorio de github](https://github.com/hackliza/hackliza.github.io).
+Se atopas algún erro nalgún post, podes deixar un comentario ou abrir un issue no [repositorio de github](https://github.com/hackliza/hackliza.github.io).
