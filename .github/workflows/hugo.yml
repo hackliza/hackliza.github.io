@@ -1,0 +1,24 @@
+name: Push to GitHub Pages on push to main
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v1
+        with:
+          submodules: true
+
+      - name: Deploy the site
+        uses: benmatselby/hugo-deploy-gh-pages@master
+        env:
+          HUGO_VERSION: 0.74.3
+          TARGET_REPO: hackliza/hackliza.github.io
+          CNAME: hackliza.gal
+          TARGET_BRANCH: gh-pages
+          TOKEN: "ghtoken:${{ secrets.GITHUB_TOKEN }}"
