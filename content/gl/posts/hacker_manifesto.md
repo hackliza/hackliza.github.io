@@ -2,6 +2,7 @@
 title: Manifesto Hacker
 author: Hackliza
 date: 2020-12-06
+tags: ['tradución']
 ---
 
 Boas xente,
