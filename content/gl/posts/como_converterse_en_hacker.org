@@ -91,8 +91,8 @@ Hai moitas traducións deste documento dispoñibles:
 [[https://sindominio.net/biblioweb/telematica/hacker-como.html][español]],
 [[http://www.belgeler.org/howto/hacker-howto/hacker-howto.html][turco]]
 e [[www1.tripnet.se/~mly/open/faqs/hacker-howto.se.html][sueco]].
-Ten en conta que dado que este documento cambia ocasionalmente, pode que estea
-desactualizado en diferentes graos.
+Ten en conta que dado que este documento cambia ocasionalmente, pode que estean
+desactualizados en diferentes graos.
 
 O diagrama de cinco puntos en nove cadrados que decora este documento chámase
 /glider/. É un patrón sinxelo con algunhas propiedades sorprendentes nunha
