@@ -1,0 +1,316 @@
+#+title: Using libfuzzer in autotools compiled projects
+#+author: Eloy Pérez González
+#+date: 2021-07-16
+#+tags[]: fuzzing libfuzzer
+
+Hey there.
+
+These days I've been playing with [[https://www.llvm.org/docs/LibFuzzer.html][libfuzzer]], a tool that comes with clang
+compiler and that allows us to fuzz a program compiled with clang. The fuzzing
+consists on passing (pseudo-)random data as program input and check if that
+breaks.
+
+To do this with libfuzzer, it is required to define in the program a function
+called ~LLVMFuzzerTestOneInput~ that accepts a buffer of bytes as argument. Then
+libfuzzer will call this function in a loop with different data. The function
+implementation will be something like this:
+
+#+begin_src c
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
+  DoSomethingInterestingWithMyAPI(Data, Size);
+  return 0;  // Non-zero return values are reserved for future use.
+}
+#+end_src
+
+Afterwards, you need to compile the project with clang and the following
+options:
+#+begin_src
+clang -g -O1 -fsanitize=fuzzer,address fuzzer-file.c project.c -o fuzz-project
+#+end_src
+
+This way clang will create an executable (~fuzz-project~ in this case) that will
+allow us to fuzz the library. Besides, libfuzzer also adds code to [[https://en.wikipedia.org/wiki/Instrumentation_(computer_programming)][instrument]]
+the program (doing this libfuzzer is able to know what code paths are executed
+in each execution and create more eficient tests that discover new code paths).
+
+If you are interested in libfuzzer, you can check the following tutorials:
+
+- [[https://github.com/google/fuzzing/blob/master/tutorial/libFuzzerTutorial.md][libFuzzerTutorial by Google]]
+- [[https://github.com/Dor1s/libfuzzer-workshop][Libfuzzer-workshop by Dor1s]]
+
+They are really good, since they already have prepared examples so you can
+focus on learning libfuzzer instead of worrying about compile the target
+programs.
+
+But to show how to compile target programs is the goal of this post, since in
+that is something you will need to do in the real world, and that can be a
+daunting task if don't know how to do it. In this case, we will see how to
+incorporate libfuzzer to a project that is compiled by using autotools.
+
+You can identify projects using autotools since they require the following steps
+to compile them:
+
+#+begin_src 
+autoreconf -i -f -v
+./configure
+make
+#+end_src
+
+In my case I wanted to fuzz [[https://github.com/OISF/libhtp][libhtp]], a library to parse the HTTP protocol in a
+safe and eficient way. This library is used in software like the Suricata IDS so
+it can detect network attacks.
+
+Therefore, libhtp needs to be able to parse even malformed data without
+breaking, since this could be used by an attacker to send a malicious packet
+that breaks software like Suricata.
+
+What libfuzzer does to fuzz is to execute the same function in a loop in the
+same process. This makes libfuzzer faster than other tools like AFL that
+spawns a process per each test case. However, as a consequence, if the program
+breaks by any reason, then libfuzzer ends its execution.
+
+Consequentially libfuzzer should be used in programs/libraries that are not
+allowed to break under any reason, such as libhtp, since if you are able to
+break it, that means that you have detected a failure that needs to be fixed.
+
+On the contrary, if you want to fuzz a software that is allowed to break with
+malformed data, like a video player or pdf reader, libfuzzer is not the best
+option, since it is possible that the fuzzing process will be stopped frequently
+without getting a relevant issue and it would be very complicated to make it
+work. In this scenario a better approach would be to use another fuzzer like [[https://github.com/google/AFL][AFL]].
+
+Ok, let's back to the topic. The first thing to do is to clone libhtp with git:
+
+#+begin_src 
+git clone https://github.com/OISF/libhtp
+#+end_src
+
+And following the instructions in the README, it is possible to compile the
+project with the following commands:
+#+begin_src 
+./autogen.sh
+./configure
+make
+#+end_src
+
+#+BEGIN_QUOTE
+In this case we can know that the project is using autotools since ~autogen.sh~
+executes ~autoreconf -i -f -v~ and there are several files like =Makefile.am=
+and =configure.ac=, that are used by autotools.
+#+END_QUOTE
+
+
+Ok, compile the project in the regular way seems easy, but how do I compile this
+with clang and libfuzzer? And where should I put the libfuzzer
+~LLVMFuzzerTestOneInput~ function? In a project file? In an external file? And
+what should I write in the ~LLVMFuzzerTestOneInput~ function?
+
+Step by step. Firstly, what should we have to write in ~LLVMFuzzerTestOneInput~?
+That is not an easy question since it depends on the project. The point is that
+we need to pass to the library a data buffer and check if it breaks. This
+probably will involve to initialize the library and then call to a function that
+processes the data buffer. It sounds easier than it actually is.
+
+
+In this case I was able to write a test following the examples contained in the
+project (specifically in the =extras= folder). After a while inspecting how it
+works it I was able to write this function:
+#+begin_src c
+#include <stddef.h>
+#include <stdint.h>
+
+#include <htp/htp.h>
+#include <htp/htp_list.h>
+#include <htp/htp_table.h>
+
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+    htp_cfg_t *cfg = htp_config_create();
+    htp_connp_t *connp = htp_connp_create(cfg);
+
+    htp_connp_req_data(connp, 0, data, size);
+
+    // Release
+    htp_connp_destroy_all(connp);
+    htp_config_destroy(cfg);
+    return 0;  // Non-zero return values are reserved for future use.
+}
+#+end_src
+
+#+BEGIN_QUOTE
+Remember that all the memory that we reserve in the ~LLVMFuzzerTestOneInput~
+function must be freed before it ends, since there is a risk to create a memory
+leak and run out of memory after execute this function several times (which is
+what libfuzzer does).
+#+END_QUOTE
+
+
+Ok, now that we have a function to parse data, where do we put it? We should put
+it in an external file not related with the library (and not in the library code
+as I did firstly). After many attempts and errors, I finally create a the file
+=fuzz-htp.c= in the project root directory.
+
+Now that our test is ready is time to compile the library with clang and
+libfuzzer. Firstly we indicate that we want to use clang, so we set the =clang=
+value in the ~CC~ environment variable with the ~export CC=clang~ command (we
+use ~CC~ since it is a C project, in case of a C++ project, we should set
+~CXX~).
+
+Secondly, we indicate that we want to use libfuzzer in the ~CFLAGS~ variable, so
+we execute ~export CFLAGS="-g -fsanitize=fuzzer,address"~ (in case of a C++
+project, we would use the ~CXXFLAGS~ variable). These parameters indicate that
+we want to add debug symbols (~-g~), so the error output gives us information
+about failures in the source code, and on the other side
+~-fsanitize=fuzzer,address~ express that we want to use libfuzzer and
+[[https://clang.llvm.org/docs/AddressSanitizer.html][AddressSanitizer]].
+
+#+BEGIN_QUOTE
+AddressSanitizer allows to detect more read and write out of limits errors. It
+creates a shadow memory that keeps information related to the current state of
+the normal memory and it is able to discover if the program access to memory
+addresses that are not reserved or out of buffer limits.
+#+END_QUOTE
+
+Then, to compile, the next commands will be used:
+#+begin_src 
+export CC=clang
+export CFLAGS="-g -fsanitize=fuzzer,address"
+./autogen.sh
+./configure
+make
+#+end_src
+
+Notwithstanding, it raises an error:
+#+begin_src
+~/libhtp $ export CC=clang
+~/libhtp $ export CFLAGS="-g -fsanitize=fuzzer,address"
+~/libhtp $ ./autogen.sh 
+autoreconf: Entering directory `.'
+autoreconf: configure.ac: not using Gettext
+autoreconf: running: aclocal --force -I m4
+autoreconf: configure.ac: tracing
+autoreconf: running: libtoolize --copy --force
+libtoolize: putting auxiliary files in '.'.
+libtoolize: copying file './ltmain.sh'
+libtoolize: putting macros in AC_CONFIG_MACRO_DIRS, 'm4'.
+libtoolize: copying file 'm4/libtool.m4'
+libtoolize: copying file 'm4/ltoptions.m4'
+libtoolize: copying file 'm4/ltsugar.m4'
+libtoolize: copying file 'm4/ltversion.m4'
+libtoolize: copying file 'm4/lt~obsolete.m4'
+autoreconf: running: /usr/bin/autoconf --force
+autoreconf: running: /usr/bin/autoheader --force
+autoreconf: running: automake --add-missing --copy --force-missing
+configure.ac:86: installing './compile'
+configure.ac:7: installing './missing'
+htp/Makefile.am: installing './depcomp'
+autoreconf: Leaving directory `.'
+~/projects/libhtp $ ./configure
+checking for a BSD-compatible install... /usr/bin/install -c
+checking whether build environment is sane... yes
+checking for a thread-safe mkdir -p... /usr/bin/mkdir -p
+checking for gawk... no
+checking for mawk... mawk
+checking whether make sets $(MAKE)... yes
+checking whether make supports nested variables... yes
+checking for gcc... clang
+checking whether the C compiler works... no
+configure: error: in `/home/user/projects/libhtp':
+configure: error: C compiler cannot create executables
+See `config.log' for more details  
+#+end_src
+
+
+If we check the =config.log= file, we can find the following:
+#+begin_src 
+configure:3410: checking whether the C compiler works
+configure:3432: clang -g -fsanitize=fuzzer,address -O2  -O2  conftest.c  >&5
+/usr/bin/ld: /tmp/conftest-859fac.o: in function `main':
+/home/user/projects/libhtp/conftest.c:14: multiple definition of `main'; /usr/lib/llvm-10/lib/clang/10.0.0/lib/linux/libclang_rt.fuzzer-x86_64.a(fuzzer.o):(.text.main+0x0): first defined here
+/usr/bin/ld: /usr/lib/llvm-10/lib/clang/10.0.0/lib/linux/libclang_rt.fuzzer-x86_64.a(fuzzer.o): in function `main':
+(.text.main+0x12): undefined reference to `LLVMFuzzerTestOneInput'
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+#+end_src
+
+There are two errors, on one hand =multiple definition of `main'= and on the
+other =undefined reference to `LLVMFuzzerTestOneInput'=.
+
+The first error is caused by a conflict between libfuzzer, that wants to create
+a binary with a =main= function, and autotools, that defines a main function in
+an auxiliar file.
+
+The second error is about libfuzzer trying to link with our function
+~LLVMFuzzerTestOneInput~, but since our file is not in the compilation process
+(yet), libfuzzer cannot find it.
+
+In order to solve these errors we can divide the compilation in two separate
+steps. Firstly, we need to compile the library and then our fuzzer by linking
+our file =fuzz-htp.c= with the library.
+
+To do this we need to start by indicating to libfuzzer that we don't want to
+generate the fuzzer executable with the library, but we want the instrumentation
+code (so libfuzzer can find new code paths). So we change the ~CFLAGS~ value
+from ~-g -fsanitize=fuzzer,address~ to ~-g -fsanitize=fuzzer-no-link,address~. 
+
+Then, the following commands are used to compile the library:
+#+begin_src 
+export CC=clang
+export CFLAGS="-g -fsanitize=fuzzer-no-link,address"
+./autogen.sh
+./configure
+make
+#+end_src
+
+
+If we executed this, then it works (I skip the output for the sake of space).
+Now is time to link our fuzzer with the library, but, where is the library?
+Well, autotools usually move the generated libraries to the =.libs= hidden
+directory, that can be in the root folder or in the source code folder. Anyway,
+we can use ~find~ to get the libraries:
+
+#+begin_src
+~/libhtp $ find . -name *.a
+./htp/lzma/.libs/liblzma-c.a
+./htp/.libs/libhtp-c.a
+./htp/.libs/libhtp.a  
+#+end_scr
+
+Here they are. We want to test =libhtp.a= so we execute the following:
+#+begin_src 
+clang -g -fsanitize=fuzzer,address fuzz_htp.c -I . htp/.libs/libhtp.a -lz -o fuzz-htp
+#+end_src
+
+In this command we specify that we want to generate the fuzzing binary that
+calls our function in =fuzz_htp.c=, we link the library =htp/.libs/libhtp.a= and
+we indicate that we want to use the header files (=.h=) in this project with
+=-I .= (=-lz= is to link a required compression library).
+
+Finally, we execute ~./fuzz-htp~ and wait for the library to break.
+#+begin_src 
+~/libhtp$ ./fuzz-htp
+INFO: Seed: 2543270220
+INFO: Loaded 1 modules   (3551 inline 8-bit counters): 3551 [0x5f8f10, 0x5f9cef), 
+INFO: Loaded 1 PC tables (3551 PCs): 3551 [0x5f9cf0,0x607ae0), 
+INFO: -max_len is not provided; libFuzzer will not generate inputs larger than 4096 bytes
+INFO: A corpus is not provided, starting from an empty corpus
+#2	INITED cov: 112 ft: 113 corp: 1/1b exec/s: 0 rss: 31Mb
+	NEW_FUNC[1/12]: 0x55fcd0 in htp_connp_REQ_FINALIZE /home/user/projects/libhtp/htp/htp_request.c:838
+	NEW_FUNC[2/12]: 0x5626d0 in htp_connp_REQ_PROTOCOL /home/user/projects/libhtp/htp/htp_request.c:726
+#4	NEW    cov: 166 ft: 182 corp: 2/5b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 2 ShuffleBytes-CrossOver-
+#6	NEW    cov: 166 ft: 186 corp: 3/9b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 2 CopyPart-ChangeBinInt-
+#8	NEW    cov: 166 ft: 196 corp: 4/11b lim: 4 exec/s: 0 rss: 33Mb L: 2/4 MS: 2 ShuffleBytes-CopyPart-
+#13	NEW    cov: 166 ft: 197 corp: 5/13b lim: 4 exec/s: 0 rss: 33Mb L: 2/4 MS: 5 EraseBytes-ChangeByte-ChangeByte-ChangeByte-InsertByte-
+#20	NEW    cov: 166 ft: 199 corp: 6/16b lim: 4 exec/s: 0 rss: 33Mb L: 3/4 MS: 2 ChangeByte-InsertByte-
+	NEW_FUNC[1/4]: 0x55ee90 in htp_connp_req_receiver_finalize_clear /home/user/projects/libhtp/htp/htp_request.c:131
+	NEW_FUNC[2/4]: 0x5634c0 in htp_connp_REQ_IGNORE_DATA_AFTER_HTTP_0_9 /home/user/projects/libhtp/htp/htp_request.c:910
+#47	NEW    cov: 184 ft: 218 corp: 7/20b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 2 ChangeBinInt-CrossOver-
+#52	NEW    cov: 191 ft: 229 corp: 8/24b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 5 CrossOver-ChangeBit-EraseBytes-ShuffleBytes-CrossOver-
+#53	NEW    cov: 191 ft: 231 corp: 9/28b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 1 CopyPart-
+#56	NEW    cov: 191 ft: 232 corp: 10/30b lim: 4 exec/s: 0 rss: 33Mb L: 2/4 MS: 3 ChangeBit-ShuffleBytes-EraseBytes-
+#83	NEW    cov: 192 ft: 233 corp: 11/34b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 2 CopyPart-ChangeBit-  
+#+end_src
+
+
+We should generate some initial test cases to improve the fuzzing process, but
+we are going to let that part for another post.
+
+See you and happy fuzzing.

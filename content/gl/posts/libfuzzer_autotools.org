@@ -1,0 +1,322 @@
+#+title: Usando libfuzzer en proxectos compilados con autotools
+#+author: Eloy Pérez González
+#+date: 2021-07-16
+#+tags[]: fuzzing libfuzzer
+
+Boas xente.
+
+Estes días estiven xogando con [[https://www.llvm.org/docs/LibFuzzer.html][libfuzzer]], unha ferramenta incorporada no
+compilador clang que nos permite fuzzear un programa que se compile con clang. O
+fuzzing é pasarlle datos (pseudo-)aleatorios a un programa e ver se casca.
+
+Para facer isto con libfuzzer, tes que definir no programa unha función chamada
+~LLVMFuzzerTestOneInput~ que acepte un buffer de bytes que libfuzzer invocará en
+repetidamente en bucle pasando diferentes datos. A sería algo coma esto:
+
+#+begin_src c
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
+  DoSomethingInterestingWithMyAPI(Data, Size);
+  return 0;  // Non-zero return values are reserved for future use.
+}
+#+end_src
+
+Logo tes que compilar o proxecto con clang indicando as seguintes opcións:
+#+begin_src
+clang -g -O1 -fsanitize=fuzzer,address fuzzer-file.c project.c -o fuzz-project
+#+end_src
+
+Deste xeito libfuzzer creará un executable (neste caso ~fuzz-project~) que nos
+permitirá fuzzear a libraría. Ademais, libfuzzer tamén engadirá código para
+[[https://en.wikipedia.org/wiki/Instrumentation_(computer_programming)][instrumentar]] a execución do programa (así libfuzzer é capaz de ver que
+camiños do código se seguen en cada execución e crear tests máis eficientes e
+que descubran novos camiños).
+
+Se estás interesado en libfuzzer podes botarlle unha ollada aos seguintes
+tutorias:
+
+- [[https://github.com/google/fuzzing/blob/master/tutorial/libFuzzerTutorial.md][libFuzzerTutorial by Google]]
+- [[https://github.com/Dor1s/libfuzzer-workshop][Libfuzzer-workshop by Dor1s]]
+
+Están moi ben, xa que veñen con exemplos xa masticadiños para que practicamente
+non te teñas que esforzar en compilar os programas obxetivos e te podas centrar
+en aprender libfuzzer.
+
+E isto lévanos ao tema deste post, xa que no mundo real un ten que compilar os
+proxectos para fuzzear, e isto pode ser bastante enrevesado se non sabes como
+facer. Imos ver como incorporar libfuzzer en caso que o proxecto que queres
+fuzzear se compile usando [[https://www.gnu.org/software/automake/manual/html_node/Autotools-Introduction.html#Autotools-Introduction][autotools]].
+
+Podes identificar un proxecto que usa autotools porque xeralmente tes que seguir
+estes pasos para compilalo:  
+
+#+begin_src 
+autoreconf -i -f -v
+./configure
+make
+#+end_src
+
+No meu caso quería fuzzear [[https://github.com/OISF/libhtp][libhtp]], unha libraría para parsear o protocolo HTTP
+de xeito seguro e eficiente. Esta libraría úsase en software como o IDS Suricata
+para poder detectar ataques informáticos na rede. 
+
+Polo tanto, libhtp ten que ser capaz de parsear incluso datos malformados sen
+romperse, xa que senon isto podería ser usado para un atacante para mandar un
+paquete malicioso que rebente tools que usen libhtp como Suricata e as deixe
+fora de servizo.
+
+libfuzzer fai fuzzing executando un so proceso e chamando continuamente á mesma
+función, isto fai que o fuzzing sea moito máis rápido que con outras ferramentas
+como AFL, que executa un proceso distinto por cada proba de fuzzing. Sen embargo
+isto ten a consequencia de que se o programa fuzzea se rompe por calquera
+motivo, a execución de libfuzzer finaliza tamén.
+
+En consequencia o seu é usar libfuzzer en programas/librarías que non se poidan
+permitir romper por ningún motivo, como o caso de libhtp, xa que se consegues
+que se rompan é que acabas de detectar un fallo que necesita ser arranxado. 
+
+Se pola contra, queres fuzzear un software que pode permitirse rebentar con
+datos malformados, como por exemplo un reproductor de vídeo ou lector de pdf,
+libfuzzer non sería adecuado, xa que é posible que o fuzzeo se detivese cada
+dous por tres sen atopar un fallo relevante e a cousa complicaríase enormemente.
+Neste tipo de casos obterías moito mellor resultado con outro fuzzer como [[https://github.com/google/AFL][AFL]]. 
+
+Bueno, imos ao tema, o primeiro e clonar libhtp con git:
+#+begin_src 
+git clone https://github.com/OISF/libhtp
+#+end_src
+
+E seguindo as instruccións incluidos no README, o proxecto pódese compilar con
+estes comandos:
+#+begin_src 
+./autogen.sh
+./configure
+make
+#+end_src
+
+#+BEGIN_QUOTE
+Neste caso sabemos que o proxecto usa autotools porque ~autogen.sh~ executa
+~autoreconf -i -f -v~ e ademais contén ficheiros =Makefile.am= e =configure.ac=,
+característicos de autotools.
+#+END_QUOTE
+
+Vale, compilalo de xeito normal parece fácil, pero como carallo facemos para
+meterlle man a isto e compilalo con clang e libfuzzer? E onde incorporamos a
+función ~LLVMFuzzerTestOneInput~ de libfuzzer? Nun arquivo do proxecto? Nun
+externo? E que carallo escribimos na función ~LLVMFuzzerTestOneInput~?
+
+Imos por partes. Primeiro, que temos que escribir en
+~LLVMFuzzerTestOneInput~? Non é unha pregunta fácil, pois iso depende de cada
+proxecto. O caso é que temos que ser capaces de pasarlle á libraría un buffer de
+datos e ver se casca. Probablemente isto implica facer algún tipo de
+inicialización da libraría e logo chamar a unha función que procese un buffer de
+datos. Xa che digo agora que sona máis fácil do que é.
+
+Neste caso fun quen de escribir unha proba baseandome nos ficheiros de
+exemplo que atopei no proxecto (na carpeta =extras= concretamente). Logo
+dun rato vendo como funcionaba todo escribin a seguinte función:
+
+#+begin_src c
+#include <stddef.h>
+#include <stdint.h>
+
+#include <htp/htp.h>
+#include <htp/htp_list.h>
+#include <htp/htp_table.h>
+
+
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+    htp_cfg_t *cfg = htp_config_create();
+    htp_connp_t *connp = htp_connp_create(cfg);
+
+    htp_connp_req_data(connp, 0, data, size);
+
+    // Release
+    htp_connp_destroy_all(connp);
+    htp_config_destroy(cfg);
+    return 0;  // Non-zero return values are reserved for future use.
+}
+#+end_src
+
+#+BEGIN_QUOTE
+Recorda que toda a memoria reservada na función ~LLVMFuzzerTestOneInput~ debe
+ser liberada antes de rematala, senon corremos o risco de deixar un leak de
+memoria e quedarnos sen ela tras executar a función unhas cantas veces (que é o
+que fai libfuzzer).
+#+END_QUOTE
+
+Vale, xa temos unha función para probar a parsear datos, onde a poñemos? Pois o seu
+o poñelo nun ficheiro externo á libraría (e non no propio código da libraría
+como se me pasou pola cabeza ao principio). Tras moitas probas e erros,
+finalmente creei o ficheiro =fuzz-htp.c= no directorio root do proxecto.
+
+Agora que xa temos o noso ficheiro de test preparado (insisto en que isto sona
+máis fácil do que é), toca compilar a libraría con clang e libfuzzer.
+
+O primeiro entón e indicar que queremos usar o compilar clang, para o cal
+establecemos o valor =clang= na variable de entorno ~CC~ co comando ~export
+CC=clang~ (neste caso usamos ~CC~ xa que é un proxecto en C, se fose en C++
+teríamos que usar ~CXX~ que indica o compilador de C++).
+
+E segundo indicamos que se use libfuzzer coa variable ~CFLAGS~, para o cal
+executamos ~export CFLAGS="-g -fsanitize=fuzzer,address"~ (no caso de ser un
+proxecto en C++, usaríase a variable ~CXXFLAGS~). Estes parámetros indican que
+ao compilar queremos incorporar símbolos debugging (~-g~), para que a saída de
+erros nos de información de onde se atopan estes no código fonte, e por outra
+banda ~-fsanitize=fuzzer,address~ usar, como non, libfuzzer e [[https://clang.llvm.org/docs/AddressSanitizer.html][AddressSanitizer]].
+
+#+BEGIN_QUOTE
+AddressSanitizer permite detectar máis errors de lectura e escritura fora dos
+límites dos buffers, para isto crea unha memoria sombra (shadow memory) que
+rexistra continuamente o estado da memoria normal e descubre se se accede a
+zonas que non están inicializadas ou fora dos límites dos buffers.
+#+END_QUOTE
+
+
+Bueno, a cousa para compilar quedaría entón do seguinte xeito:
+#+begin_src 
+export CC=clang
+export CFLAGS="-g -fsanitize=fuzzer,address"
+./autogen.sh
+./configure
+make
+#+end_src
+
+Sen embargo, ao executar vemos que nos da un erro:
+#+begin_src
+~/libhtp $ export CC=clang
+~/libhtp $ export CFLAGS="-g -fsanitize=fuzzer,address"
+~/libhtp $ ./autogen.sh 
+autoreconf: Entering directory `.'
+autoreconf: configure.ac: not using Gettext
+autoreconf: running: aclocal --force -I m4
+autoreconf: configure.ac: tracing
+autoreconf: running: libtoolize --copy --force
+libtoolize: putting auxiliary files in '.'.
+libtoolize: copying file './ltmain.sh'
+libtoolize: putting macros in AC_CONFIG_MACRO_DIRS, 'm4'.
+libtoolize: copying file 'm4/libtool.m4'
+libtoolize: copying file 'm4/ltoptions.m4'
+libtoolize: copying file 'm4/ltsugar.m4'
+libtoolize: copying file 'm4/ltversion.m4'
+libtoolize: copying file 'm4/lt~obsolete.m4'
+autoreconf: running: /usr/bin/autoconf --force
+autoreconf: running: /usr/bin/autoheader --force
+autoreconf: running: automake --add-missing --copy --force-missing
+configure.ac:86: installing './compile'
+configure.ac:7: installing './missing'
+htp/Makefile.am: installing './depcomp'
+autoreconf: Leaving directory `.'
+~/projects/libhtp $ ./configure
+checking for a BSD-compatible install... /usr/bin/install -c
+checking whether build environment is sane... yes
+checking for a thread-safe mkdir -p... /usr/bin/mkdir -p
+checking for gawk... no
+checking for mawk... mawk
+checking whether make sets $(MAKE)... yes
+checking whether make supports nested variables... yes
+checking for gcc... clang
+checking whether the C compiler works... no
+configure: error: in `/home/user/projects/libhtp':
+configure: error: C compiler cannot create executables
+See `config.log' for more details  
+#+end_src
+
+E se lle botamos un ollo a =config.log= atopamos o seguinte:
+#+begin_src 
+configure:3410: checking whether the C compiler works
+configure:3432: clang -g -fsanitize=fuzzer,address -O2  -O2  conftest.c  >&5
+/usr/bin/ld: /tmp/conftest-859fac.o: in function `main':
+/home/user/projects/libhtp/conftest.c:14: multiple definition of `main'; /usr/lib/llvm-10/lib/clang/10.0.0/lib/linux/libclang_rt.fuzzer-x86_64.a(fuzzer.o):(.text.main+0x0): first defined here
+/usr/bin/ld: /usr/lib/llvm-10/lib/clang/10.0.0/lib/linux/libclang_rt.fuzzer-x86_64.a(fuzzer.o): in function `main':
+(.text.main+0x12): undefined reference to `LLVMFuzzerTestOneInput'
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+#+end_src
+
+Vemos que temos dous erros, por unha banda =multiple definition of `main'= e
+pola outra =undefined reference to `LLVMFuzzerTestOneInput'=.
+
+O primeiro erro débese a que por un lado, libfuzzer quere crear un executable coa
+función =main= e por outro autotools, que tamén ten definida unha función =main=
+nun ficheiro auxiliar.
+
+E o segundo erro, débese a que libfuzzer está a intentar enlazar coa nosa función
+=LLVMFuzzerTestOneInput=, pero o noso arquivo non se atopa dentro do proceso de
+compilación (de momento), así que non a atopa.
+
+Para solucionar estes erros o que temos que facer é separar a compilación en
+dúas partes. En primeiro lugar compilamos a libraría e logo o noso fuzzer
+enlazando o noso ficheiro =fuzz-htp.c= coa libraría.
+
+Para facer isto temos que empezar por indicarlle a libfuzzer que non queremos
+que xere o executable de fuzzer de boas a primeiras, inda que sí que queremos
+que engada o seu código de instrumentación á libraría xerada (de xeito que poda
+saber que camiños de código se van executando en cada caso e poder xerar tests
+mellores). Para iso cambiamos o valor da variable ~CFLAGS~ de
+~-g -fsanitize=fuzzer,address~ a ~-g -fsanitize=fuzzer-no-link,address~. 
+
+Quedarían así os comandos para compilar a libraría:
+#+begin_src 
+export CC=clang
+export CFLAGS="-g -fsanitize=fuzzer-no-link,address"
+./autogen.sh
+./configure
+make
+#+end_src
+
+E desta se executamos sí que vai (non o poño aquí que ocupa bastante espazo).
+Agora queda enlazar o noso ficheiro de fuzzing coa libraría, pero, onde anda a
+libraría? Pois no caso de autotools, este as esconde un pouquiño nun
+subdirectorio oculto chamado =.libs=, que pode estar na carpeta raíz do proxecto
+ou na carpeta de código. En calquera caso, para atopar a libraría podemos
+executar un ~find~: 
+#+begin_src 
+~/libhtp $ find . -name *.a
+./htp/lzma/.libs/liblzma-c.a
+./htp/.libs/libhtp-c.a
+./htp/.libs/libhtp.a  
+#+end_src
+
+E velaí temos as librarías xeradas no proceso de compilación. Neste caso
+interésanos =libhtp.a=. Para xerar o binary de fuzzing executamos:
+#+begin_src 
+clang -g -fsanitize=fuzzer,address fuzz_htp.c -I . htp/.libs/libhtp.a -lz -o fuzz-htp
+#+end_src
+
+Neste comando indicamos que queremos xerar o binario de fuzzing que invoca á
+nosa función en =fuzz_htp.c=, linkamos a libraría =htp/.libs/libhtp.a= e
+indicamos que queremos usar como arquivos de cabeceiras (os =.h=) os que están
+contidos neste proxecto con =-I .= (=-lz= indícase para linkar un libraría de
+compresión que require o proxecto).
+
+Finalmente executamos ~./fuzz-htp~ e nada, a ver se estoupa a libraría.
+
+#+begin_src 
+~/libhtp$ ./fuzz-htp
+INFO: Seed: 2543270220
+INFO: Loaded 1 modules   (3551 inline 8-bit counters): 3551 [0x5f8f10, 0x5f9cef), 
+INFO: Loaded 1 PC tables (3551 PCs): 3551 [0x5f9cf0,0x607ae0), 
+INFO: -max_len is not provided; libFuzzer will not generate inputs larger than 4096 bytes
+INFO: A corpus is not provided, starting from an empty corpus
+#2	INITED cov: 112 ft: 113 corp: 1/1b exec/s: 0 rss: 31Mb
+	NEW_FUNC[1/12]: 0x55fcd0 in htp_connp_REQ_FINALIZE /home/user/projects/libhtp/htp/htp_request.c:838
+	NEW_FUNC[2/12]: 0x5626d0 in htp_connp_REQ_PROTOCOL /home/user/projects/libhtp/htp/htp_request.c:726
+#4	NEW    cov: 166 ft: 182 corp: 2/5b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 2 ShuffleBytes-CrossOver-
+#6	NEW    cov: 166 ft: 186 corp: 3/9b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 2 CopyPart-ChangeBinInt-
+#8	NEW    cov: 166 ft: 196 corp: 4/11b lim: 4 exec/s: 0 rss: 33Mb L: 2/4 MS: 2 ShuffleBytes-CopyPart-
+#13	NEW    cov: 166 ft: 197 corp: 5/13b lim: 4 exec/s: 0 rss: 33Mb L: 2/4 MS: 5 EraseBytes-ChangeByte-ChangeByte-ChangeByte-InsertByte-
+#20	NEW    cov: 166 ft: 199 corp: 6/16b lim: 4 exec/s: 0 rss: 33Mb L: 3/4 MS: 2 ChangeByte-InsertByte-
+	NEW_FUNC[1/4]: 0x55ee90 in htp_connp_req_receiver_finalize_clear /home/user/projects/libhtp/htp/htp_request.c:131
+	NEW_FUNC[2/4]: 0x5634c0 in htp_connp_REQ_IGNORE_DATA_AFTER_HTTP_0_9 /home/user/projects/libhtp/htp/htp_request.c:910
+#47	NEW    cov: 184 ft: 218 corp: 7/20b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 2 ChangeBinInt-CrossOver-
+#52	NEW    cov: 191 ft: 229 corp: 8/24b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 5 CrossOver-ChangeBit-EraseBytes-ShuffleBytes-CrossOver-
+#53	NEW    cov: 191 ft: 231 corp: 9/28b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 1 CopyPart-
+#56	NEW    cov: 191 ft: 232 corp: 10/30b lim: 4 exec/s: 0 rss: 33Mb L: 2/4 MS: 3 ChangeBit-ShuffleBytes-EraseBytes-
+#83	NEW    cov: 192 ft: 233 corp: 11/34b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 2 CopyPart-ChangeBit-  
+#+end_src
+
+
+O seu sería pasarlle uns casos de probas iniciais para que libfuzzer poda ter unha
+orientación de que probar, pero bueno, iso xa o veremos noutro post se cadra.
+
+A pasalo ben e feliz fuzzing.
+
