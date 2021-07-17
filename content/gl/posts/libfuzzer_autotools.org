@@ -61,11 +61,11 @@ para poder detectar ataques informáticos na rede.
 
 Polo tanto, libhtp ten que ser capaz de parsear incluso datos malformados sen
 romperse, xa que senon isto podería ser usado para un atacante para mandar un
-paquete malicioso que rebente tools que usen libhtp como Suricata e as deixe
-fora de servizo.
+paquete malicioso que rebente ferramentas que usen libhtp como Suricata e as
+deixe fora de servizo.
 
 libfuzzer fai fuzzing executando un so proceso e chamando continuamente á mesma
-función, isto fai que o fuzzing sea moito máis rápido que con outras ferramentas
+función, isto fai que o fuzzing sexa moito máis rápido que con outras ferramentas
 como AFL, que executa un proceso distinto por cada proba de fuzzing. Sen embargo
 isto ten a consequencia de que se o programa fuzzea se rompe por calquera
 motivo, a execución de libfuzzer finaliza tamén.
@@ -147,7 +147,7 @@ que fai libfuzzer).
 Vale, xa temos unha función para probar a parsear datos, onde a poñemos? Pois o seu
 o poñelo nun ficheiro externo á libraría (e non no propio código da libraría
 como se me pasou pola cabeza ao principio). Tras moitas probas e erros,
-finalmente creei o ficheiro =fuzz-htp.c= no directorio root do proxecto.
+finalmente creei o ficheiro =fuzz_htp.c= no directorio root do proxecto.
 
 Agora que xa temos o noso ficheiro de test preparado (insisto en que isto sona
 máis fácil do que é), toca compilar a libraría con clang e libfuzzer.
@@ -245,7 +245,7 @@ compilación (de momento), así que non a atopa.
 
 Para solucionar estes erros o que temos que facer é separar a compilación en
 dúas partes. En primeiro lugar compilamos a libraría e logo o noso fuzzer
-enlazando o noso ficheiro =fuzz-htp.c= coa libraría.
+enlazando o noso ficheiro =fuzz_htp.c= coa libraría.
 
 Para facer isto temos que empezar por indicarlle a libfuzzer que non queremos
 que xere o executable de fuzzer de boas a primeiras, inda que sí que queremos

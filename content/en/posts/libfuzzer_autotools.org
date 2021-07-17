@@ -147,7 +147,7 @@ what libfuzzer does).
 Ok, now that we have a function to parse data, where do we put it? We should put
 it in an external file not related with the library (and not in the library code
 as I did firstly). After many attempts and errors, I finally create a the file
-=fuzz-htp.c= in the project root directory.
+=fuzz_htp.c= in the project root directory.
 
 Now that our test is ready is time to compile the library with clang and
 libfuzzer. Firstly we indicate that we want to use clang, so we set the =clang=
@@ -244,7 +244,7 @@ The second error is about libfuzzer trying to link with our function
 
 In order to solve these errors we can divide the compilation in two separate
 steps. Firstly, we need to compile the library and then our fuzzer by linking
-our file =fuzz-htp.c= with the library.
+our file =fuzz_htp.c= with the library.
 
 To do this we need to start by indicating to libfuzzer that we don't want to
 generate the fuzzer executable with the library, but we want the instrumentation
