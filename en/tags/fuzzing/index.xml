@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>fuzzing on Hackliza</title>
+    <link>https://hackliza.gal/en/tags/fuzzing/</link>
+    <description>Recent content in fuzzing on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Fri, 16 Jul 2021 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/en/tags/fuzzing/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Using libfuzzer in autotools compiled projects</title>
+      <link>https://hackliza.gal/en/posts/libfuzzer_autotools/</link>
+      <pubDate>Fri, 16 Jul 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/libfuzzer_autotools/</guid>
+      <description>Hey there.
+ These days I&amp;#39;ve been playing with libfuzzer, a tool that comes with clang compiler and that allows us to fuzz a program compiled with clang. The fuzzing consists on passing (pseudo-)random data as program input and check if that breaks.
+ To do this with libfuzzer, it is required to define in the program a function called LLVMFuzzerTestOneInput that accepts a buffer of bytes as argument. Then libfuzzer will call this function in a loop with different data.</description>
+    </item>
+    
+  </channel>
+</rss>

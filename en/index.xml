@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hackliza</title>
+    <link>https://hackliza.gal/en/</link>
+    <description>Recent content on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Fri, 16 Jul 2021 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/en/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Using libfuzzer in autotools compiled projects</title>
+      <link>https://hackliza.gal/en/posts/libfuzzer_autotools/</link>
+      <pubDate>Fri, 16 Jul 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/libfuzzer_autotools/</guid>
+      <description>Hey there.
+ These days I&amp;#39;ve been playing with libfuzzer, a tool that comes with clang compiler and that allows us to fuzz a program compiled with clang. The fuzzing consists on passing (pseudo-)random data as program input and check if that breaks.
+ To do this with libfuzzer, it is required to define in the program a function called LLVMFuzzerTestOneInput that accepts a buffer of bytes as argument. Then libfuzzer will call this function in a loop with different data.</description>
+    </item>
+    
+    <item>
+      <title>Tricks to improve console programs usability</title>
+      <link>https://hackliza.gal/en/posts/console_usability/</link>
+      <pubDate>Thu, 24 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/console_usability/</guid>
+      <description>Hi folks.
+ In this post I goint to present you some tricks that, in my experience, allow to greatly improve the usability of the console programs. I write them down here to avoid to forget them and in the hope that they can be useful to other people.
+ The key is to make the programs simple, which normally is not as easy as it sounds, but I hope these tricks will help you to achieve that.</description>
+    </item>
+    
+    <item>
+      <title>Virus and Python</title>
+      <link>https://hackliza.gal/en/posts/virus_python/</link>
+      <pubDate>Mon, 14 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/virus_python/</guid>
+      <description>This post will explain several issues when it comes to understanding how a virus works. They will first be explained what they are and how is its life cycle. The main techniques for detecting a virus will be outlined below. After, the main anti-antivirus techniques will be discussed. Then, it will be explained how a virus works by providing examples of code, to finally add various enhancements and protections so that it cannot be detected by signature.</description>
+    </item>
+    
+    <item>
+      <title>Heap analysis with radare2</title>
+      <link>https://hackliza.gal/en/posts/r2heap/</link>
+      <pubDate>Sat, 21 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/r2heap/</guid>
+      <description>Hi everyone.
+ In this post, I&amp;#39;m going to show you how radare2 can be used to perform heap analisys in the glibc. My purpose is to create a reference with examples, that shows what can be done in radare2. I do this cause I haven&amp;#39;t found too much info about this on internet, only the heap module presentation made by n4x0r in the r2con 2016.
+ However, I prefer text, so I&amp;#39;ll write here the commands with examples, ready to be consulted and copypasted.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://hackliza.gal/en/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/about/</guid>
+      <description>Hackliza is galician community interested in computer science and hacker culture. You are reading the blog, here you will find information about free software, software development, computer security, privacy and other stuff.
+If you fancy to participate, the idea is publishing in galician, our language (and optionally in english, the lingua franca of hacking), for this you can reach us out via twitter (@hackliza) or via e-mail (hackliza@hackliza.gal).
+If you find any error in a post, you can drop a comment or open an issue in the repo.</description>
+    </item>
+    
+  </channel>
+</rss>

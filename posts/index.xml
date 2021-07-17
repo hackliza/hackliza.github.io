@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Hackliza</title>
+    <link>https://hackliza.gal/posts/</link>
+    <description>Recent content in Posts on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Fri, 16 Jul 2021 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/posts/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Usando libfuzzer en proxectos compilados con autotools</title>
+      <link>https://hackliza.gal/posts/libfuzzer_autotools/</link>
+      <pubDate>Fri, 16 Jul 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/libfuzzer_autotools/</guid>
+      <description>Boas xente.
+ Estes días estiven xogando con libfuzzer, unha ferramenta incorporada no compilador clang que nos permite fuzzear un programa que se compile con clang. O fuzzing é pasarlle datos (pseudo-)aleatorios a un programa e ver se casca.
+ Para facer isto con libfuzzer, tes que definir no programa unha función chamada LLVMFuzzerTestOneInput que acepte un buffer de bytes que libfuzzer invocará en repetidamente en bucle pasando diferentes datos.</description>
+    </item>
+    
+    <item>
+      <title>Como Converterse En Hacker</title>
+      <link>https://hackliza.gal/posts/como_converterse_en_hacker/</link>
+      <pubDate>Mon, 19 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/como_converterse_en_hacker/</guid>
+      <description>Boas xente.
+ Este post é unha tradución do How To Become A Hacker de Eric Steven Raymond, publicado orixinariamente no 2001 (a última actualización a día de hoxe fíxose no 2020).
+ Eric Raymond, autor de grandes pezas como The Cathedral &amp;amp; the Bazaar ou The Art of Unix Programming , amósanos neste icónico texto o que é un hacker, cal é a súa filosofía e os valores que defende, así como a actitude e coñecementos que se precisan para ser un deles.</description>
+    </item>
+    
+    <item>
+      <title>Truquiños para mellorar a usabilidade de programas de consola</title>
+      <link>https://hackliza.gal/posts/console_usability/</link>
+      <pubDate>Thu, 24 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/console_usability/</guid>
+      <description>Boas xente,
+ Neste post vouvos amosar unha serie de truquiños que, pola miña experiencia, son cremita para aumentar a usabilidade das utilidades de consola. Vounos deixar aquí plasmados para non esquecelos e coa esperanza de que tamén lle poidan servir a máis xente.
+ Ao final a clave e facer os programas simples, o que non é tan fácil como parece, pero agardo que estes truquiños che axuden.</description>
+    </item>
+    
+    <item>
+      <title>Virus e Python</title>
+      <link>https://hackliza.gal/posts/virus_python/</link>
+      <pubDate>Mon, 14 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/virus_python/</guid>
+      <description>Nesta publicación explicarase varias cuestións a hora de entender como funciona un virus. Primeiro explicaranse que son e como é o seu ciclo de vida. A continuación, esbozaranse as principais técnicas para detectar un virus. Despois, comentaranse as principais técnicas anti-antivirus. Logo, explicarase como funciona un virus aportando exemplos de código, para finalmente, engadir varias melloras e proteccións para que non se poida detectar mediante sinatura.
+Advertencia: a finalidade desta publicación é educativa.</description>
+    </item>
+    
+    <item>
+      <title>Manifesto Hacker</title>
+      <link>https://hackliza.gal/posts/hacker_manifesto/</link>
+      <pubDate>Sun, 06 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/hacker_manifesto/</guid>
+      <description>Boas xente,
+Hoxe traemos a tradución dun dos textos máis icónicos da cultura hacker, o manifesto hacker, publicado orixinalmente na revista Phrack en 1986. Inda que xa choveu dende aquela, ideas como a liberdade de coñecemento e a curiosidade insaciable seguen moi presentes na comunidade hacker hoxe en día.
+Esperamos que vos guste esta homenaxe.
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= O seguinte foi escrito pouco despois do meu arresto... \/\A conciencia dun Hacker/\/ by +++The Mentor+++ (traducido por Hackliza) Escrito o 8 de Xaneiro do 1986 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Outro foi capturado hoxe, está en todos os xornais.</description>
+    </item>
+    
+    <item>
+      <title>Análise do heap con radare2</title>
+      <link>https://hackliza.gal/posts/r2heap/</link>
+      <pubDate>Sat, 21 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/r2heap/</guid>
+      <description>Boas xente.
+ Neste post, vou mostrar como se pode utilizar radare2 para facer análises do heap da glibc. A miña intención é crear unha referencia con exemplos, que permita coñecer que se pode levar a cabo con radare2. Fago isto xa que non atopei moito ao respecto en internet, soamente a presentación do módulo de heap feita por n4x0r na r2con 2016.  Sen embargo, eu son un amante do texto, así que deixarei aquí plasmados os comandos de radare2 con exemplos, listos para ser consultados e copipasteados.</description>
+    </item>
+    
+  </channel>
+</rss>
