@@ -136,4 +136,4 @@ $ C sqrt [ 3 + [ 3 * 4 ] / 2 ]
 3.0
 #+END_SRC
 
-Iso e todo, ahí queda a idea. Leémonos!
+Iso é todo, ahí queda a idea. Leémonos!
