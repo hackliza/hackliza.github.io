@@ -1,0 +1,139 @@
+#+title: Quick math on the terminal
+#+author: Sergio Martínez Portela
+#+date: 2021-11-01
+#+tags[]: terminal explorations
+
+Hey there!
+
+Just this past week I stumbled on [[https://news.ycombinator.com/item?id=20407438][a HN comment from 2019]]. The commenter was
+fiddling with some scripts to perform some simple math directly on the (bash)
+terminal.
+
+[[#headline-1][TLDR: Click here to go to the code and skip the backstory.]]
+
+
+What the commenter proposed was something like this, based on the [[https://www.computerhope.com/unix/udc.htm][dc command]] (comments are mine).
+
+#+BEGIN_SRC shell
+$ . calc.sh  # Load functionality
+$ * 4 5      # Multiply 4 and 5
+20
+$ / 21 3     # Divide 21 by 3
+7
+#+END_SRC
+
+This sounded interesting. I normally open a terminal and invoke Python when I
+need to do some simple math, and doing it directly without invoking python was
+appealing.
+
+If I were to do a simple change... some people can find [[https://en.wikipedia.org/wiki/Polish_notation][Polish notation]]
+intuitive, but for this I'd rather have some more standard notation. Think
+something like:
+
+#+BEGIN_SRC shell
+$ C 4 * 5
+20
+$ C 21 / 3
+7
+#+END_SRC
+
+You get the point, the command is named ~C~ and the arguments should feel as natural as possible.
+
+The simplest way to do this would be to write a simple bash function that invokes the Python interpreter transparently, let's say...
+
+#+BEGIN_SRC shell
+C () {
+  python -c "print($*)"
+}
+#+END_SRC
+
+But there's a problem! With this we can perform some commands, but products (~*~) will get [[https://en.wikipedia.org/wiki/Glob_(programming)][expanded]] into file names:
+
+#+BEGIN_SRC shell
+# Let's just simulate a directory with some files
+$ mkdir test
+$ cd test
+$ touch fname1
+$ touch fname2
+# Now, if we invoke the function, the '*' will be replaced with file names
+$ C 4 * 5
+  File "<string>", line 1
+    print(4 fname1 fname2 5)
+            ^
+SyntaxError: invalid syntax
+#+END_SRC
+
+We might thing about [[https://stackoverflow.com/a/11456496][disabling the expansion]] on our ~C~ command. But the expansion happens before our command is run, so that won't fix it.
+
+Something that /looks/ like a command, and can do things before it's arguments are expanded is an [[https://tldp.org/LDP/abs/html/aliases.html][alias]].
+
+#+BEGIN_SRC shell
+__calc () {
+  python -c "print($*)"
+  set +f  # Re-enable wildcard expansion
+}
+
+alias C='set -f; __calc '
+#+END_SRC
+
+This way, the alias runs ~set -f~ and disables the expansion *before* the ~__calc~ function arguments get a chance to be evaluated.
+
+#+BEGIN_SRC shell
+$ C 4 * 5
+20
+$ echo *
+fname1 fname2
+#+END_SRC
+
+Ok, now lets import the [[https://docs.python.org/3/library/math.html][Python math library]]...
+
+#+BEGIN_SRC shell
+__calc () {
+  python -c "from math import *; print($*)"
+  set +f  # Re-enable wildcard expansion
+}
+
+alias C='set -f; __calc '
+#+END_SRC
+
+And let's we use the library to do some calculations:
+
+#+BEGIN_SRC shell
+$ C sqrt( 999 )
+bash: syntax error near unexpected token `('
+#+END_SRC
+
+Well, that's not great. See, the ~(~ character in bash will be understood as the start of a [[https://tldp.org/LDP/abs/html/subshells.html][subshell]] and this, unlike the file name expansion, cannot be disabled.
+
+To be honest, I have yet not found a solution for this, but I can offer you two options:
+
+One, just quote the parameters:
+
+#+BEGIN_SRC shell
+$ C "sqrt( 999 )"
+31.606961258558215
+#+END_SRC
+
+The other is to take in the command with other charaters replacing the parens ~[]~ → ~()~:
+
+** Result
+
+#+BEGIN_SRC shell
+__calc () {
+  local __calc_CMD=$(echo "$*"|tr "[]" "()")
+  python -c "from math import *; print($__calc_CMD)"
+  set +f  # Re-enable wildcard expansion
+}
+
+alias C='set -f; __calc '
+#+END_SRC
+
+And with this we have our calculations on the shell:
+
+#+BEGIN_SRC shell
+$ C sqrt [ 3 + [ 3 * 4 ] / 2 ]
+3.0
+#+END_SRC
+
+
+That's it, maybe it can be useful to you. Bye!

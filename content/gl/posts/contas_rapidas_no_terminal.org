@@ -1,0 +1,139 @@
+#+title: Contas rápidas no terminal
+#+author: Sergio Martínez Portela
+#+date: 2021-11-01
+#+tags[]: terminal exploracións
+
+Boas, xente.
+
+A semana pasada pasei por [[https://news.ycombinator.com/item?id=20407438][un comentario en HN do 2019]]. O usuario estaba
+experimentando cuns script pra facer algunhas contas directamente no terminal
+bash.
+
+[[#headline-1][TLDR: Clica aquí pra saltar a historia e ir directamente ao código.]]
+
+O que o usuario propoñía era usar algo coma isto, baseado no [[https://www.computerhope.com/unix/udc.htm][comando dc]] (os comentarios son meus).
+
+#+BEGIN_SRC shell
+$ . calc.sh  # Cargar funcións
+$ * 4 5      # Multiplica 4 e 5
+20
+$ / 21 3     # Divide 21 por 3
+7
+#+END_SRC
+
+Isto soaba interesante. Persoalmente, cando teño que facer algunhas contas abro
+un terminal e invoco ao Python, e facelo directamente sen ter que lanzar Python parecía útil.
+
+Pero, se tivera que facer un cambio pequeno... a algunha xente lle resulta intuitiva a [[https://en.wikipedia.org/wiki/Polish_notation][notación Polaca]]
+, pero pra isto preferiría ter unha notación mais habitual. Algo coma:
+
+#+BEGIN_SRC shell
+$ C 4 * 5
+20
+$ C 21 / 3
+7
+#+END_SRC
+
+Esa e a idea, o comando se chamaría ~C~ e os argumentos deben ser o mais naturais posible.
+
+O xeito máis sinxelo de facelo é escreber unha función bash que invoque o interprete de Python de transparentemente, algo coma...
+
+#+BEGIN_SRC shell
+C () {
+  python -c "print($*)"
+}
+#+END_SRC
+
+Pero hai un problema! Con isto podemos facer algunhas contas, pero os produtos (~*~) serían [[https://en.wikipedia.org/wiki/Glob_(programming)][expandidos]] a nomes de ficheiros:
+
+#+BEGIN_SRC shell
+# Simulemos un directorio con algúns ficheiros
+$ mkdir test
+$ cd test
+$ touch fname1
+$ touch fname2
+# Se invocamos a función, o '*' será reemplazado por nomes de ficheiro
+$ C 4 * 5
+  File "<string>", line 1
+    print(4 fname1 fname2 5)
+            ^
+SyntaxError: invalid syntax
+#+END_SRC
+
+Podemos pensar en [[https://stackoverflow.com/a/11456496][desactivar a expansión]] dentro da nosa función. Pero a
+expansión ocorre antes de que o comando se execute, así que non podemos solucionalo dentro da función.
+
+Algo que /semella/ unha función, e que pode facer cousas antes de expandir os argumentos e un [[https://tldp.org/LDP/abs/html/aliases.html][alias]].
+
+#+BEGIN_SRC shell
+__calc () {
+  python -c "print($*)"
+  set +f  # Re-activar a expansión de ficheiros
+}
+
+alias C='set -f; __calc '
+#+END_SRC
+
+De este xeito, o alias executa ~set -f~, e con isto desactiva a expansión,
+*antes* de que se evalúen os argumentos de función ~__calc~.
+
+#+BEGIN_SRC shell
+$ C 4 * 5
+20
+$ echo *
+fname1 fname2
+#+END_SRC
+
+Vale, agora imos probar a importar a [[https://docs.python.org/3/library/math.html][libraría matemática de Python]]...
+
+#+BEGIN_SRC shell
+__calc () {
+  python -c "from math import *; print($*)"
+  set +f  # Re-activar a expansión de ficheiros
+}
+
+alias C='set -f; __calc '
+#+END_SRC
+
+E usémola pra facer algúns cálculos:
+
+#+BEGIN_SRC shell
+$ C sqrt( 999 )
+bash: syntax error near unexpected token `('
+#+END_SRC
+
+Vaia, iso non pinta ben. Veredes, en bash o carácter ~(~ é interpretado coma o
+comezo dunha [[https://tldp.org/LDP/abs/html/subshells.html][subshell]], e isto (ao contrario da expansión dos nomes de ficheiro)
+non pode ser deshabilitado.
+
+Pra ser honesto, non atopei unha solución pra isto, pero podo ofrecervos dúas opcións:
+
+Primeira, simplemente usemos comiñas:
+
+#+BEGIN_SRC shell
+$ C "sqrt( 999 )"
+31.606961258558215
+#+END_SRC
+
+A outra e aceptar os parámetros con outros caracteres, que reemplazaremos por parénteses ~[]~ → ~()~:
+
+** Resultado
+
+#+BEGIN_SRC shell
+__calc () {
+  local __calc_CMD=$(echo "$*"|tr "[]" "()")
+  python -c "from math import *; print($__calc_CMD)"
+  set +f  # Re-activar a expansión de ficheiros
+}
+
+alias C='set -f; __calc '
+#+END_SRC
+
+E con isto xa podemos facer os cálculos directamente no terminal:
+
+#+BEGIN_SRC shell
+$ C sqrt [ 3 + [ 3 * 4 ] / 2 ]
+3.0
+#+END_SRC
+
+Iso e todo, ahí queda a idea. Leémonos!
