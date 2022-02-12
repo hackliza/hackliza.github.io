@@ -1,0 +1,282 @@
+#+title: Reversing con carraxe
+#+subtitle: Sacando contrasinais con angr
+#+author: Eloy Pérez González
+#+date: 2022-02-12
+#+tags: angr radare2 ghidra reversing
+
+Boas xente,
+
+Estes dias andei cacharreando con [[https://angr.io/][angr]] e aprendendo un pouco sobre
+execución simbólica.
+
+** Que diaños é angr? E a execución simbólica?
+
+angr é unha ferramenta para análise dinámico de programas. Concretamente é un
+emulador que executa o programa aplicando execución simbólica. Deste xeito
+podemos só executar a parte do programa que nos interesa e non todo o programa.
+
+A execución simbólica ven sendo executar o programa ou unha parte del para
+coñecer que valor precisamos nun símbolo (algo parecido a unha variábel) para
+podermos chegar dunha parte ou estado do programa a outro.
+
+Por exemplo, se temos un programa que nos pide un contrasinal, pódenos
+interesar saber o valor do contrasinal que nos permite chegar dende o punto no
+que se nos pide o contrasinal ao estado no que obtemos aceso ao programa.
+
+Por tanto, na execución simbólica precisamos as seguintes cousas:
+- Algo que non coñecemos, que será a parte simbólica -> O contrasinal
+- Indicar de que estado partimos -> Petición de contrasinal
+- Indicar a que estado queremos chegar -> Aceso permitido no programa
+
+E angr tratará de averiguar que valor concreto da parte simbólica que non
+coñecemos nos leva do estado inicial ao estado desexado. Para iso irá pasando
+por vários estados ata chegar ao que nos interesa.
+
+É tamén posíbel que o programa chegue a un estado que nos queiramos a evitar,
+como no caso de que nos diga que o contrasinal foi rexeitado. Tamén lle podemos
+indicar a angr neste caso que unha vez chegado a dito estado, non siga por esa
+via, que xa sabemos que está mal.
+
+Deixo por aqui un exemplo gráfico de como seria esta execución por parte de
+angr, se temos en conta que o contrasinal se examina carácter a carácter (por
+exemplo con [[https://man7.org/linux/man-pages/man3/strcmp.3.html][strcmp]]):
+#+begin_example
+                                           pass=p4ssX???
+                                           .-------.
+                                           | bad   |
+                                     .---->| state |
+                                     |     '-------'
+                      pass=p4ss????  |  "Access denied"   
+                      .--------.     |  
+  pass=????????       | middle |>----'                    pass=p4ssw0rd
+  .---------.      .->| state  |>--.                       .-------.
+  | initial |>-----'  '--------'   |                       | good  |
+  | state   |>-----.               |    pass=p4ssw0?? .--->| state |
+  '---------'      |               |    .--------.    |    '-------' 
+"Enter password:"  |               |    | middle |    |  "Access allowed"
+                   |               '--->| state  |----'
+                   |                    '--------'
+                   |
+                   |   pass=Y???????
+                   |   .-------.
+                   |   | bad   |
+                   '-->| state |
+                       '-------'
+                     "Access denied"
+#+end_example
+
+Indicar o estado do que queres que parta o programa significa precisar en que
+instrución debe arrincar e que valor teñen os rexistros e a memoria. Non
+precisaremos indicar todos os rexistros, nen moito menos absolutamente todo o
+que aí na memoria (mimadriña, vaia choio), senón soamente as partes que nos
+interesan, especialmente a parte simbólica que queremos resolver, como veremos
+agora no exemplo deste artigo.
+
+Por outra parte, o estado ao que queremos chegar pódese indicar de diversas
+formas. Pode ser que o que nos interese e chegar a unha instrución en concreto
+ou un estado no que o programa, inda que non saibamos en que instrución está,
+faga algunha acción como indicarmos que o noso contrasinal é correcto.
+
+Isto resume un pouco a idea de execución simbólica na que se basea angr, pero
+dista moito de ser unha explicación exhaustiva. Para coñecer en máis detalle o
+tema, que é importante se queres entender como funciona angr, recoméndoche
+botarlle unha ollada á presentación [[https://github.com/jakespringer/angr_ctf/blob/master/SymbolicExecution.pptx][Understanding Symbolic Execution]].
+
+Para coñecer como funciona angr, tamén che recomendo seguir os exercicios
+propostos en https://github.com/jakespringer/angr_ctf (na carpeta =dist= tes os
+binarios xa compilados, que pode axudar bastante para traballar sobre os mesmos
+binarios que a solución proposta) 
+
+** Si si, todo moi bonito... amósame o código
+
+Estes dias tamén estiven facendo alguns retos de reversing e tropecei me co reto
+~ircware~. Non vou a meterme en moitos detalles do reversing porque non é o
+obxectivo do artigo, pero tras un rato examinando o becho con [[https://ghidra-sre.org/][ghidra]] e [[https://github.com/radareorg/radare2][radare2]]
+decateime de que se conectaba ao porto 8000 e que lle podias pedir a flag, pero
+requeriache un contrasinal primeiro.
+
+#+begin_src 
+$rlwrap nc -lvp 8000
+listening on [any] 8000 ...
+connect to [127.0.0.1] from localhost [127.0.0.1] 39486
+NICK ircware_7773
+USER ircware 0 * :ircware
+JOIN #secret
+PRIVMSG #secret :@pass cachelo
+PRIVMSG #secret :Rejected
+PRIVMSG #secret :@flag
+PRIVMSG #secret :Requires password  
+#+end_src
+
+Asi que seguin estudando o código a ver se daba saltado a comprobación da
+contrasinal ou descuberto cal era esta, pero atopeime con que o ofuscaba estas
+cousas cun algoritmo un pouco escuro.
+
+Podedes ver nas seguintes imaxes o código que nos leva dende o contrasinal ata a
+parte na que programa escupe se o contrasinal e correcto ou non.
+
+#+CAPTION: Algoritmo de contrasinal en ghidra
+[[./algoritmo-ghidra.png]]
+
+#+CAPTION: Algoritmo de contrasinal en radare2
+[[./algoritmo-r2.png]]
+
+Asi que ao ver este percal lembreime de angr e as suas virtudes, asi que no
+canto de resolver como funcionaba o algoritmo e descubrir cal é o contrasinal,
+fixen un pequeno script de angr para que o fixese por min.
+
+Aqui tedes o script completo, pero imos examinar cada unha das suas partes:
+#+begin_src python
+import angr
+import claripy
+
+def main():
+    p = angr.Project("./ircware")
+
+    base_addr = p.loader.main_object.min_addr
+    start_addr = base_addr + 0x3ed
+
+    istate = p.factory.blank_state(addr=start_addr)
+
+    pass_addr = 0x7f0000
+    password = claripy.BVS("password", 9*8)
+
+    istate.memory.store(pass_addr, password)
+
+    istate.regs.rsi = pass_addr
+
+    good_addr = base_addr + 0x451
+    bad_addr = base_addr + 0x471
+
+    sim = p.factory.simgr(istate)
+    sim.explore(find=good_addr, avoid=bad_addr)
+
+    if sim.found:
+        sol_state = sim.found[0]
+        print(sol_state.solver.eval(password, cast_to=bytes))
+    else:
+        print("No solution found")
+
+
+if __name__ == '__main__':
+    exit(main())
+#+end_src
+
+Para usar angr, empezamos indicando que ficheiro queremos examinar e creamos un
+proxecto:
+#+begin_src python
+p = angr.Project("./ircware")  
+#+end_src
+
+Os proxectos de angr garda a información do binario e permítennos crear o resto
+das clases que imos usar. 
+
+Unha vez temos o proxecto, precisamos indicar como é o estado inicial do que
+partimos. Para iso precisamos en primeiro lugar xerar un estado en branco:
+
+#+begin_src python
+base_addr = p.loader.main_object.min_addr
+start_addr = base_addr + 0x3ed
+
+istate = p.factory.blank_state(addr=start_addr)
+#+end_src
+
+Neste anaco creamos o estado inicial indicándolle da instrución da que queremos
+partir, que será no comezo do código amosado por radare2. Aí que ter en conta
+que radare2 e angr poden cargar o binario en distintas direccións de memoria
+base.
+
+Polo tanto o que debemos de extraer será o offset da instrución dende a
+base, no noso caso radare2 carga o binario na base =0x400000= e a instrución da
+que queremos partir é =0x4003ed= (despois de que se cargue o contrasinal en
+rsi). Polo tanto temos que o offset é =0x3ed=.
+
+Base do binario en radare2:
+#+begin_src 
+[0x00400210]> i~baddr
+baddr    0x400000  
+#+end_src
+
+
+Agora que creamos o estado inicial, temos que indicarlle como van a estar os
+rexistros e a memoria que nos interesa, especialmente a parte do contrasinal.
+#+begin_src python
+pass_addr = 0x7f0000
+password = claripy.BVS("password", 9*8)
+
+istate.memory.store(pass_addr, password)
+
+istate.regs.rsi = pass_addr
+#+end_src
+
+Para almacenar o contrasinal en memoria, seleccionamos unha dirección de memoria
+ficticia (que saibamos que non vai ter nada máis) e gardamos o noso contrasinal
+simbólico no mesmo. Ademais, examinando o código, concretamente a instrución en
+=0x400441=, deducimos que o contrasinal terá 8 carácteres, e que precisaremos un
+máis como final da cadea. Seguindo isto, creamos un [[https://docs.angr.io/core-concepts/solver][bitvector]] de 9 bytes (72
+bits). Por último, indicamos que o rexistro =rsi= ten que estar apuntando á
+dirección de memoria onde estará o contrasinal.
+
+Bota o freo, que é un bitvector?? Un [[https://docs.angr.io/core-concepts/solver][bitvector]] é o tipo de dato que usa
+angr para almacenar os símbolos. A medida que angr faga a execución irá
+incorporando a este valor unha serie de restricións, como por exemplo, o
+primeiro carácter ten que ser "p", o segundo ten que ser "4", e asi
+sucesivamente ata que cheguemos ao estado que queiramos. Neste estado, coma
+veremos agora, pedirémoslle a angr que nos devolva un valor que cumpra con
+tódalas restricións impostas. 
+
+
+Faltanos antes de arrincar a execución, indicar cal é o estado ao que queremos
+chegar. Neste caso sabemos que queremos chegar á rama que vai devolver
+=Accepted= (no =0x400451=). Ademais tamén sabemos que se chegamos á rama que
+indica =Rejected= (no =0x400471=), xa nos equivocamos e non debemos continuar.
+É moi recomendábel indicarlle a angr tamén os estados a evitar, de xeito que se
+minimice o tempo de execución.
+#+begin_src python
+good_addr = base_addr + 0x451
+bad_addr = base_addr + 0x471
+
+sim = p.factory.simgr(istate)
+sim.explore(find=good_addr, avoid=bad_addr)  
+#+end_src
+
+
+Por último temos que ver se se atopa unha solución, e no caso de darse, resolver
+o bitvector =password= a un valor que cumpra cas condicións para chegar ao estado.
+#+begin_src python
+if sim.found:
+    sol_state = sim.found[0]
+    print("Password:", sol_state.solver.eval(password, cast_to=bytes))
+else:
+    print("No solution found")  
+#+end_src
+
+É hora de executar o script e ver que sae...
+#+begin_src 
+$ python3 angrsol.py 
+WARNING | 2022-02-12 12:11:19,176 | angr.storage.memory_mixins.default_filler_mixin | The program is accessing memory or registers with an unspecified value. This could indicate unwanted behavior.
+WARNING | 2022-02-12 12:11:19,176 | angr.storage.memory_mixins.default_filler_mixin | angr will cope with this by generating an unconstrained symbolic variable and continuing. You can resolve this by:
+WARNING | 2022-02-12 12:11:19,176 | angr.storage.memory_mixins.default_filler_mixin | 1) setting a value to the initial state
+WARNING | 2022-02-12 12:11:19,176 | angr.storage.memory_mixins.default_filler_mixin | 2) adding the state option ZERO_FILL_UNCONSTRAINED_{MEMORY,REGISTERS}, to make unknown regions hold null
+WARNING | 2022-02-12 12:11:19,176 | angr.storage.memory_mixins.default_filler_mixin | 3) adding the state option SYMBOL_FILL_UNCONSTRAINED_{MEMORY,REGISTERS}, to suppress these messages.
+WARNING | 2022-02-12 12:11:19,176 | angr.storage.memory_mixins.default_filler_mixin | Filling register cc_ndep with 8 unconstrained bytes referenced from 0x400430 (offset 0x430 in ircware (0x400430))
+Password: b'ASS3MBLY\x00'
+#+end_src
+
+Bingo!!!
+
+Probamos a introducir o contrasinal no programa e sacámola flag:
+#+begin_src 
+$ rlwrap nc -lvp 8000
+listening on [any] 8000 ...
+connect to [127.0.0.1] from localhost [127.0.0.1] 39486
+NICK ircware_7773
+USER ircware 0 * :ircware
+JOIN #secret
+PRIVMSG #secret :@pass ASS3MBLY
+PRIVMSG #secret :Accepted
+PRIVMSG #secret :@flag
+PRIVMSG #secret :HTB{m1N1m411st1C_fL4g_pR0v1d3r_b0T}
+#+end_src
+
+
