@@ -153,7 +153,7 @@ def main():
 
     if sim.found:
         sol_state = sim.found[0]
-        print(sol_state.solver.eval(password, cast_to=bytes))
+        print("Password:", sol_state.solver.eval(password, cast_to=bytes))
     else:
         print("No solution found")
 
