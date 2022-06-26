@@ -85,6 +85,9 @@ Para instalar esta versión do paquete directamente a partir do GitHub podemos f
 #+END_SRC
 
 O seguinte necesario será clonar este repositorio: https://github.com/brendangregg/FlameGraph
+#+BEGIN_SRC shell
+  git clone https://github.com/brendangregg/FlameGraph
+#+END_SRC
 
 * Tomando medidas e analizando
 Unha vez temos todo preparado podemos medir o noso programa cun comando coma:
@@ -93,9 +96,9 @@ Unha vez temos todo preparado podemos medir o noso programa cun comando coma:
   python -m flamegraph -o medida.log sample.py
 #+END_SRC
 
-Esto producirá un ficheiro =medida.log= cos datos necesarios, pra convertelo nunha imaxe de /Flame Graph/ podemos executar isto (adaptando a ruta inicial a onde se haia clonado o repo [[https://github.com/brendangregg/FlameGraph][brendangregg/FlameGraph]]:
+Esto producirá un ficheiro =medida.log= cos datos necesarios, pra convertelo nunha imaxe de /Flame Graph/ podemos executar isto (adaptando a ruta inicial a onde se haia clonado o repo [[https://github.com/brendangregg/FlameGraph][brendangregg/FlameGraph]]):
 #+BEGIN_SRC shell
-  ~/repos/FlameGraph/flamegraph.pl medida.log > medida.svg
+  FlameGraph/flamegraph.pl medida.log > medida.svg
 #+END_SRC
 
 Isto producirá un ficheiro =medida.svg= que poderemos abrir cun navegador:

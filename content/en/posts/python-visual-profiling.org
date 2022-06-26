@@ -84,6 +84,10 @@ To install this version of the package directly from GitHub we can run:
 #+END_SRC
 
 The last step will be to clone this repository: https://github.com/brendangregg/FlameGraph
+#+BEGIN_SRC shell
+  git clone https://github.com/brendangregg/FlameGraph
+#+END_SRC
+
 
 * Measuring and analyzing
 Once everything's ready we can measure our program with this command:
@@ -93,7 +97,7 @@ Once everything's ready we can measure our program with this command:
 
 This will produce a =measure.log= file with the necessary data. To convert this into a /Flame Graph/ image we can run this (adapting the initial path to the directory where we have cloned the [[https://github.com/brendangregg/FlameGraph][brendangregg/FlameGraph]] repo):
 #+BEGIN_SRC shell
-  ~/repos/FlameGraph/flamegraph.pl measure.log > measure.svg
+  FlameGraph/flamegraph.pl measure.log > measure.svg
 #+END_SRC
 
 This will produce a =measure.svg= file that we can open with a browser:
