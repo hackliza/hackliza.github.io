@@ -1,6 +1,6 @@
 #+title: Profiling visual para Python
 #+author: Sergio Martínez Portela
-#+date: 2022-06-26
+#+date: 2022-06-27
 #+tags[]: python profiling optimización flamegraph
 
 Boas, xente.
