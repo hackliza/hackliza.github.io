@@ -17,12 +17,12 @@ There are lots of ways to measure and visualize the behavior of a program. Perso
 
 It's quite interesting as a way to explore the execution of a program as you can "zoom" interactively in the image itself. Try to open the image by following the link above and press on ~mysqld`mysql_parse~. You can see it will expand that function to take all the horizontal space so you can better find the time it takes to run each function that is called by it.
 
-Also by hovering the cursor over a function, like  ~mysqld`mysql_exec~, we can see the fraction of time of the program spent executing these function, in this case =83.77%=
+Also by hovering the cursor over a function, like  ~mysqld`mysql_exec~, we can see the fraction of time of the program spent executing these function, in this case =83.77%=.
 
 [[./zoom_sample_image.png]]
 
 * Getting the data
-OK, now that we know how to use /Flame Graphs/ let's see how to generate our own. To measure the program execution we will need a program to measure. We will use this one, but the process is the same for any program.
+OK, now that we know how to use /Flame Graphs/ let's see how to generate our own. To measure the program execution we will need a program to run. We will use this one, but the process is the same for any program.
 
 An important thing to keep in mind is that this technique (and a lot of other profiling ones) divide the time spent on a program by its functions. This means that it may be necessary to divide long functions into shorter ones to get better data on which parts of the code take most of the time.
 
@@ -74,16 +74,16 @@ If we run this code we will find out that it's quite slow:
 Let's see then what's taking all that time using /Flame Graphs/.
 
 * Preparing the environment
-To get our graph we can use the [[https://github.com/evanhempel/python-flamegraph/][python-flamegraph]] package. Usually it'd be preferable to get it from the upstream repository, but it's outdated and it doesn't work on a modern Python version.
+To measure the program runtime we can use the [[https://github.com/evanhempel/python-flamegraph/][python-flamegraph]] package. Usually it would be preferable to get it from the upstream repository, but it's outdated and it doesn't work on a modern Python version.
 
-Luckily [[https://github.com/evanhempel/python-flamegraph/network][many people maintain more up-to-date forks]]. We have to find out one with the necessary changes and with the features we may be intersected on, and review the intermediate commits to make sure no malicious code has been introduced. Usually at this point I prefer to keep it simple and, as long as we don't actively profile something in production (or exposed to the internet) we can do with the minimal changes that makes it compatible with out Python version. Looking for this [[https://github.com/evanhempel/python-flamegraph/compare/master...nickodell:master][I've opted for nickodell's fork]]. (It you are looking for something more *serious* [[https://github.com/IceTDrinker/python-flamegraph/commit/74312897641a3b86f569b40627e3ad0e4f9edd69][check this note]]).
+Luckily [[https://github.com/evanhempel/python-flamegraph/network][many people maintain more up-to-date forks]]. We have to find out one with the necessary changes and with the features we may be intersected on, and review the intermediate commits to make sure no malicious code has been introduced. Usually at this point I prefer to keep it simple and, as long as we don't actively profile something in production (or exposed to the internet), we can do with the minimal changes that makes it compatible with out Python version. Looking for this [[https://github.com/evanhempel/python-flamegraph/compare/master...nickodell:master][I've opted for nickodell's fork]]. (It you are looking for something more *serious* [[https://github.com/IceTDrinker/python-flamegraph/commit/74312897641a3b86f569b40627e3ad0e4f9edd69][check this note]]).
 
 To install this version of the package directly from GitHub we can run:
 #+BEGIN_SRC shell
   pip install git+https://github.com/nickodell/python-flamegraph.git
 #+END_SRC
 
-The last step will be to clone this repository: https://github.com/brendangregg/FlameGraph
+The last step will be to clone this repository so we can generate the /Flame Graph/ from the measures: https://github.com/brendangregg/FlameGraph
 #+BEGIN_SRC shell
   git clone https://github.com/brendangregg/FlameGraph
 #+END_SRC
@@ -139,7 +139,7 @@ Usually changing at a single function is not enough to optimize a program, it is
 - Optimize the function taking the most time
 - Repeat until we are satisfied with the program execution time
 
-And the goal of this example was to apply this optimization over the two functions, showing this iteration. Ironically, my own presumption that the ~factorial~ function was slow was false, so you will have to trust me when I say that it usually doesn't work in a single step 😉. This even goes to demonstrate the most important lesson one can learn about code optimization:
+And, to be honest, the goal of this example was to apply this optimization over the two functions, showing this iteration. Ironically, my own presumption that the ~factorial~ function was slow was false, so you will have to trust me when I say that it usually doesn't work in a single step 😉. This even goes to demonstrate the most important lesson one can learn about code optimization:
 
 *Before changing anything, measure your program!*
 
