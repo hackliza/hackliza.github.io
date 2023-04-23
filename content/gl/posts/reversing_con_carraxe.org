@@ -2,7 +2,7 @@
 #+subtitle: Sacando contrasinais con angr
 #+author: Eloy Pérez González
 #+date: 2022-02-12
-#+tags: angr radare2 ghidra reversing
+#+tags[]: angr radare2 ghidra reversing
 
 Boas xente,
 
