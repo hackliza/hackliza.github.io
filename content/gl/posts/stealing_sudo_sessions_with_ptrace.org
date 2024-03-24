@@ -1,0 +1,216 @@
+#+title: Roubando sesións de sudo con ptrace
+#+author: Eloy Pérez González
+#+date: 2024-03-24
+#+tags[]: pentest linux sudo ptrace
+
+Boas xentiña.
+
+Hoxe traiovos unha vella técnica ca que estiven fuchicando estes días.
+Trátase dun ataque para obter sudo se outra persoa que estea conectada na mesma
+máquina ca mesma usuaria ca nos o ten desbloqueado. Esta técnica xa foi
+documentada por [[https://github.com/nongiach/sudo_inject][nongiach]] no seu repo [[https://github.com/nongiach/sudo_inject][sudo_inject]]. Sen embargo, na súa
+implementación requirense varios ficheiros e dependencias para o ataque, polo
+que para simplificalo, e tamén aprender sobre esta técnica, desenvolvín a
+ferramenta [[https://gitlab.com/Zer1t0/sudohunt][sudohunt]].
+
+Para poñernos en materia, ~sudo~ é un programa usando en sistemas basados en Unix
+(como GNU/Linux) que permite executar programas como outra usuaria. Por defecto e
+xeral, soense executar os comandos como root (ou sexa, o administrador de
+GNU/Linux). Tedes mais info na [[https://www.man7.org/linux/man-pages/man8/sudo.8.html][páxina do manual de sudo]]. Daquela, ser capaz de
+utilizar ~sudo~ prácticamente significa que imos poder facer o que queiramos
+na máquina.
+
+Polo tanto, poñámonos na seguinte situación: nun pentest conseguimos unha clave
+SSH que nos permite conectarnos a unha máquina ca usuaria ~it~. Ben, ao
+conectarnos descubrimos que dita usuaria pode executar programas con ~sudo~,
+mais se nos pide un contrasinal que non sabemos.
+
+#+begin_src
+$ ssh  -i itkey it@itserver
+it@itserver:~$ sudo id
+[sudo] password for it:
+#+end_src
+
+Podemos comprobar se hai outra persoa conectada á mesma máquina usando a usuaria
+~it~. Para iso pódese usar o comando ~w~ ou ~who~:
+#+begin_src
+it@itserver:~$ w
+ 14:16:16 up 15 min,  2 users,  load average: 0.00, 0.00, 0.00
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+it       pts/0    146.89.128.11    12:14    0.00s  0.01s   ?    w
+it       pts/2    192.168.2.12     12:05  20.00s  0.01s  0.01s -bash
+#+end_src
+
+Vemos que hai outra sesión iniciada da usuaria ~it~ na máquina obxetivo.
+Nesta situación podemos intentar inxectar un comando na sesión da outra persoa,
+e no caso de que teña ~sudo~ desbloqueado, tentar desbloquear sudo na nosa
+sesión. A que me refiro con ~sudo~ desbloqueado? Pois a que sudo non pida
+contrasinal. Cando se executa ~sudo~ por primeira vez nunha sesión, este pide
+contrasinal, mais para non estar amolando á usuaria, se se executan máis
+comandos con ~sudo~ nun breve espazo de tempo, 15 minutos por defecto, o
+contrasinal non se volve pedir.
+
+Isto podemos comprobalo executando un comando con ~sudo~ dúas veces seguidas.
+Por exemplo:
+#+begin_src
+$ sudo id
+[sudo] password for user:
+uid=0(root) gid=0(root) groups=0(root)
+$ sudo id
+uid=0(root) gid=0(root) groups=0(root)
+#+end_src
+
+Como vemos ~sudo~ so pide o contrasinal a primeira vez que executamos o comando.
+E como fai isto? E como nos podemos aproveitar deste comportamento?
+
+Vaiamos por partes. Respondendo á primeira pregunta, ~sudo~ mantén un rexistro
+das usuarias autenticadas por sesión. Para cada usuaria mantén un ficheiro no
+cartafol =/run/sudo/ts/=. Podemos listar os ficheiros de dito cartafol:
+#+begin_src
+$ sudo ls -l /run/sudo/ts/
+total 4
+-rw------- 1 root it 224 Mar  3 14:51 it
+#+end_src
+
+Vemos que hai un ficheiro para a usuaria ~it~, que so pode ser lido e escrito
+por root. Estes ficheiros teñen un formato binario descrito na páxina de manual
+[[https://man.archlinux.org/man/core/sudo/sudoers_timestamp.5.en][sudoers_timestamp]]. Sen embargo, podemos leelos usando o comando read de
+~sudohunt~. Aquí vai un exemplo:
+#+begin_src
+$ sudo ./sudohunt read
+
+
+Timestamp file: /run/sudo/ts/it
+
+version: 2
+size: 56
+type: 4 TS_LOCKEXCL
+flags: 0
+auth_uid: 0
+sid: 0
+start_time: 0.0
+ts: 0.0
+id: 0
+
+version: 2
+size: 56
+type: 2 TS_TTY
+flags: 0
+auth_uid: 1000 it
+sid: 2210 -bash
+start_time: 931.530000000 (1933.998431745 seconds ago)
+ts: 2865.526131254 (0.2300491 seconds ago)
+tty: 34818 /dev/pts/2
+#+end_src
+
+Vemos que hai dous rexistros no ficheiro =/run/sudo/ts/it=. O primeiro podemos
+ignoralo xa que é un rexistro de control do propio ficheiro. O que nos interesa
+é o segundo rexistro, que nos indica que ~sudo~ está permitido para a usuaria
+~it~ (co =uid= 1000) na sesión =2210= (cuxo programa líder é unha shell de
+=bash=) que se está a executar no terminal =/dev/pts/2= (isto concorda ca saída
+do comando ~w~ que executamos antes). Ademais podemos ver no campo =ts= que
+transcorreron =0.23= segundos dende a última vez que se usou ~sudo~, un tempo
+normal tendo en conta que se acaba de executar para leer este ficheiro.
+
+Tendo isto en conta, e respondendo á nosa segunda cuestión, o obxetivo do noso
+ataque será incluir un novo rexistro neste ficheiro que indique que a nosa
+sesión tamén executou ~sudo~ fai pouco (menos de 15 minutos) para poder usalo
+sen precisar contrasinal. ~sudohunt~ inclúe o comando =write= que permite
+escribir novos rexistros nos ficheiros de sesións de ~sudo~.
+
+E como imos facer isto sabendo que so root pode engadir novos rexistros?
+Pois lembrade que se poden executar cousas como root usando ~sudo~. Polo tanto,
+o que imos facer é forzar a outra sesión que teña ~sudo~ desbloqueado a escribir
+o rexistro por nos. Para isto imos a ser inxectar un proceso na sesión da
+persoa que desbloqueou ~sudo~ que engada un novo rexistro para a nosa sesión.
+Hai que lembrar que tanto a nosa sesión de atacante como o obxetivo da inxección
+están a usar a mesma usuaria: ~it~.
+
+Por defecto, algunhas distribucións de GNU/Linux coma Debian ou Alma Linux
+permiten a unha usuaria depurar calquera dos seus procesos coa syscall [[https://www.man7.org/linux/man-pages/man2/ptrace.2.html][ptrace]]
+inda que estean noutra sesión. Isto implica que se pode leer a memoria do
+proceso obxetivo, modificar os seus rexistros ou establecer breakpoints, entre
+outros, polo que podemos inxectar código (e por tanto procesos) noutras sesións.
+
+Para verificar que se pode usar ptrace sobre procesos de outras sesións temos
+que comprobar que o ficheiro =/proc/sys/kernel/yama/ptrace_scope= ten escrito o
+valor =0=. No caso de ser outro valor non se poderán realizar inxeccións con
+ptrace a outras sesións.
+
+#+BEGIN_QUOTE
+Ademais do indicado en =/proc/sys/kernel/yama/ptrace_scope= podería haber outros
+mecanismos de seguridade coma SELinux que nos poderían impedir usar ptrace sobre
+outros procesos, mais neste caso asumimos que non os hai.
+#+END_QUOTE
+
+Unha vez que comprobemos que os requisitos se cumplen o que intentaremos será
+que a sesión doutra persoa execute o comando ~sudo sudohunt write --pid
+<sesion>~. Isto escribirá como root un rexistro no ficheiro
+=/run/sudo/ts/<user>= que lle dará sudo á sesión co identificador =<session>=
+(que substituiremos pola nosa sesión actual).
+
+Polo tanto o ataque, que se executa co comando ~sudohunt inject~ terá as
+seguintes fases:
+
+1. Búscanse procesos noutras sesións da usuaria. Xa que so se precisa localizar
+   un proceso por sesión, búscanse os líderes de sesión, que son os procesos
+   cuxo pid sexa igual ao número de sesión (sid) e que teñan unha terminal
+   asociada (sesións interactivas).
+2. Unha vez localizado os procesos, inxéctase en cada un un novo proceso
+   ~sudo sudohunt write~. No caso de que a sesión obxetivo teña sudo habilitado
+   o comando anterior escribe un rexistro que concede sudo á sesión actual.
+
+Isto pódese comprobar executando ~sudohunt~ ca nosa usuaria ~it~:
+#+begin_src
+it@itserver:~$ ./sudohunt inject
+Injection work. sudo may work now. If not, retry injection later.
+it@itserver:~$ sudo id
+uid=0(root) gid=0(root) groups=0(root)
+#+end_src
+
+E desta forma conseguimos sudo para executar comandos como root!!
+
+Podes ver un exemplo deste ataque no seguinte asciinema:
+#+begin_export html
+<script src="https://asciinema.org/a/l3CIltwOX30YdGbWVqUdFU8Dx.js" id="asciicast-647682" async="true"></script>
+#+end_export
+
+No caso de que teñas curiosidade de que pasa na inxección, este é o procedemento
+mais detallado para un proceso dunha sesión obxetivo (se queres inda mais
+detalles terás que revisar o código de [[https://gitlab.com/Zer1t0/sudots][sudohunt]]):
+
+1. ~sudohunt~ acóplase con ptrace a o proceso obxetivo, no noso caso ~bash~.
+2. Faise que bash execute a syscall [[https://www.man7.org/linux/man-pages/man2/fork.2.html][fork]] para crear un proceso fillo e evitar
+   interferencias no propio bash que pode estar usando outra persoa.
+3. ~sudohunt~ acóplase ao proceso fillo.
+4. Libérase o proceso ~bash~ (pai) da nosa influencia para que continue con
+   normalidade.
+5. Faise que o proceso fillo execute o comando ~sudo sudohunt write~ mediante a
+   syscall [[https://www.man7.org/linux/man-pages/man2/execve.2.html][execve]]. Unha cousa curiosa é que antes de que o proceso fillo execute
+   execve hai que se desacoplarse del para que sudo sea capaz de lanzarse como
+   root, xa que nos procesos depurados ignórase o flag =setuid= dos programas
+   (que fai que se executen como root).
+
+Aquí queda un esquema de como sería a inxección:
+#+caption: Inxección de sudohunt
+#+begin_example
+  session: 1001                session: 1337
+.-----------------.  1. attach   .------.
+| sudohunt inject |------------->| bash |
+'-----------------'  4. detach   '------'
+                |                   |
+                |                   | 2.fork
+                |                   v
+                |  3. attach     .------.
+                '--------------->| bash |
+                   5. detach     '------'
+                                    |
+                                    | 6. execve
+                                    v
+                     .--------------------------------.
+                     | sudo sudohunt write --pid 1001 |
+                     '--------------------------------'
+#+end_example
+
+E de momento isto e todo xente, agardo que vos gustase este pequeno artigo e
+vémonos nas redes!!

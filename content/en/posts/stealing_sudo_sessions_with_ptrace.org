@@ -1,0 +1,209 @@
+#+title: Stealing sudo sessions with ptrace
+#+author: Eloy Pérez González
+#+date: 2024-03-24
+#+tags[]: pentest linux sudo ptrace
+
+Hi people.
+
+Today we are going to deepen an old technique that I have been studying. It is
+an attack to get sudo in case someone else is connected to the same machine
+with the same user and has sudo unlocked. This technique was already documented
+by [[https://github.com/nongiach/sudo_inject][nongiach]] in the [[https://github.com/nongiach/sudo_inject][sudo_inject]] repository. However, that implementation requires
+several files and dependences for the attack, so, in order to simplify it and
+learning about the technique, I have developed [[https://gitlab.com/Zer1t0/sudohunt][sudohunt]].
+
+To get into the subject, ~sudo~ is a program used in Unix-like systems (like
+GNU/Linux) that allows to execute programs as another user, root by default.
+There is more info in the [[https://www.man7.org/linux/man-pages/man8/sudo.8.html][sudo manual page]]. Hence, being able to use ~sudo~
+means to be able to do whatever we want in the machine.
+
+Therefore, let's imagine the following situation: We get a SSH key that allows
+us to connect to a machine with the ~it~ user. After connecting to the machine,
+we discover that ~it~ user is allowed to use ~sudo~, but a password that we
+don't know is required.
+
+#+begin_src
+$ ssh  -i itkey it@itserver
+it@itserver:~$ sudo id
+[sudo] password for it:
+#+end_src
+
+We can check if there is another person connected to the machine with the ~it~
+user with the ~w~ or ~who~ commands:
+#+begin_src
+it@itserver:~$ w
+ 14:16:16 up 15 min,  2 users,  load average: 0.00, 0.00, 0.00
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+it       pts/0    146.89.128.11    12:14    0.00s  0.01s   ?    w
+it       pts/2    192.168.2.12     12:05  20.00s  0.01s  0.01s -bash
+#+end_src
+
+We can see that there is someone else connected as ~it~, so we can try to
+inject a command into that user's session and unlock ~sudo~ if it is
+unlocked in that another session. What do I mean by unlocked ~sudo~? That it
+doesn't ask for a password. When ~sudo~ is executed for the first time, it ask
+for a password, but in order not to disturb the user, for the next 15 minutes by
+default, ~sudo~ will executed without asking for a password.
+
+We can validate this behavior by executing ~sudo~ twice in a row:
+#+begin_src
+$ sudo id
+[sudo] password for user:
+uid=0(root) gid=0(root) groups=0(root)
+$ sudo id
+uid=0(root) gid=0(root) groups=0(root)
+#+end_src
+
+As we can see ~sudo~ only asks for a password the first time we execute it. How
+does it do that? And how can we take advantage of this behavior?
+
+Let's go step by step. To answer the first question, ~sudo~ keeps a record of
+all authenticated sessions. It keeps a file for each user under the
+=/run/sudo/ts= directory. We can list the files:
+#+begin_src
+$ sudo ls -l /run/sudo/ts/
+total 4
+-rw------- 1 root it 224 Mar  3 14:51 it
+#+end_src
+
+We can see that there is a file for ~it~ user, that can only be read and written
+by root. These files have a binary format described in the [[https://man.archlinux.org/man/core/sudo/sudoers_timestamp.5.en][sudoers_timestamp]]
+manual page. Nevertheless, we can read it with the ~sudohunt read~ command:
+#+begin_src
+$ sudo ./sudohunt read
+
+
+Timestamp file: /run/sudo/ts/it
+
+version: 2
+size: 56
+type: 4 TS_LOCKEXCL
+flags: 0
+auth_uid: 0
+sid: 0
+start_time: 0.0
+ts: 0.0
+id: 0
+
+version: 2
+size: 56
+type: 2 TS_TTY
+flags: 0
+auth_uid: 1000 it
+sid: 2210 -bash
+start_time: 931.530000000 (1933.998431745 seconds ago)
+ts: 2865.526131254 (0.2300491 seconds ago)
+tty: 34818 /dev/pts/2
+#+end_src
+
+We can notice that there are two records in the =run/sudo/ts/it= file. The first
+one is a control register that we can ignore. We must focus on the second
+register that shows that ~sudo~ is unlocked for the ~it~ user (with =uid= 1000)
+in the session =2210= (whose leader program is a =bash= shell) which is executed
+in the =/dev/pts/2= terminal (that is coherent with the previous ~w~ command
+output). Furthermore, we can see that =0.23= seconds have passed since the last
+time that ~sudo~ was used, an expected time since the command was executed to
+read the file.
+
+Taking this into account, and answering our second question, the goal of our
+attack will be writing a new record into the file that indicates that our
+session has unlocked ~sudo~ in the last 15 minutes, in order to used it without
+providing a password. ~sudohunt~ includes a =write= command that allows to write
+new records into the ~sudo~ session files.
+
+And how are we going to do this knowing that only root can add new records?
+Remember that ~sudo~ allows to execute as root. Therefore, what we need to do is
+to force to another session with ~sudo~ unlocked to write the new record for
+us. To do this we are going to inject a process into the session of the person
+who unlocked ~sudo~ that adds a new record for our session. We need to remember
+that our session and the target session in which we try to inject is executed as
+the same user: ~it~.
+
+By default, some GNU/Linux distros like Debian or Alma Linux allow an user to
+debug any of their processes with the [[https://www.man7.org/linux/man-pages/man2/ptrace.2.html][ptrace]] syscall, even if they are in
+another session. This means that it is possible to read the target process
+memory, modify its registers or setting breakpoints, among other actions, so we
+can inject code (and thus processes) in other sessions.
+
+To verify that, it is possible to use ptrace over processes in other
+sessions we need to check that the value of the
+=/proc/sys/kernel/yama/ptrace_scope= file is 0. For other cases, injections
+with ptrace to other sessions are not possible.
+
+#+BEGIN_QUOTE
+Additionally to =/proc/sys/kernel/yama/ptrace_scope= file, there could be other
+security mechanisms like SELinux that will preventing us from use ptrace over
+other session processes. In this case we assume that there aren't any additional
+security measure.
+#+END_QUOTE
+
+Once we have verified that the requirements have been meet, we are going to try
+to execute the ~sudo sudohunt write --pid <sesion>~ command into the session of
+other user. This will write a new record into =/run/sudo/ts/<user>= file
+that will grant sudo to the session with the =<session>= identifier (that will
+be replace by our current session).
+
+Therefore, the attack, executed with the ~sudohunt inject~ command will have the
+following stages:
+
+1. Process in other sessions of the same user are searched. We only need a
+   process per session, so session leaders will be used, which are those
+   processes which the pid is the same as the session identifier (sid) and with
+   an associated terminal (interactive session).
+
+2. Once the processes are located, the ~sudo sudohunt write~ command is injected
+   in each one. In the case that sudo is unblocked in the target session the
+   previous command will grant sudo to our current session.
+
+We can check this by executing ~sudohunt~ with our ~it~ user:
+#+begin_src
+it@itserver:~$ ./sudohunt inject
+Injection work. sudo may work now. If not, retry injection later.
+it@itserver:~$ sudo id
+uid=0(root) gid=0(root) groups=0(root)
+#+end_src
+
+And we finally get root!!
+
+You can watch an example of this attack in the following asciinema:
+#+begin_export html
+<script src="https://asciinema.org/a/l3CIltwOX30YdGbWVqUdFU8Dx.js" id="asciicast-647682" async="true"></script>
+#+end_export
+
+In case you are curious about the process injection, here is a more detailed
+procedure of what happens (if you are looking even for more detail, you should
+inspect the [[https://gitlab.com/Zer1t0/sudots][sudohunt]] source code):
+
+1. Attach with ptrace to the target process, ~bash~ in our case.
+2. Force bash to execute the [[https://www.man7.org/linux/man-pages/man2/fork.2.html][fork]] syscall in order to create a child process so
+   we can avoid disturb the person using it.
+3. Attach to the child process.
+4. Detach from the parent process.
+5. Force the child process to execute the ~sudo sudohunt write~ command through
+   the [[https://www.man7.org/linux/man-pages/man2/execve.2.html][execve]] syscall. A curious thing is that we need to detach from the child
+   process before execve is called to allow sudo to be spawned as root, since in
+   the debugged processes the =setuid= flag (that allows to execute as root) is
+   ignored.
+
+Here is a little schema of the injection process:
+#+caption: sudohunt injection
+#+begin_example
+  session: 1001                session: 1337
+.-----------------.  1. attach   .------.
+| sudohunt inject |------------->| bash |
+'-----------------'  4. detach   '------'
+                |                   |
+                |                   | 2.fork
+                |                   v
+                |  3. attach     .------.
+                '--------------->| bash |
+                   5. detach     '------'
+                                    |
+                                    | 6. execve
+                                    v
+                     .--------------------------------.
+                     | sudo sudohunt write --pid 1001 |
+                     '--------------------------------'
+#+end_example
+
+And that's all for now friends, I hope you liked this little article and see you!!
