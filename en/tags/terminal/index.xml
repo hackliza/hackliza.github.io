@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>terminal on Hackliza</title>
+    <link>https://hackliza.gal/en/tags/terminal/</link>
+    <description>Recent content in terminal on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Mon, 01 Nov 2021 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/en/tags/terminal/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Quick math on the terminal</title>
+      <link>https://hackliza.gal/en/posts/quick_math_on_terminal/</link>
+      <pubDate>Mon, 01 Nov 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/quick_math_on_terminal/</guid>
+      <description>Hey there!
+ Just this past week I stumbled on a HN comment from 2019. The commenter was fiddling with some scripts to perform some simple math directly on the (bash) terminal.
+ TLDR: Click here to go to the code and skip the backstory.
+ What the commenter proposed was something like this, based on the dc command (comments are mine).
+$ . calc.sh # Load functionality $ * 4 5 # Multiply 4 and 5 20 $ / 21 3 # Divide 21 by 3 7   This sounded interesting.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>obfuscation on Hackliza</title>
+    <link>https://hackliza.gal/tags/obfuscation/</link>
+    <description>Recent content in obfuscation on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Thu, 02 Nov 2023 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/tags/obfuscation/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>PUME: unha ferramenta para mutar código Python</title>
+      <link>https://hackliza.gal/posts/pume/</link>
+      <pubDate>Thu, 02 Nov 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/pume/</guid>
+      <description>Neste artigo explicarase que é e como funciona a ferramenta PUME (Python Universal Mutation Engine), dando tamén algún exemplo de uso para que se vexa ata onde chega.
+Introdución PUME é unha ferramenta que modifica aleatoriamente o código fonte dun script ou programa feito en Python sen cambiar a funcionalidade do programa orixinal. Isto conséguese principalmente facendo modificacións sobre a Árbore Sintáctica Abstracta (AST polas súas siglas en inglés) do programa.</description>
+    </item>
+    
+    <item>
+      <title>Virus e Python</title>
+      <link>https://hackliza.gal/posts/virus_python/</link>
+      <pubDate>Mon, 14 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/virus_python/</guid>
+      <description>Nesta publicación explicarase varias cuestións a hora de entender como funciona un virus. Primeiro explicaranse que son e como é o seu ciclo de vida. A continuación, esbozaranse as principais técnicas para detectar un virus. Despois, comentaranse as principais técnicas anti-antivirus. Logo, explicarase como funciona un virus aportando exemplos de código, para finalmente, engadir varias melloras e proteccións para que non se poida detectar mediante sinatura.
+Advertencia: a finalidade desta publicación é educativa.</description>
+    </item>
+    
+  </channel>
+</rss>

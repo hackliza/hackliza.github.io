@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>pwn on Hackliza</title>
+    <link>https://hackliza.gal/en/tags/pwn/</link>
+    <description>Recent content in pwn on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Sat, 21 Nov 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/en/tags/pwn/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Heap analysis with radare2</title>
+      <link>https://hackliza.gal/en/posts/r2heap/</link>
+      <pubDate>Sat, 21 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/r2heap/</guid>
+      <description>Hi everyone.
+ In this post, I&amp;#39;m going to show you how radare2 can be used to perform heap analisys in the glibc. My purpose is to create a reference with examples, that shows what can be done in radare2. I do this cause I haven&amp;#39;t found too much info about this on internet, only the heap module presentation made by n4x0r in the r2con 2016.
+ However, I prefer text, so I&amp;#39;ll write here the commands with examples, ready to be consulted and copypasted.</description>
+    </item>
+    
+  </channel>
+</rss>

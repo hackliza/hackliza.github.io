@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>AST on Hackliza</title>
+    <link>https://hackliza.gal/en/tags/ast/</link>
+    <description>Recent content in AST on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Thu, 02 Nov 2023 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/en/tags/ast/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>PUME: a tool to mutate Python source code</title>
+      <link>https://hackliza.gal/en/posts/pume/</link>
+      <pubDate>Thu, 02 Nov 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/pume/</guid>
+      <description>This article will explain what PUME (Python Universal Mutation Engine) is and how it works and after that some examples of use will be given.
+Introduction PUME is a tool that randombly modifies the source code of a program made with Python without change the orginal features. This is mainly achived by doing modifications in the Abstract Syntax Tree (AST) of the program but it should be noted that exist a modification that is made directly in the source code.</description>
+    </item>
+    
+  </channel>
+</rss>

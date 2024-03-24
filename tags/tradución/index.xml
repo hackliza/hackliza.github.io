@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>tradución on Hackliza</title>
+    <link>https://hackliza.gal/tags/traduci%C3%B3n/</link>
+    <description>Recent content in tradución on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Mon, 19 Apr 2021 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/tags/traduci%C3%B3n/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Como Converterse En Hacker</title>
+      <link>https://hackliza.gal/posts/como_converterse_en_hacker/</link>
+      <pubDate>Mon, 19 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/como_converterse_en_hacker/</guid>
+      <description>Boas xente.
+ Este post é unha tradución do How To Become A Hacker de Eric Steven Raymond, publicado orixinariamente no 2001 (a última actualización a día de hoxe fíxose no 2020).
+ Eric Raymond, autor de grandes pezas como The Cathedral &amp;amp; the Bazaar ou The Art of Unix Programming , amósanos neste icónico texto o que é un hacker, cal é a súa filosofía e os valores que defende, así como a actitude e coñecementos que se precisan para ser un deles.</description>
+    </item>
+    
+    <item>
+      <title>Manifesto Hacker</title>
+      <link>https://hackliza.gal/posts/hacker_manifesto/</link>
+      <pubDate>Sun, 06 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/hacker_manifesto/</guid>
+      <description>Boas xente,
+Hoxe traemos a tradución dun dos textos máis icónicos da cultura hacker, o manifesto hacker, publicado orixinalmente na revista Phrack en 1986. Inda que xa choveu dende aquela, ideas como a liberdade de coñecemento e a curiosidade insaciable seguen moi presentes na comunidade hacker hoxe en día.
+Esperamos que vos guste esta homenaxe.
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= O seguinte foi escrito pouco despois do meu arresto... \/\A conciencia dun Hacker/\/ by +++The Mentor+++ (traducido por Hackliza) Escrito o 8 de Xaneiro do 1986 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Outro foi capturado hoxe, está en todos os xornais.</description>
+    </item>
+    
+  </channel>
+</rss>
