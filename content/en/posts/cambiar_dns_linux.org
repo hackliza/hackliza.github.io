@@ -1,0 +1,477 @@
+#+title: Who is messing with my DNS server? Discovering and managing network daemons
+#+author: Eloy Pérez González
+#+date: 2024-08-18
+#+tags[]: dns bpf dhclient networkmanager systemd linux gnu
+
+Hi there, today I would like to talk about an recurrent issue that I've been
+facing for many years. I
+wanted to configure my machine to use an specific DNS server, so I including it in
+[[https://www.man7.org/linux/man-pages/man5/resolv.conf.5.html][/etc/resolv.conf]]. However, after a while my new DNS server was removed and
+~/etc/resolv.conf~ restored to a previous version.
+
+In this article I'm going to explore what is happening and how discover who is
+modifying ~/etc/resolv.conf~ so we can solve it.
+
+#+begin_quote
+This article was made thinking of server environments were only a CLI is
+used. In case of having a GUI, usually we can just modify the network options in
+the system settings menu and it should work nicely.
+#+end_quote
+
+Let's go with the topic.
+
+* The DNS file: /etc/resolv.conf
+:PROPERTIES:
+:custom_id: o-ficheiro-dns-etc-resolv-conf
+:END:
+
+As I said previously, to change the DNS server seems easy, since the
+~/etc/resolv.conf~ file can be modified.
+
+We can check it to retrieve our DNS servers:
+#+begin_src
+$ cat /etc/resolv.conf
+nameserver 192.168.122.1
+#+end_src
+
+Then, we can add a ~nameserver~ entry to include our DNS server:
+#+begin_src
+$ echo "nameserver 192.168.122.135" | sudo tee /etc/resolv.conf
+nameserver 192.168.122.135
+$ cat /etc/resolv.conf
+nameserver 192.168.122.135
+#+end_src
+
+Everything seems right so far. Now, what happens after a few minutes or if we
+reboot our machine? ~/etc/resolv.conf~ is restored and our changes are lost. If
+that is not your case, congrats, you have already modified the DNS servers and
+there is no need for you to continue reading.
+
+Why is restored ~/etc/resolv.conf~ to a previous state? Because some daemon (a
+background process) is modifying the file. Which daemon? It depends.
+
+There are several programs in GNU/Linux that can be on charge of DNS
+configuration, so we have to find out which one is taking care of it in our
+machine.
+
+* The hack: Making /etc/resolv.conf immutable
+:PROPERTIES:
+:custom_id: etc-resolv-inmutable
+:END:
+
+However, before diving into the daemon process discovery, I would like to
+discuss a nice hack that can be used against any daemon, even if some side
+effects may apply.
+
+In order to avoid any daemon can modify ~/etc/resolv.conf~, we can just
+[[https://unix.stackexchange.com/a/249404][make it immutable]] after modifying it. Thus, no process, nor even root ones, can
+modify it (until immutability flag is removed).
+
+We can use the [[https://www.man7.org/linux/man-pages/man1/chattr.1.html][chattr]] command for this purpose:
+#+begin_src
+$ echo "nameserver 192.168.122.135" | sudo tee /etc/resolv.conf
+nameserver 192.168.122.135
+$ sudo chattr +i /etc/resolv.conf
+#+end_src
+
+After executing the commands, we can restart our machine to verify that our
+configuration was kept. In case we want to modify ~/etc/resolv.conf~ again, we
+will need to remove the immutability with ~sudo chattr -i /etc/resolv.conf~.
+
+This hack can be a good option in case we only want to use an static server. I
+have used it in order to configure [[https://www.dnscrypt.org/][dnscrypt]].
+
+However, we can find cons if we also want to use the DNS server provided by our
+DHCP client. In that case, if we change our network, the network daemon won't be
+able to update the DNS address and we may lost our network connection. I'm not
+sure it worked with a VPN either.
+
+Therefore, the most proper option is to change the configuration of the network
+daemon on charge of modifying the DNS server.
+
+* Network daemons: Figuring out who is modifying /etc/resolv.conf
+:PROPERTIES:
+:custom_id: descubrindo-quen-toca-etc-resolv-conf
+:END:
+
+The major problem with network daemons is that anyone is different from each
+other. Besides, many times we don't really know who is managing the DNS
+servers. I going to explore some techniques to discover the one in our machine,
+but let's check the usual suspects:
+
+- [[https://linux.die.net/man/8/dhclient][dhclient]]: [[https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol][DHCP]] configuration daemon.
+- [[https://networkmanager.dev/][NetworkManager]]: GNOME network daemon.
+- [[https://www.man7.org/linux/man-pages/man8/systemd-resolved.service.8.html][systemd-resolved]]: systemd DNS daemon.
+- etc: There are more, but we will focus on the previous three, since are the
+  most common.
+
+Once we know what are we looking for, let's see what we can do to discover who
+is messing with ~/etc/resolv.conf~. We have several courses of action.
+
+** Hint nº1: /etc/resolv.conf content
+:PROPERTIES:
+:custom_id: pista-1-contido-etc-resolv-conf
+:END:
+
+The first thing we need to do is read ~/etc/resolv.conf~, since many programs
+that modify it include an explanatory message, that usually says we shouldn't
+modify it cause is going to be overwritten.
+
+For example, this is one of my machines ~/etc/resolv.conf~, which is modified by
+~systemd-resolved~:
+
+#+caption: /etc/resolv.conf managed by systemd-resolved
+#+begin_src
+$ cat /etc/resolv.conf
+# This is /run/systemd/resolve/stub-resolv.conf managed by man:systemd-resolved(8).
+# Do not edit.
+#
+# This file might be symlinked as /etc/resolv.conf. If you're looking at
+# /etc/resolv.conf and seeing this text, you have followed the symlink.
+#
+# This is a dynamic resolv.conf file for connecting local clients to the
+# internal DNS stub resolver of systemd-resolved. This file lists all
+# configured search domains.
+#
+# Run "resolvectl status" to see details about the uplink DNS servers
+# currently in use.
+#
+# Third party programs should typically not access this file directly, but only
+# through the symlink at /etc/resolv.conf. To manage man:resolv.conf(5) in a
+# different way, replace this symlink by a static file or a different symlink.
+#
+# See man:systemd-resolved.service(8) for details about the supported modes of
+# operation for /etc/resolv.conf.
+
+nameserver 127.0.0.53
+options edns0 trust-ad
+search .
+#+end_src
+
+
+And this is the ~/etc/resolv.conf~ content in case NetworkManager is managing
+it:
+#+caption: /etc/resolv.conf managed by NetworkManager
+#+begin_src
+$ cat /etc/resolv.conf
+# Generated by NetworkManager
+nameserver 192.168.122.1
+#+end_src
+
+But we can also found ~/etc/resolv.conf~ without comments:
+#+begin_src
+$ cat /etc/resolv.conf
+nameserver 192.168.122.1
+#+end_src
+
+In this last case, I discovered that was being managed by ~dhclient~.
+
+However, in case we are in doubt, we can apply other techniques.
+
+** Hint nº2: Monitoring /etc/resolv.conf
+:PROPERTIES:
+:custom_id: pista-2-monitorizando-etc-resolv-conf
+:END:
+
+Alternatively, we can monitor ~/etc/resolv.conf~ file for write operations. We
+can do this with [[https://github.com/iovisor/bcc/blob/master/tools/opensnoop_example.txt][opensnoop]], an utility that uses eBPF for tracing file opening
+operations. In order to use it we must install the ~bpfcc-tools~ package and
+Linux headers (in the case of Debian can be done with
+~sudo apt install linux-headers-$(uname -r)~).
+
+Once the tool is installed, we can execute it and await a few minutes to check
+if any process is modifying some ~resolv.conf~ file:
+#+caption: /etc/resolv.conf writings made by dhclient
+#+begin_src
+$ sudo opensnoop-bpfcc -f O_WRONLY -f O_RDWR | grep 'resolv.conf'
+1857   dhclient-script     3   0 /etc/resolv.conf.dhclient-new.1857
+1857   dhclient-script     3   0 /etc/resolv.conf.dhclient-new.1857
+1857   dhclient-script     3   0 /etc/resolv.conf
+#+end_src
+
+With the previous command, we trace with ~opensnoop~ the files open for
+writing and filter them with ~grep~ to just show those whose name includes
+~resolv.conf~, not just ~/etc/resolv.conf~.
+
+#+begin_quote
+If you want to learn more about eBPF, check
+[[https://www.brendangregg.com/blog/2019-01-01/learn-ebpf-tracing.html][Learn eBPF Tracing: Tutorial and Examples]] by Brendan Gregg, who shows a lot of
+tools for tracing based on eBPF, like [[https://github.com/iovisor/bcc/blob/master/tools/tcpconnect_example.txt][tcpconnect]], one of my favorites, that
+allows to see the processes network connections in real time.
+#+end_quote
+
+It is advisable to monitor not just ~/etc/resolv.conf~, but any file that
+contains ~resolv.conf~ since many programs use cache files with similar names to
+store temporal results. For instance, ~dhclient~ uses files like
+~/etc/resolv.conf.dhclient-new.590~ to write changes and then checks if those
+are different from ~/etc/resolv.conf~, if that is not the case,
+~/etc/resolv.conf~ is not written.
+
+On the other hand, it is possible for programs to just rename the cache file to
+~/etc/resolv.conf~ instead of writing it (something like
+~mv /etc/resolv.conf.HOIHS2 /etc/resolv.conf~, which is done by
+NetworkManager), so ~/etc/resolv.conf~ won't appear in as an open file (since
+[[https://www.man7.org/linux/man-pages/man2/rename.2.html][rename]] syscall is used instead of [[https://www.man7.org/linux/man-pages/man2/open.2.html][open]] and ~opensnoop~ won't be able to detect
+it).
+
+Anyway, after examining ~/etc/resolv.conf~ content and monitoring it, we should
+already have an idea about the daemon that is managing the DNS server, but even
+if we are not sure, I'm going to explain many of them and see how we can check
+if they are running.
+
+* Network daemons
+:PROPERTIES:
+:custom_id: demos-de-rede
+:END:
+
+** dhclient
+:PROPERTIES:
+:custom_id: dhclient
+:END:
+
+Let's how we can add a DNS server when [[https://linux.die.net/man/8/dhclient][dhclient]] is in charge. First, we need to
+make sure it is running:
+#+caption: dhclient processes
+#+begin_src
+$ ps -ef | grep dhclient
+root         469       1  0 21:14 ?        00:00:00 dhclient -4 -v -i -pf /run/dhclient.enp1s0.pid -lf /var/lib/dhcp/dhclient.enp1s0.leases -I -df /var/lib/dhcp/dhclient6.enp1s0.leases enp1s0
+root         585       1  0 21:18 ?        00:00:00 dhclient
+user         611     554  0 21:25 pts/0    00:00:00 grep dhclient
+#+end_src
+
+Once we know for sure that ~dhclient~ is running, in order to add a new DNS
+server we need to modify [[https://linux.die.net/man/5/dhclient.conf][/etc/dhcp/dhclient.conf]], its configuration file, where
+we can found several DNS options related. Specifically, to add a new
+DNS server we can add some of these lines:
+
+#+caption: /etc/dhcp/dhclient.conf DNS configuration
+#+begin_src
+prepend domain-name-servers 127.0.0.1;
+append domain-name-servers 192.168.122.13;
+#+end_src
+
+This way we can add our DNS with higher or lower priority, respectively, to the
+one added by DHCP configuration. Additionally, we can avoid using the DHCP
+configured by DHCP by removing the ~domain-name-servers~ item from the ~request~
+statement that we can found in ~/etc/dhcp/dhclient.conf~.
+
+~dhclient~ also allows to create specific configurations for each network
+interface where we can also specify a DNS server for such interface, but I'm not
+going to discuss that here. In case you want more information you can check 
+[[https://linux.die.net/man/5/dhclient.conf][dhclient.conf(5)]].
+
+Therefore, if we add the previously discussed lines to [[https://linux.die.net/man/5/dhclient.conf][/etc/dhcp/dhclient.conf]]
+and we restart the ~ifup~ service reexecute ~dhclient~ (or wait for a while) we should see the changes
+applied to ~/etc/resolv.conf~:
+#+begin_src
+$ sudo systemctl restart ifup@enp1s0.service
+$ cat /etc/resolv.conf
+nameserver 127.0.0.1
+nameserver 192.168.122.1
+nameserver 192.168.122.13;
+#+end_src
+
+Be aware that the ~ifup~ service, which spawns ~dhclient~ is given the network
+interface as a parameter, which in my case is ~enp1s0~, but yours may differ.
+
+Besides, if we reboot the machine, changes should remain.
+
+
+** NetworkManager
+:PROPERTIES:
+:custom_id: networkmanager
+:END:
+
+As we state before, [[https://networkmanager.dev/][NetworkManager]] usually is on charge of managing DNS servers
+when we found a ~/etc/resolver.conf~ file similar to the following:
+
+#+caption: /etc/resolv.conf managed by NetworkManager
+#+begin_src
+$ cat /etc/resolv.conf
+# Generated by NetworkManager
+nameserver 192.168.122.1
+#+end_src
+
+Besides, we can confirm that NetworkManager is running by checking the service:
+
+#+caption: NetworkManager running as systemd service
+#+begin_src
+$ systemctl status NetworkManager
+● NetworkManager.service - Network Manager
+     Loaded: loaded (/lib/systemd/system/NetworkManager.service; enabled; vendo>
+     Active: active (running) since Sun 2024-08-11 10:36:47 CEST; 9h ago
+       Docs: man:NetworkManager(8)
+   Main PID: 1270 (NetworkManager)
+      Tasks: 3 (limit: 37642)
+     Memory: 14.4M
+        CPU: 5.143s
+     CGroup: /system.slice/NetworkManager.service
+             └─1270 /usr/sbin/NetworkManager --no-daemon
+#+end_src
+
+NetworkManager is more complex that other network managers, since it offers
+several options to manage the DNS server such as do it itself or delegate the
+task in third-parties like [[#systemd-resolved][systemd-resolved]] or [[#dhclient][dhclient]]. You can get more
+information on the /dns/ section of [[https://man.archlinux.org/man/NetworkManager.conf.5][NetworkManager.conf(5)]]. In this section we
+are going to assume that the DNS server is going to be managed by NetworkManager
+itself, since other options are explored in their respective sections.
+
+We can use [[https://linux.die.net/man/1/nmcli][nmcli]] to manage NetworkManager. With this tool we can specify a new
+[[https://serverfault.com/a/810639][DNS server for the network connection we want]] (I didn't found how to specify for
+all connections). We can list the connections (network interfaces) with 
+~nmcli connection show~:
+
+#+caption: Active network connections
+#+begin_src
+$ nmcli connection show
+NAME                UUID                                  TYPE      DEVICE
+Wired connection 1  56d704b3-e21d-4fba-93b8-c89870296a94  ethernet  eth0
+lo                  28786bc1-47ab-4264-bdca-3e25b38361b3  loopback  lo
+#+end_src
+
+
+And afterwards add a DNS server with ~nmcli connection modify~:
+#+caption: Modifying NetworkManager DNS server
+#+begin_src
+$ network_connection="Wired connection 1"
+$ sudo nmcli connection modify "$network_connection" ipv4.dns "192.168.122.135"
+$ sudo systemctl restart NetworkManager
+$ cat /etc/resolv.conf
+# Generated by NetworkManager
+nameserver 192.168.122.135
+nameserver 192.168.122.1
+#+end_src
+
+As we can appreciate, our DNS servers were updated after executing the command,
+and if we reboot the machine, changes should remain. Be aware that your network
+connection name could be different from mine so you may need to adapt the
+command.
+
+Additionally, if you don't want to use the DHCP specified DNS you can use the
+following command:
+
+#+begin_src
+sudo nmcli con mod "$network_connection" ipv4.ignore-auto-dns yes
+#+end_src
+
+
+** systemd-resolved
+:PROPERTIES:
+:custom_id: systemd-resolved
+:END:
+
+Last but not least, we have [[https://www.man7.org/linux/man-pages/man8/systemd-resolved.service.8.html][systemd-resolved]]. We can verify that is been used by
+checking that ~/etc/resolv.conf~ has a similar content to the following:
+
+#+caption: /etc/resolv.conf managed by systemd-resolved
+#+begin_src
+$ cat /etc/resolv.conf
+# This is /run/systemd/resolve/stub-resolv.conf managed by man:systemd-resolved(8).
+# Do not edit.
+#
+# This file might be symlinked as /etc/resolv.conf. If you're looking at
+# /etc/resolv.conf and seeing this text, you have followed the symlink.
+#
+# This is a dynamic resolv.conf file for connecting local clients to the
+# internal DNS stub resolver of systemd-resolved. This file lists all
+# configured search domains.
+#
+# Run "resolvectl status" to see details about the uplink DNS servers
+# currently in use.
+#
+# Third party programs should typically not access this file directly, but only
+# through the symlink at /etc/resolv.conf. To manage man:resolv.conf(5) in a
+# different way, replace this symlink by a static file or a different symlink.
+#
+# See man:systemd-resolved.service(8) for details about the supported modes of
+# operation for /etc/resolv.conf.
+
+nameserver 127.0.0.53
+options edns0 trust-ad
+search .
+#+end_src
+
+If we put attention to the content, we can see that ~systemd-resolved~ is
+pointing to its own local DNS server at ~127.0.0.53~.
+
+On the other hand,  ~/etc/resolv.conf~ will be a link to
+~/run/systemd/resolve/stub-resolv.conf~:
+#+begin_src
+$ ls -l /etc/resolv.conf
+lrwxrwxrwx 1 root root 39 ago 19  2022 /etc/resolv.conf -> ../run/systemd/resolve/stub-resolv.conf
+#+end_src
+
+And we cannot forget to verify that ~systemd-resolved~ is running:
+#+caption: systemd-resolved running
+#+begin_src
+$ sudo systemctl status systemd-resolved.service
+● systemd-resolved.service - Network Name Resolution
+     Loaded: loaded (/lib/systemd/system/systemd-resolved.service; enabled; vendor preset: enabled)
+     Active: active (running) since Tue 2024-08-13 20:04:55 CEST; 29min ago
+...
+#+end_src
+
+So, now we know ~systemd-resolved~ is on charge of DNS resolutions we can add a
+DNS server. To do this we need to add a new ~DNS~ entry in
+~/etc/systemd/resolved.conf~, like the following:
+#+caption: /etc/systemd/resolved.conf DNS server configuration
+#+begin_src
+$ cat /etc/systemd/resolved.conf | grep DNS=
+# Some examples of DNS servers which may be used for DNS= and FallbackDNS=:
+DNS=192.168.122.135
+#FallbackDNS=
+#MulticastDNS=no
+#+end_src
+
+Then we restart the ~systemd-resolved~ service:
+#+begin_src
+sudo systemctl restart systemd-resolved.service
+#+end_src
+
+And we can confirm our DNS server is set:
+#+caption: systemd-resolved DNS servers
+#+begin_src
+$ resolvectl status
+Global
+         Protocols: -LLMNR -mDNS -DNSOverTLS DNSSEC=no/unsupported
+  resolv.conf mode: stub
+Current DNS Server: 192.168.122.135
+       DNS Servers: 192.168.122.135
+
+Link 2 (enp1s0)
+    Current Scopes: DNS
+         Protocols: +DefaultRoute +LLMNR -mDNS -DNSOverTLS DNSSEC=no/unsupported
+Current DNS Server: 192.168.122.1
+       DNS Servers: 192.168.122.1
+#+end_src
+
+We can verify it by reading ~/run/systemd/resolve/resolv.conf~ as well:
+#+caption: /etc/systemd/resolve/resolv.conf DNS servers
+#+begin_src
+$ cat /run/systemd/resolve/resolv.conf | grep nameserver
+nameserver 192.168.122.135
+nameserver 192.168.122.1
+#+end_src
+
+We must note that this time we didn't check ~/etc/resolv.conf~ to verify the
+changes, but  ~resolvectl~ and ~/run/systemd/resolve/resolv.conf~. This is due
+to ~systemd-resolved~ don't really modify ~/etc/resolv.conf~, but adds its own
+local DNS server in ~127.0.0.53~ and then it redirects the DNS requests to the
+servers we indicate.
+
+Anyway, changes should remain after we reboot the machine.
+
+* Conclusion
+:PROPERTIES:
+:custom_id: conclusion
+:END:
+
+In this article we have seen how to modify the DNS servers on different tools
+after discovering which one of them is on charge. This kind of the GNU/Linux
+beauty, the existence of several solutions to managed different parts of the
+operating system, even if some times them give us headaches.
+
+I hope this allowed you to solve a problem and learning a little about GNU/Linux
+ecosystem.
+
+See you and long live to GNU/Linux!!
