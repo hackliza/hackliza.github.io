@@ -1,0 +1,895 @@
+#+title: Como unir Debian a Active Directory
+#+author: Eloy Pérez González
+#+date: 2024-08-29
+#+tags[]: linux gnu ad debian
+
+Boas xente, neste artigo vou amosar como unir unha máquina GNU/Linux,
+específicamente unha Debian, a un entorno de Active Directory. Seino, seino,
+Active Directory (AD) é unha ferramenta comercial do malvado Microsoft, mais por
+moito que nos pese, é a solución de directorio mais usada do mercado.
+
+Sen embargo, non por ter un entorno de Microsoft temos que usar Windows,
+inda que iso é o que lles gustaría. Polo tanto, neste artigo vou describir como se
+pode integrar un GNU/Linux con AD. Os mesmos principios deberían servir para
+integralo con outras alternativas de directorio, como [[https://www.freeipa.org/page/Main_Page][FreeIPA]] ou un servizo
+[[https://gl.wikipedia.org/wiki/LDAP][LDAP]].
+
+Hai que ter en conta que vou poñer exemplos do Active Directory que teño no meu
+laboratorio e que terás que adaptar os exemplos e comandos ao teu caso
+particular. Eu usarei os seguintes datos:
+
+- Dominio: ~dev.lab~
+- Administrador de dominio: ~Administrator~
+- Controlador de dominio: ~dc01.dev.lab~ - ~192.168.122.135~
+
+Unha vez aclarado isto, imos ao tema.
+
+* Resolvendo o dominio por DNS
+:PROPERTIES:
+:custom_id: resolvendo-o-dominio-por-dns
+:END:
+
+O primeiro que precisamos é ser capaces de resolver por DNS o nome do noso
+dominio. Para isto a opción mais sinxela é establecer como servidor DNS o noso
+Controlador de Dominio (DC), que é a máquina que contén toda a base de datos do
+directorio e prové os servicios do mesmo, coma o DNS.
+
+#+begin_quote
+Nun entorno de Active Directory pode haber varios controladores de dominio, con
+que escollamos un para facer de servidor DNS chega. Tal vez dous se queremos un
+DNS de respaldo.
+#+end_quote
+
+No meu caso o DC está na IP ~192.168.122.135~. O primeiro é comprobar que temos
+conectividade co mesmo podemos facerlle [[https://gl.wikipedia.org/wiki/Ping][ping]] (e se nos poñemos exquisitos
+podemos usar netcat ou nmap para verificar que alcanzamos o porto 53/UDP, que é
+o usado para DNS):
+#+caption: Ping ao controlador de dominio
+#+begin_src
+$ ping -c4 192.168.122.135
+PING 192.168.122.135 (192.168.122.135) 56(84) bytes of data.
+64 bytes from 192.168.122.135: icmp_seq=1 ttl=128 time=0.645 ms
+64 bytes from 192.168.122.135: icmp_seq=2 ttl=128 time=0.600 ms
+64 bytes from 192.168.122.135: icmp_seq=3 ttl=128 time=0.563 ms
+64 bytes from 192.168.122.135: icmp_seq=4 ttl=128 time=0.659 ms
+
+--- 192.168.122.135 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3061ms
+rtt min/avg/max/mdev = 0.563/0.616/0.659/0.037 ms
+#+end_src
+
+Unha vez verificamos que temos conexión, engadimos o DC como servidor DNS. No
+meu caso vouno engadir en [[https://linux.die.net/man/5/dhclient.conf][/etc/dhcp/dhclient.conf]] para que [[https://linux.die.net/man/8/dhclient][dhclient]] mo inclúa en
+[[https://www.man7.org/linux/man-pages/man5/resolv.conf.5.html][/etc/resolv.conf]], que é o ficheiro usado en GNU/Linux (concretamente na [[https://www.man7.org/linux/man-pages/man7/libc.7.html][libc]])
+para obter os servidores DNS.
+
+#+begin_quote
+Pode que no teu caso non sexa ~dhclient~ o encargado da configuración DNS, polo
+que deberás descubrir que programa é. Polo xeral as alternativas son
+NetworkManager e systemd-resolved. Podes botarlle un ollo ao noso artigo
+[[https://hackliza.gal/posts/cambiar_dns_linux/][Que demo pasa co meu DNS?]] para ver como configurar o teu DNS.
+#+end_quote
+
+Os comando para engadir o meu DC coma servidor DNS sería o seguinte:
+#+caption: Establecendo o controlador de dominio coma servidor DNS
+#+begin_src
+$ echo "prepend domain-name-servers 192.168.122.135;" | sudo tee -a /etc/dhcp/dhclient.conf 
+prepend domain-name-servers 192.168.122.135;
+#+end_src
+
+Ademais tamén lle vou indicar ao xestor DNS que se intento resolver a IP dun
+nome de máquina como ~dc01~ a secas, sen a parte do dominio, mo busque dentro do
+meu dominio, ~dev.lab~:
+#+caption: Usando o dominio por defecto a buscar
+#+begin_src
+$ echo 'prepend domain-search "dev.lab";' | sudo tee -a /etc/dhcp/dhclient.conf
+prepend domain-search "dev.lab";
+#+end_src
+
+E finalmente reiniciamos o servizo para aplicar a nova configuración DNS:
+#+caption: Reiniciando o demo de rede
+#+begin_src
+$ sudo systemctl restart ifup@enp1s0.service
+#+end_src
+
+Ten en conta que o servizo ~ifup~, que se encarga de executar ~dhclient~, recibe
+como parámetro unha interface de rede, no meu caso ~enp1s0~, pero pode ser
+diferente na túa máquina.
+
+E para confirmar que o noso DC se engadiu correctamente coma servidor DNS
+podemos probar a resolver o noso dominio:
+#+caption: Resolución DNS no noso dominio
+#+begin_src 
+$ cat /etc/resolv.conf
+search dev.lab.
+nameserver 192.168.122.135
+nameserver 192.168.122.1
+$ host dev.lab
+dev.lab has address 192.168.122.135
+#+end_src
+
+Tamén comprobamos que se busca ben o nome de máquinas no dominio incluso se so
+especificamos o nome sen o dominio:
+#+caption: Resolvendo nomes de máquinas do dominio
+#+begin_src
+$ host dc01.dev.lab
+dc01.dev.lab has address 192.168.122.135
+$ host dc01
+dc01.dev.lab has address 192.168.122.135
+#+end_src
+
+* Un pouco de teoría: Os compoñentes para conectar
+:PROPERTIES:
+:custom_id: un-pouco-de-teoria-os-componentes-para-conectar
+:END:
+
+Agora que xa temos conectividade co dominio, toca instalar todas as utilidades e
+librarías que implementan os diferentes protocolos (que son uns cantos) que lle
+van permitir a nosa máquina interactuar co Controlador de Dominio.
+
+Mais antes de continuar, vou dar un pouco de teoría, xa que me gustaría facer un
+repaso das diferentes utilidades e protocolos que son necesarias para esta
+comunicación e integración con Active Directory, de xeito que podamos comprender
+o obxetivo das diferentes ferramentas deste complexo sistema. 
+
+** Protocolos usados en Active Directory
+Para comezar, hai varios protocolos esenciais que temos que coñecer para
+entender a comunicación co Controlador de Dominio:
+
+*** DNS
+:PROPERTIES:
+:custom_id: dns
+:END:
+
+Este xa o tocamos. O [[https://gl.wikipedia.org/wiki/Domain_Name_System][DNS]] (Sistema de Nomes de Dominio) é o protocol fundamental
+usado no dominio para obter as direccións IPs das diferentes máquinas do
+mesmo. A autoridade central de nomes no dominio é o Controlador de Dominio.
+
+Calquera utilidade que use nomes de máquina resolverá estes de xeito
+transparente para nos, mais se queremos obter a ip explícitamente, podemos usar
+utilidades coma [[https://linux.die.net/man/1/host][host]], [[https://linux.die.net/man/1/nslookup][nslookup]] ou [[https://linux.die.net/man/1/dig][dig]]:
+
+#+caption: Resolvendo nomes de máquinas do dominio
+#+begin_src
+$ host dc01.dev.lab
+dc01.dev.lab has address 192.168.122.135
+#+end_src
+
+*** Kerberos
+:PROPERTIES:
+:custom_id: kerberos
+:END:
+
+[[https://en.wikipedia.org/wiki/Kerberos_(protocol)][Kerberos]] é un protocolo para a autenticación remota de usuarias. É
+un sistema baseado na obtención duns tokens chamados *tickets*, que dispensa o
+Controlador de Dominio cando unha usuaria se autentica por primeira vez ca súa
+usuaria e contrasinal, e que posteriormente se poden presentar a outras
+máquinas do dominio para a autenticación da usuaria.
+
+Hai dous tipos de tickets:
+
+- *TGT* (Ticket Granting Ticket): É o ticket que o Controlador de Dominio (DC)
+  entrega cando unha usuaria se autentica co seu nome e contrasinal. Pódese usar
+  para pedir tickets para os diferentes servizos, coñecidos como ST, sen ter que
+  andar metendo de novo o contrasinal.
+
+#+caption: Obtención dun TGT
+#+begin_example
+                                                .---.
+    _____                                      /   /|
+   |     |   >----Usuaria e contrasnal---->   .---. |
+   |_____|                                    |   | '
+   /:::::/   <--------------TGT-----------<   |   |/ 
+  cliente                                     '---'  
+                                                DC
+#+end_example
+
+- *ST* (Service Ticket): É un ticket que serve para un servizo en concreto, como
+  SMB (tamén coñecido como CIFS) ou LDAP, que imos ver a continuación. O ST nolo
+  entrega o Controlador de Dominio cando presentamos o noso TGT.
+
+#+caption: Obtención e uso dun ST
+#+begin_example
+                                          .---.
+    _____                                /   /|
+   |     |   >----------TGT--------->   .---. |
+   |_____|                              |   | '
+   /:::::/   <-----ST para CIFS-----<   |   |/ 
+  cliente                               '---'  
+    ^  v                                 DC
+    |  |
+    |  |                          .---. 
+    |  '-----ST para CIFS----->  /   /|                                          
+    |                           .---. | 
+    '---carpeta compartida----< |   | '                                          
+                                |   |/  
+                                '---'   
+                            Servidor SMB/CIFS
+#+end_example
+
+O uso de tickets evita ter que estar escribindo de novo a usuaria e contraseña
+cada vez que se quera establecer unha conexión a unha máquina. Ademais, os
+tickets poden incluir información de seguridade para os protocolos de capas
+mais altas como indicadores de se deberían usar *cifrado e firmado* dos paquetes
+nas comunicacións. Por último, os tickets tamén permiten incluir información das
+usuarias como os seus *grupos no dominio*, nunha estructura coñecida como PAC
+(Privilege Attribute Certificate). 
+
+Kerberos é un protocolo que se integra con outros protocolos como SMB e LDAP,
+polo que non é o normal interactuar directamente con él, mais o paquete
+~krb5-user~ (en Debian) inclúe varias ferramentas que podemos usar para pedir e
+listar os tickets dos que dispoñemos, como no seguinte exemplo:
+
+#+caption: Listando os tickets de Kerberos da sesión actual con klist
+#+begin_src
+$ klist
+Ticket cache: FILE:/tmp/krb5cc_1190600500_fwQbdO
+Default principal: Administrator@DEV.LAB
+
+Valid starting       Expires              Service principal
+08/22/2024 20:32:19  08/23/2024 06:32:19  krbtgt/DEV.LAB@DEV.LAB
+	renew until 08/23/2024 20:32:19
+08/22/2024 20:32:20  08/23/2024 06:32:19  cifs/dc01.dev.lab@
+	renew until 08/23/2024 20:32:19
+	Ticket server: cifs/dc01.dev.lab@DEV.LAB
+#+end_src
+
+Neste caso observamos dous tickets, un para ~krbtgt/DEV.LAB@DEV.LAB~, o que nos
+indica que é un TGT para o dominio ~dev.lab~, e outro para ~cifs/dc01.dev.lab~,
+que indica que se trata de un ticket para obter acceso ás carpetas compartidas
+(mediante SMB ou CIFS) do servidor ~dc01.dev.lab~. Coñecer os tickets que temos
+pode sernos útil á hora de resolver problemas.
+
+*** LDAP
+:PROPERTIES:
+:custom_id: ldap
+:END:
+
+[[https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol][LDAP]] é un protocolo moi usado en servizos de directorio. Permite facer
+consultas sobre a base de datos do directorio, para obter e modificar
+información sobre as diferentes entidades do directorio, como por exemplo,
+usuarias ou ordenadores. Podería dicirse que é o SQL dos servicios de
+directorio.
+
+No caso de Active Directory, usa Kerberos para autenticar ás usuarias.
+En concreto, cada vez que se establece unha nova conexión LDAP, envíase un
+ticket de Kerberos para autenticar á usuaria.
+
+A implementación open source de LDAP é OpenLDAP, que se inclúe no paquete
+~libldap-<version>~, que teñen como dependencia moitos outros paquetes
+relacionados co protocolo. Ademais, se queremos consultar a base de datos do
+directorio, podemos usar ferramentas como ~ldapsearch~, que pertence ao paquete
+~ldap-utils~. Deixo aquí un exemplo no que listo os ordenadores do dominio:
+
+#+caption: Listando os ordenadores do dominio
+#+begin_src
+$ ldapsearch -H ldap://dc01.dev.lab -b 'DC=dev,DC=lab'  '(objectClass=computer)' name 2>/dev/null | grep name:
+name: DC01
+name: DEBIAN12
+#+end_src
+
+*** Samba/SMB
+:PROPERTIES:
+:custom_id: samba-smb
+:END:
+
+[[https://linux.die.net/man/7/samba][Samba]] é a implementación libre de [[https://en.wikipedia.org/wiki/Server_Message_Block][SMB]], que é un protocolo para compartir
+carpetas e ficheiros moi utilizado en entornos Windows como é Active
+Directory.
+
+#+begin_quote
+Ademais de SMB, tamén é común usar o termo CIFS para referirse ao mesmo
+protocolo, inda que CIFS foi un protocolo anterior a SMB (un pouco o mesmo que
+acontece con SSL e TLS). De feito o servizo de SMB en Active Directory chámase
+CIFS.
+#+end_quote
+
+Como mencionei antes, SMB utiliza por debaixo Kerberos como protocolo de
+autenticación, e ao igual que LDAP, envía un ticket cada vez que se establece
+unha nova conexión.
+
+No caso de Debian, o paquete ~samba-tools~ contén as utilidades e librarías
+necesarias para comunicarse como cliente de SMB. Por exemplo, podemos usar
+~smbclient~ para listar as carpetas compartidas en servidores do dominio:
+
+#+caption: Listando carpetas compartidas dun servidor SMB con smbclient
+#+begin_src
+$ smbclient --use-krb5-ccache=$KRB5CCNAME -L dc01.dev.lab
+
+	Sharename       Type      Comment
+	---------       ----      -------
+	ADMIN$          Disk      Remote Admin
+	C$              Disk      Default share
+	IPC$            IPC       Remote IPC
+	NETLOGON        Disk      Logon server share 
+	SYSVOL          Disk      Logon server share 
+SMB1 disabled -- no workgroup available
+#+end_src
+
+** Ferramentas para integrar GNU/Linux en Active Directory
+:PROPERTIES:
+:custom_id: ferramentas-para-integrar-gnulinux-en-active-directory
+:END:
+
+Unha vez visto os protocolos subxacentes, imos a revisar algúns das ferramentas
+e compoñentes do sistema claves á hora de integrar unha máquina GNU/Linux a un
+servicio de directorio.
+
+*** PAM
+:PROPERTIES:
+:custom_id: pam
+:END:
+
+[[https://www.man7.org/linux/man-pages/man8/pam.8.html][PAM]] (Pluggable Authentication Modules) é un conxunto de librerías de
+GNU/Linux que permiten integrar os diferentes mecanismos de autenticación do
+sistema. Os programas que teñen que usar autenticación, como pode ser SSH ou
+[[https://www.man7.org/linux/man-pages/man1/login.1.html][login]], poden facer uso de PAM para integrar os mecanismos de autenticación
+dispoñibles, como contrasinal, pin, certificado, etc, con pouco esforzo.
+
+#+begin_quote
+Curiosidade: As claves SSH non forman parte de PAM, senón que son un
+mecanismo propio de SSH.
+#+end_quote
+
+PAM permite tanto autenticación local, como pode ser revisar o contrasinal no
+[[https://www.man7.org/linux/man-pages/man5/shadow.5.html][/etc/shadow]], como autenticación remota, mediante protocolos coma Kerberos (a
+través de sssd neste caso).
+
+Ademais, PAM tamén se encarga doutras tarefas como o cambio de contrasinal ou
+configurar as variables de entorno e montar o directorio da usuaria cando este
+inicia sesión.
+
+No cartafol ~/etc/pam.d/~ podes ver que modulos de PAM interveñen en cada inicio
+de sesión.
+
+*** NSS
+:PROPERTIES:
+:custom_id: nss
+:END:
+
+[[https://www.man7.org/linux/man-pages/man5/nss.5.html][NSS]] (Name Service Switch) é un mecanismo usado en GNU/Linux para saber
+onde buscar información relativa a diferentes items do sistema, como poden ser
+usuarias ou nomes de dominio. Para este propósito úsase como referencia o
+ficheiro de configuración [[https://www.man7.org/linux/man-pages/man5/nsswitch.conf.5.html][/etc/nsswitch.conf]].
+
+Por exemplo, cando unha aplicación quere obter información sobre unha usuaria,
+nsswitch indica de que fontes se pode extraer os seus datos, coma o ficheiro
+local como [[https://linux.die.net/man/5/passwd][/etc/passwd]] ou o servicio sssd.
+
+#+caption: Configuración para obter os nomes de usuaria
+#+begin_src
+$ cat /etc/nsswitch.conf | grep passwd
+passwd:         files systemd sss
+#+end_src
+
+Outro caso común é que para resolver un nome de dominio, nsswitch indica que
+primeiro se consulte o [[https://www.man7.org/linux/man-pages/man5/hosts.5.html][/etc/hosts]], e se non se atopa se faga unha petición DNS.
+
+#+caption: Configuración para resolver os nomes de dominio
+#+begin_src
+$ cat /etc/nsswitch.conf | grep hosts
+hosts:          files dns
+#+end_src
+
+*** sssd
+:PROPERTIES:
+:custom_id: sssd
+:END:
+
+[[https://linux.die.net/man/8/sssd][sssd]] (System Security Services Daemon) é o pegamento que une todos os programas
+e protocolos discutidos ata agora, pois se trata dunha ferramenta que utiliza
+todas as utilidades e librerías necesarias para interactuar con entornos de
+directorio como Active Directory ou FreeIPA, e ademais permite a integración das
+mesmas con mecanismos do sistema como [[https://www.man7.org/linux/man-pages/man8/pam.8.html][PAM]] e [[https://www.man7.org/linux/man-pages/man5/nss.5.html][NSS]].
+
+A integración sería algo parecido ao seguinte:
+#+caption: Integración de sssd co resto de compoñentes
+#+begin_example
+                                             +-----------+
+ +---------------+                      .--> | Samba/SMB |
+ | PAM - pam_sss | ----.                |    +-----------+
+ +---------------+     |                |        v
+                       |                |        '------------.
+                       |                |                     v
+                       |    +------+    |                +----------+
+                       |--> | sssd | ---|--------------> | Kerberos |
+                       |    +------+    |                +----------+
+                       |                |                     ^ 
+                       |                |       .-------------' 
+ +------------------+  |                |       ^ 
+ | NSS - libnss_sss | -'                |    +------+
+ +------------------+                   '--> | LDAP |
+                                             +------+
+#+end_example
+
+
+* Unindo a máquina ao dominio
+:PROPERTIES:
+:custom_id: unindo-a-maquina-ao-dominio
+:END:
+
+Para unir a nosa máquina ao dominio podemos usar a ferramenta [[https://manpages.org/realm/8][realm]], que se
+encarga de configurar sssd de xeito que podamos usalo para autenticar as
+usuarias contra o dominio.
+
+Aquí vos deixo un breve resumo dos paquetes que imos instalar, para entender cal
+é a utilidade de cada un:
+
+- ~sssd~: Instala o demo de sssd e os módulos para comunicarse cos servicios de
+  directorio.
+- ~sssd-tools~: Instala ferramentas para controlar sssd, como [[https://man.archlinux.org/man/sssctl.8.en][sssctl]].
+- ~libnss-sss~: Instala a librería de NSS que lle permite comunicarse con sssd.
+- ~libpam-sss~: Instala a librería de PAM que lle permite comunicarse con sssd.
+- ~adcli~: Permite unir á máquina local ao dominio.
+- ~realmd~: Permite unir á máquina local ao dominio con adcli e configura sssd.
+- ~pakcagekit~: Ferramenta que permite administrar paquetes usada por realmd.
+
+Para instalar os paquetes executamos:
+#+caption: Instalación de paquetes para unirse ao dominio
+#+begin_src
+sudo apt update && sudo apt install -y sssd sssd-tools adcli libnss-sss libpam-sss realmd packagekit
+#+end_src
+
+Unha vez temos instalados os paquetes podemos proceder a unir a nosa máquina ao
+dominio. Depende de como estea configurado o dominio, isto pódese facer con
+calquera usuaria ou so con contas de administradora. No meu caso fareino coa
+conta de Administador:
+
+#+caption: Comando para unir ao dominio a máquina
+#+begin_src
+sudo realm join --user=Administrator dev.lab
+#+end_src
+
+Se todo sae ben o comando debería preguntar polo contrasinal da usuaria e non
+producir ningunha  outra saída. Podemos comprobar que estamos unidos ao dominio
+con ~sssctl~ ou ~realm~:
+#+caption: sssctl e realm amosando o dominio actual
+#+begin_src
+$ sudo sssctl domain-list
+dev.lab
+$ sudo realm list
+dev.lab
+  type: kerberos
+  realm-name: DEV.LAB
+  domain-name: dev.lab
+  configured: kerberos-member
+  server-software: active-directory
+  client-software: sssd
+  required-package: sssd-tools
+  required-package: sssd
+  required-package: libnss-sss
+  required-package: libpam-sss
+  required-package: adcli
+  required-package: samba-common-bin
+  login-formats: %U@dev.lab
+  login-policy: allow-realm-logins
+#+end_src
+
+Unha vez completamos a union ao dominio é hora de indicarlle a PAM que use sssd
+tamén como método de autenticación. Para iso necesitamos executar
+~pam-auth-update~ e seleccionar "SSS authentication". Ademais, se queremos que
+as usuarias de dominio teñan o seu propio directorio de usuaria, hai que
+seleccionar tamén "Create home directory on login":
+#+begin_src
+$ sudo pam-auth-update
+#+end_src
+
+Debería quedar algo coma isto:
+
+#+caption: pam-auth-update para usar sss e crear directorio de usuaria
+[[./pam-update-screenshot.png]]
+
+Con isto feito deberíamos poder iniciar sesión con usuarias de dominio na
+máquina. Podemos facer a proba dende outra máquina:
+#+caption: Inicio de sesión dunha usuaria de dominio con ssh
+#+begin_src
+$ ssh Administrator@dev.lab@lab-debian12
+Administrator@dev.lab@192.168.122.165's password: 
+Linux debian12-base 6.1.0-23-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.99-1 (2024-07-15) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Sun Aug 18 17:48:53 2024 from 192.168.122.137
+administrator@dev.lab@lab-debian12:~$
+#+end_src
+
+E finalmente podemos iniciar sesión cas usuarias de dominio!! Con isto estaría o
+mais básico, pero se queres seguir lendo vou configurar algunha cousiña mais que
+nos pode ser útil.
+
+* Autenticando so co nome de usuaria, sen o dominio
+:PROPERTIES:
+:custom_id: autenticando-so-co-nome-de-usuaria-sen-o-dominio
+:END:
+
+Unha cousa que pode facilitarnos a vida é non ter que especificar o
+dominio no login de usuarias de dominio, polo que "Administrator@dev.lab"
+quedaría en "Administrator". No caso de ssh pasaríamos de:
+
+#+begin_src
+$ ssh Administrator@dev.lab@lab-debian12
+#+end_src
+
+a usar so o nome de usuaria:
+
+#+begin_src
+$ ssh Administrator@lab-debian12
+#+end_src
+
+
+Para facer iso debemos indicarlle a sssd que por defecto queremos usar o noso
+dominio como sufixo para as usuarias. Isto podemos facelo engadindo unha
+directiva ~default_domain_suffix~ en ~/etc/sssd/sssd.conf~ como a seguinte:
+#+caption: sssd.conf con default_domain_suffix
+#+begin_src
+$ sudo head -6 /etc/sssd/sssd.conf
+
+[sssd]
+domains = dev.lab
+config_file_version = 2
+services = nss, pam
+default_domain_suffix = dev.lab
+#+end_src
+
+E logo reiniciamos ~sssd~:
+#+begin_src
+sudo systemctl restart sssd
+#+end_src
+
+Unha vez temos iso configurado podemos facer ssh so co nome de usuaria:
+#+begin_src
+$ ssh Administrator@lab-debian12
+Administrator@192.168.122.165's password: 
+Linux debian12-base 6.1.0-23-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.99-1 (2024-07-15) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Sun Aug 18 18:07:39 2024 from 192.168.122.137
+administrator@dev.lab@lab-debian12:~$
+#+end_src
+
+Perfecto!! Agora xa podemos aforrarnos 2 segundos de escribir o dominio e
+gastalo no que queiramos. Non é moito, pero por algo se comeza.
+
+* Integrar grupos de dominio en sudo
+:PROPERTIES:
+:custom_id: integrar-grupos-de-dominio-en-sudo
+:END:
+
+Outra cousa que nos pode interesar é poder usar *sudo* con usuarias de
+dominio. En concreto eu vou tentar replicar o comportamento dos administradores
+de dominio nas máquinas Windows. Por defecto o grupo "Domain Admins" é
+privilexiado en tódalas máquinas Windows. En GNU/Linux para acadar un efecto
+semellante o que podemos facer e concederlle execución con ~sudo~ a dito grupo. 
+
+Para iso podemos engadir unha regla coma a seguinte en ~/etc/sudoers~:
+#+begin_src
+$ sudo cat /etc/sudoers | grep domain
+"%domain admins@dev.lab" ALL=(ALL) ALL
+#+end_src
+
+Unha vez engadida, deberíamos ser quen de executar ~sudo~ sen restriccións coa
+usuaria ~Administrator~:
+#+begin_src
+administrator@dev.lab@lab-debian12:~$ sudo id
+uid=0(root) gid=0(root) groups=0(root)
+#+end_src
+
+A outra posibilidade que temos é obter as reglas para sudo dende o Controlador
+de Dominio a maiores das que hai en ~/etc/sudoers~. Para isto precisamos que
+interveña sssd, polo que instalaremos o paquete ~libsss-sudo~:
+#+caption: Instalación de libsss-sudo
+#+begin_src
+sudo apt update && sudo apt install -y libsss-sudo
+#+end_src
+
+Despois da instalación veremos que o ficheiro ~/etc/nsswitch.conf~ amosa o uso
+de sss para sudoers:
+#+caption: Configuración de nss para obter as reglas de sudo
+#+begin_src
+$ cat /etc/nsswitch.conf | grep sudoers
+sudoers: files  sss
+#+end_src
+
+Por outro lado, temos que configurar ~sssd~ para que use o módulo de
+sudo. Facemos isto engadindo ~sudo~ na clausula ~services~ de
+~/etc/sssd/sssd.conf~. Quedaría algo coma isto:
+#+caption: sssd configurado para usar sudo
+#+begin_src
+$ sudo cat /etc/sssd/sssd.conf | grep services
+services = nss, pam, sudo
+#+end_src
+
+Con esta configuración ~sssd~ buscará as regras de sudo dentro da base de datos
+de Active Directory (mediante LDAP). Polo tanto, ditas regras deben ser
+introducidas na base de datos de de Active Directory, pero iso queda fora do
+alcance deste post, que eu estou configurando Debian, non Active Directory. Mais
+podes consultar o seguinte recurso (eu non o probei):
+
+- [[https://noobient.com/2015/11/02/integrating-ubuntu-with-active-directory/#Sudo][Integrating Ubuntu with Active Directory: Sudo]]
+
+* Montar carpetas compartidas no sistema
+:PROPERTIES:
+:custom_id: montar-carpetas-compartidas-no-sistema
+:END:
+
+Outra cousa que pode ser moi interesante e útil á hora de unir unha máquina a
+Active Directory e montar as carpetas compartidas, usando SMB, que se poden
+atopar en distintos servidores (e nalguna que outra computadora persoal).
+
+Imos ver varias ferramentas que nos poden axudar en diferentes situacións.
+
+** Explorando carpetas compartidas con smbclient
+:PROPERTIES:
+:custom_id: explorando-carpetas-compartidas-con-smbclient
+:END:
+
+Unha das nosas opcións é ~smbclient~, o cliente de consola de Samba. O primeiro
+é instalalo:
+#+caption: Instalación de smbclient
+#+begin_src
+sudo apt install smbclient
+#+end_src
+
+Unha vez instalado, temos que indicarlle a nosa configuración no ficheiro
+~/etc/samba/smb.conf~. Para que funcione no meu dominio, eu usei as seguintes
+opcións:
+#+caption: Configuración de /etc/samba/smb.conf
+#+begin_src
+workgroup = DEV
+client signing = yes
+realm = DEV.LAB
+#+end_src
+
+Para darche un pouco de contexto, isto é o que ven a significar cada opción:
+
+- workgroup : É o nome do dominio en formato NetBIOS, que é un protocolo usado,
+  entre outras cousas, para as direccións IP das máquinas na rede local. Para
+  sacar o nome de netbios podemos usar ~ldapsearch -LLL -H ldap://dc01.dev.lab
+  -b 'DC=dev,DC=lab'  '(objectClass=domain)' name 2>/dev/null | grep name:~, pero
+  ten en conta que tes que polo en maiúsculas.
+- realm: O nome de dominio en formato DNS.
+- client signing: Para habilitar o firmado nas comunicacións.
+
+
+A pesares de que smbclient pode utilizar kerberos, non
+din feito para que me detectase os tickets por defecto, xa que se o executo,
+pregúntame polo contrasinal da usuaria:
+#+caption: smbclient pedindo o contrasinal
+#+begin_src
+administrator@dev.lab@lab-debian12:~$ smbclient -L dc01.dev.lab
+Password for [Administrator@DEV.LAB]:
+#+end_src
+
+Non está mal porque o comando funciona, quero dicir que a autenticación está
+integrada con AD, pero o ideal sería usar os tickets de Kerberos que por defecto
+temos no ficheiro indicado por ~$KRB5CCNAME~. Afortunadamente, para iso podemos
+usar o parámetro ~--use-krb5-ccache=$KRB5CCNAME~ a ~sbmclient~. Mais andar a
+pasarlle este parámetro se o usamos moitas veces pode ser un peñazo, así que o
+que podemos facer para solucionalo é crear o seguinte alias:
+#+caption: Alias para que smbclient use os nosos tickets de Kerberos
+#+begin_src
+alias smbclient='smbclient --use-krb5-ccache=$KRB5CCNAME'
+#+end_src
+
+Deste xeito, o comando usaría os tickets. Porén, eu nestes exemplos vouno
+usar indicándolle o parámetro explícito para que me quede mais didáctico.
+
+O tema é que podemos executar smbclient do seguinte xeito para obter un listado
+das carpetas compartidas do servidor que lle indiquemos (se temos permiso e
+conectividade claro):
+#+caption: Listado de carpetas compartidas dun servidor
+#+begin_src
+administrator@dev.lab@lab-debian12:~$ smbclient --use-krb5-ccache=$KRB5CCNAME -L dc01.dev.lab
+
+	Sharename       Type      Comment
+	---------       ----      -------
+	ADMIN$          Disk      Remote Admin
+	C$              Disk      Default share
+	IPC$            IPC       Remote IPC
+	NETLOGON        Disk      Logon server share 
+	SYSVOL          Disk      Logon server share 
+SMB1 disabled -- no workgroup available
+#+end_src
+
+Unha vez temos listadas as carpetas compartidas, podemos exploralas tamén con ~smbclient~:
+#+caption: Exploración da carpeta SYSVOL
+#+begin_src
+administrator@dev.lab@lab-debian12:~$ smbclient --use-krb5-ccache=$KRB5CCNAME \\\\dc01.dev.lab\\SYSVOL
+Try "help" to get a list of possible commands.
+smb: \> ls
+  .                                   D        0  Mon Sep 25 10:23:21 2023
+  ..                                  D        0  Mon Sep 25 10:23:21 2023
+  dev.lab                            Dr        0  Mon Sep 25 10:23:21 2023
+
+		18221567 blocks of size 4096. 12979219 blocks available
+#+end_src
+
+Con isto podeste facer unha idea de cando usar ~smbclient~. Mais se queres
+montar unha carpeta no equipo local temos outras alternativas. Pero antes de
+seguir gustaríame comentar un erro que tiven mentres facía probas, que é o
+seguinte:
+#+caption: Error de smbclient
+#+begin_src
+administrator@dev.lab@lab-debian12:~$ smbclient -L dc01.dev.lab --use-krb5-ccache=$KRB5CCNAME
+gse_get_client_auth_token: gss_init_sec_context failed with [ Miscellaneous failure (see text): FAST fast response is missing FX-FAST (cifs/dc01.dev.lab@DEV.LAB)](2529639059)
+gensec_spnego_client_negTokenInit_step: gse_krb5: creating NEG_TOKEN_INIT for cifs/dc01.dev.lab failed (next[(null)]): NT_STATUS_LOGON_FAILURE
+session setup failed: NT_STATUS_LOGON_FAILURE
+#+end_src
+
+A mensaxe de erro leva a equivocación, xa que no meu caso este erro foi
+provocado porque a miña máquina e o Controlador de Dominio (que é o que expede
+os tickets de Kerberos) non estaban sincronizados ca mesma hora. Unha vez
+axustado o reloxo todo funcionou correctamente.
+
+** Montar carpeta compartida con mount
+:PROPERTIES:
+:custom_id: montar-carpeta-compartida-con-mount
+:END:
+
+Inda que está moi ben explorar as carpetas compartidas con ~smbclient~, noutras
+ocasións queremos traballar con elas coma se dunha carpeta local se
+tratase. Para estes casos é mellor montalas no noso sistema de ficheiros, para o
+que podemos usar o programa [[https://www.man7.org/linux/man-pages/man8/mount.8.html][mount]]. Mais para traballar con carpetas SMB (ou
+CIFS, como era coñecido anteriormento) precisamos instalar o seguinte paquete:
+#+caption: Instalación de paquete para usar SMB en mount
+#+begin_src
+sudo apt install cifs-utils
+#+end_src
+
+O paquete ~cifs-utils~ permíte a ~mount~ saber como montar sistemas de ficheiros
+SMB. Isto combinado ca opción ~-o sec=krb5~ que permite usar Kerberos para
+a autenticación, permítenos montar carpetas remotas con facilidade como se
+aprecia no seguinte exemplo:
+
+#+caption: Montando a carpeta SYSVOL en /tmp/SYSVOL
+#+begin_src
+administrator@dev.lab@lab-debian12:~$ mkdir /tmp/SYSVOL
+administrator@dev.lab@lab-debian12:~$ sudo mount -t cifs -o sec=krb5 //dc01.dev.lab/SYSVOL /tmp/SYSVOL/
+administrator@dev.lab@lab-debian12:~$ ls /tmp/SYSVOL/
+dev.lab
+#+end_src
+
+E xa temos a carpeta montada!! E lembra que [[https://www.man7.org/linux/man-pages/man8/mount.8.html][mount]] tamén permite pasarlle opcións
+aos puntos de montaxe para facelos de so lectura, deshabilitar execución de
+binarios, etc. Podes ver consultar as opcións en [[https://www.man7.org/linux/man-pages/man8/mount.8.html][mount(8)]].
+
+** Montando carpetas compartidas con pam_mount
+:PROPERTIES:
+:custom_id: montando-carpetas-compartidas-con-pam-mount
+:END:
+
+Montar carpetas compartidas con ~mount~ está moi ben, pero as veces é mellor
+montar as carpetas automáticamente cando unha usuaria inicia sesión. Isto pódese
+facer co módulo ~libpam-mount~ de PAM, que podemos instalar co seguinte comando:
+
+#+caption: Instalación do módulo de carpetas compartidas de PAM
+#+begin_src
+sudo apt install libpam-mount
+#+end_src
+
+E tras instalar o novo módulo temos que asegurarnos que PAM está configurado
+para habilitalo. Para iso executamos o seguinte comando:
+
+#+caption: Actualizando a configuración de PAM
+#+begin_src
+sudo pam-auth-update
+#+end_src
+
+E comprobamos que a opción "Mount volumes" está seleccionada.
+
+Unha vez temos ~libpam-mount~, podemos configurar as carpetas compartidas a montar
+no ficheiro ~/etc/security/pam_mount.conf.xml~ (si, xa sei que é unha merda que
+sexa XML). Para isto debemos engadir un elemento ~volume~ coma o seguinte:
+#+caption: Configuración de volume para montar por libpam-mount
+#+begin_src xml
+<volume fstype="cifs" 
+	sgrp="domain users@dev.lab"
+	server="dc01.dev.lab"
+	path="SYSVOL"
+	mountpoint="~/SYSVOL"
+	options="vers=3.0,sec=krb5,cruid=%(USERUID),noexec,rw,nosuid,nodev"
+	/>
+#+end_src
+
+Aquí indicamos que os membros do grupo ~domain users~ do dominio ~dev.lab~ van
+montar o cartafol compartido ~SYSVOL~ no seu directorio persoal. O campo
+~options~ correspóndese con opcións de ~mount~. Ademais é importante engadir o
+~volume~ despois do elemento ~debug~ por se fai falta depurar algo (como me fixo
+falta a mín).
+
+Unha vez o temos todo ao iniciar sesión cunha usuaria que pertence ao grupo
+indicado debería montarse a carpeta compartida:
+
+#+caption: Carpeta compartida montada ao iniciar sesión
+#+begin_src
+user@debdev:~$ ssh Administrator@lab-debian12 
+Administrator@192.168.122.165's password: 
+Linux lab-debian12 6.1.0-23-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.99-1 (2024-07-15) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Fri Aug 23 21:12:07 2024 from 192.168.122.137
+administrator@dev.lab@lab-debian12:~$ ls SYSVOL/
+dev.lab
+#+end_src
+
+E ahí temos o noso cartafol compartido montado!!
+
+Mais antes de terminar, vouche describir un problema que tiven coa esperanza de que
+che poida axudar. Mentres intentaba montar este cartafol compartido tiven
+problemas e costoume atopar como solucionalo, así que o deixo aquí escrito para
+aprender. Para depurar ~pam_mount~ podemos habilitar a opción
+~<debug enable="1"/>~ que ten que estar o mais arriba posible na configuración
+do ficheiro ~/etc/security/pam_mount.conf.xml~. Unha vez habilitado, ~pam_count~
+mostrará mensaxes pola saída de erro, que no caso de ssh podemos ver con:
+
+#+begin_src
+$ systemctl status sshd.service 
+● ssh.service - OpenBSD Secure Shell server
+     Loaded: loaded (/lib/systemd/system/ssh.service; enabled; preset: enabled)
+     Active: active (running) since Wed 2024-08-17 20:20:05 CEST; 16h ago
+       Docs: man:sshd(8)
+             man:sshd_config(5)
+    Process: 512 ExecStartPre=/usr/sbin/sshd -t (code=exited, status=0/SUCCESS)
+   Main PID: 518 (sshd)
+      Tasks: 1 (limit: 2315)
+     Memory: 19.4M
+        CPU: 2.608s
+     CGroup: /system.slice/ssh.service
+             └─518 "sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups"
+
+Aug 18 12:30:52 lab-debian12 sshd[8045]: (pam_mount.c:660): done opening session (ret=0)
+Aug 18 12:30:53 lab-debian12 sshd[8045]: pam_env(sshd:session): deprecated reading of user environment >
+Aug 18 12:31:34 lab-debian12 sshd[8070]: Accepted publickey for user from 192.168.122.136 port 43494 ss>
+Aug 18 12:31:34 lab-debian12 sshd[8070]: pam_unix(sshd:session): session opened for user user(uid=1000)>
+Aug 18 12:31:34 lab-debian12 sshd[8070]: (pam_mount.c:568): pam_mount 2.19: entering session stage
+Aug 18 12:31:34 lab-debian12 sshd[8070]: (pam_mount.c:629): no volumes to mount
+Aug 18 12:31:34 lab-debian12 sshd[8070]: command: 'pmvarrun' '-u' 'user' '-o' '1'
+Aug 18 12:31:34 lab-debian12 sshd[8070]: (pam_mount.c:441): pmvarrun says login count is 4
+Aug 18 12:31:34 lab-debian12 sshd[8070]: (pam_mount.c:660): done opening session (ret=0)
+#+end_src
+
+Podemos observar o erro ~(pam_mount.c:629): no volumes to mount~ que no meu caso
+debeuse a que na opción de ~volume~ estaba especificando o grupo
+~sgrp="domain users"~ no canto de ~sgrp="domain users@dev.lab"~ e non me estaba
+recoñecendo á usuaria como membro do grupo. Unha vez mudei a opción
+solucionouse o problema.
+
+* Conclusión
+:PROPERTIES:
+:custom_id: conclusion
+:END:
+
+
+Neste artigo fixemos un repaso de como unir unha máquina Debian a un entorno
+Active Directory. Espero que che sexa útil.
+
+Veña vémonos!!
+
+* Referencias
+:PROPERTIES:
+:custom_id: referencias
+:END:
+
+- Pierre Blazquez. "*How-To: Join Debian 12 to an Active Directory Domain*".
+  Pierre Blazquez blog, 02 Feb, 2024, https://www.pierreblazquez.com/2024/02/04/how-to-join-debian-12-to-an-active-directory-domain/
+
+- noobient. "*Integrating Ubuntu with Active Directory*". noobient blog, 02 Nov,
+  2015, https://noobient.com/2015/11/02/integrating-ubuntu-with-active-directory/
+
+- Matei Cezar. "*Integrate Ubuntu to Samba4 AD DC with SSSD and Realm – Part
+  15*". Tecmint, 27 Nov, 2017, https://www.tecmint.com/integrate-ubuntu-to-samba4-ad-dc-with-sssd-and-realm/
+
