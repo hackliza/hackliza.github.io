@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>radare2 on Hackliza</title>
+    <link>https://hackliza.gal/tags/radare2/</link>
+    <description>Recent content in radare2 on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Sat, 12 Feb 2022 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/tags/radare2/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Reversing con carraxe</title>
+      <link>https://hackliza.gal/posts/reversing_con_carraxe/</link>
+      <pubDate>Sat, 12 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/reversing_con_carraxe/</guid>
+      <description>Boas xente,
+ Estes dias andei cacharreando con angr e aprendendo un pouco sobre execución simbólica.
+Que diaños é angr? E a execución simbólica?   angr é unha ferramenta para análise dinámico de programas. Concretamente é un emulador que executa o programa aplicando execución simbólica. Deste xeito podemos só executar a parte do programa que nos interesa e non todo o programa.
+ A execución simbólica ven sendo executar o programa ou unha parte del para coñecer que valor precisamos nun símbolo (algo parecido a unha variábel) para podermos chegar dunha parte ou estado do programa a outro.</description>
+    </item>
+    
+    <item>
+      <title>Análise do heap con radare2</title>
+      <link>https://hackliza.gal/posts/r2heap/</link>
+      <pubDate>Sat, 21 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/r2heap/</guid>
+      <description>Boas xente.
+ Neste post, vou mostrar como se pode utilizar radare2 para facer análises do heap da glibc. A miña intención é crear unha referencia con exemplos, que permita coñecer que se pode levar a cabo con radare2. Fago isto xa que non atopei moito ao respecto en internet, soamente a presentación do módulo de heap feita por n4x0r na r2con 2016.  Sen embargo, eu son un amante do texto, así que deixarei aquí plasmados os comandos de radare2 con exemplos, listos para ser consultados e copipasteados.</description>
+    </item>
+    
+  </channel>
+</rss>

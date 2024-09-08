@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>sssd on Hackliza</title>
+    <link>https://hackliza.gal/en/tags/sssd/</link>
+    <description>Recent content in sssd on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Sun, 08 Sep 2024 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/en/tags/sssd/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Keyrings dump with keydump: Extracting SSSD cleartext credentials</title>
+      <link>https://hackliza.gal/en/posts/keydump/</link>
+      <pubDate>Sun, 08 Sep 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/keydump/</guid>
+      <description>Hi there!!
+ Time ago I was tinkered with Linux keyrings to extract Kerberos tickets from keys with tickey, and recently I was involved in a new interesting project in which I needed to learn again about this topic, so I will try to describe the important points here in case my future self or anyone else want to learn them.
+ First we need to know is that Linux keyrings is a key management facility.</description>
+    </item>
+    
+  </channel>
+</rss>

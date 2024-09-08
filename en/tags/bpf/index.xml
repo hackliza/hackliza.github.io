@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>bpf on Hackliza</title>
+    <link>https://hackliza.gal/en/tags/bpf/</link>
+    <description>Recent content in bpf on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Sun, 18 Aug 2024 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/en/tags/bpf/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Who is messing with my DNS server? Discovering and managing network daemons</title>
+      <link>https://hackliza.gal/en/posts/cambiar_dns_linux/</link>
+      <pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/cambiar_dns_linux/</guid>
+      <description>Hi there, today I would like to talk about an recurrent issue that I&amp;#39;ve been facing for many years. I wanted to configure my machine to use an specific DNS server, so I including it in /etc/resolv.conf. However, after a while my new DNS server was removed and /etc/resolv.conf restored to a previous version.
+ In this article I&amp;#39;m going to explore what is happening and how discover who is modifying /etc/resolv.</description>
+    </item>
+    
+  </channel>
+</rss>

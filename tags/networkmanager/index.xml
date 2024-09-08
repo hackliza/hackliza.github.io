@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>networkmanager on Hackliza</title>
+    <link>https://hackliza.gal/tags/networkmanager/</link>
+    <description>Recent content in networkmanager on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Sun, 18 Aug 2024 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/tags/networkmanager/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Que demo pasa co meu DNS? Descubrindo e configurando demos de rede</title>
+      <link>https://hackliza.gal/posts/cambiar_dns_linux/</link>
+      <pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/cambiar_dns_linux/</guid>
+      <description>Boas xente, hoxe veño a falar dun problema que me teño atopado en varias ocasións. O tema é que configuro o equipo para usar un servidor DNS concreto, incluíndo este no /etc/resolv.conf, e dalí a un anaco me atopo que este se borrou e se volveu ao servidor DNS anterior.
+ Neste artigo vou ver porque acontece e quen me está tocando o /etc/resolv.conf e como solucionalo.
+ Este artigo vai dirixido a entornos onde se usa a consola, xa que cando temos unha interface gráfica, polo xeral nas opcións de rede podemos poñer o DNS que queiramos sen problema ningún.</description>
+    </item>
+    
+  </channel>
+</rss>

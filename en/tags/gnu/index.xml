@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>gnu on Hackliza</title>
+    <link>https://hackliza.gal/en/tags/gnu/</link>
+    <description>Recent content in gnu on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Thu, 29 Aug 2024 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/en/tags/gnu/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>How to join Debian to Active Directory</title>
+      <link>https://hackliza.gal/en/posts/linux-en-ad/</link>
+      <pubDate>Thu, 29 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/linux-en-ad/</guid>
+      <description>Hi people, in this article I&amp;#39;m going to show how to join a GNU/Linux machine, specifically a Debian one, to an Active Directory environment.I know, I know, Active Directory (AD) is a commercial tool from the evil Microsoft, but we need to admit that is the most used tool in the market.
+ However, not because we are in a Microsoft environment we need to use Windows, even if that&amp;#39;s what they would like.</description>
+    </item>
+    
+    <item>
+      <title>Who is messing with my DNS server? Discovering and managing network daemons</title>
+      <link>https://hackliza.gal/en/posts/cambiar_dns_linux/</link>
+      <pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/cambiar_dns_linux/</guid>
+      <description>Hi there, today I would like to talk about an recurrent issue that I&amp;#39;ve been facing for many years. I wanted to configure my machine to use an specific DNS server, so I including it in /etc/resolv.conf. However, after a while my new DNS server was removed and /etc/resolv.conf restored to a previous version.
+ In this article I&amp;#39;m going to explore what is happening and how discover who is modifying /etc/resolv.</description>
+    </item>
+    
+  </channel>
+</rss>

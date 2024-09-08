@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Hackliza</title>
+    <link>https://hackliza.gal/en/posts/</link>
+    <description>Recent content in Posts on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Sun, 08 Sep 2024 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/en/posts/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Keyrings dump with keydump: Extracting SSSD cleartext credentials</title>
+      <link>https://hackliza.gal/en/posts/keydump/</link>
+      <pubDate>Sun, 08 Sep 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/keydump/</guid>
+      <description>Hi there!!
+ Time ago I was tinkered with Linux keyrings to extract Kerberos tickets from keys with tickey, and recently I was involved in a new interesting project in which I needed to learn again about this topic, so I will try to describe the important points here in case my future self or anyone else want to learn them.
+ First we need to know is that Linux keyrings is a key management facility.</description>
+    </item>
+    
+    <item>
+      <title>How to join Debian to Active Directory</title>
+      <link>https://hackliza.gal/en/posts/linux-en-ad/</link>
+      <pubDate>Thu, 29 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/linux-en-ad/</guid>
+      <description>Hi people, in this article I&amp;#39;m going to show how to join a GNU/Linux machine, specifically a Debian one, to an Active Directory environment.I know, I know, Active Directory (AD) is a commercial tool from the evil Microsoft, but we need to admit that is the most used tool in the market.
+ However, not because we are in a Microsoft environment we need to use Windows, even if that&amp;#39;s what they would like.</description>
+    </item>
+    
+    <item>
+      <title>Who is messing with my DNS server? Discovering and managing network daemons</title>
+      <link>https://hackliza.gal/en/posts/cambiar_dns_linux/</link>
+      <pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/cambiar_dns_linux/</guid>
+      <description>Hi there, today I would like to talk about an recurrent issue that I&amp;#39;ve been facing for many years. I wanted to configure my machine to use an specific DNS server, so I including it in /etc/resolv.conf. However, after a while my new DNS server was removed and /etc/resolv.conf restored to a previous version.
+ In this article I&amp;#39;m going to explore what is happening and how discover who is modifying /etc/resolv.</description>
+    </item>
+    
+    <item>
+      <title>Stealing sudo sessions with ptrace</title>
+      <link>https://hackliza.gal/en/posts/stealing_sudo_sessions_with_ptrace/</link>
+      <pubDate>Sun, 24 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/stealing_sudo_sessions_with_ptrace/</guid>
+      <description>Hi people.
+ Today we are going to deepen an old technique that I have been studying. It is an attack to get sudo in case someone else is connected to the same machine with the same user and has sudo unlocked. This technique was already documented by nongiach in the sudo_inject repository. However, that implementation requires several files and dependences for the attack, so, in order to simplify it and learning about the technique, I have developed sudohunt.</description>
+    </item>
+    
+    <item>
+      <title>PUME: a tool to mutate Python source code</title>
+      <link>https://hackliza.gal/en/posts/pume/</link>
+      <pubDate>Thu, 02 Nov 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/pume/</guid>
+      <description>This article will explain what PUME (Python Universal Mutation Engine) is and how it works and after that some examples of use will be given.
+Introduction PUME is a tool that randombly modifies the source code of a program made with Python without change the orginal features. This is mainly achived by doing modifications in the Abstract Syntax Tree (AST) of the program but it should be noted that exist a modification that is made directly in the source code.</description>
+    </item>
+    
+    <item>
+      <title>Visual profiling in Python</title>
+      <link>https://hackliza.gal/en/posts/python-visual-profiling/</link>
+      <pubDate>Mon, 27 Jun 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/python-visual-profiling/</guid>
+      <description>Hey there!
+ Today I bring a practical example of how we can analyze our Python programs to efficiently find bottlenecks.
+ There&amp;#39;s a lot of talk on how optimizations shouldn&amp;#39;t be done blindly. That instead one should measure which parts of a program are problematic to improve the code execution in an efficient way. Today we will see how to do that in a practical way.
+Flame Graphs  There are lots of ways to measure and visualize the behavior of a program.</description>
+    </item>
+    
+    <item>
+      <title>Quick math on the terminal</title>
+      <link>https://hackliza.gal/en/posts/quick_math_on_terminal/</link>
+      <pubDate>Mon, 01 Nov 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/quick_math_on_terminal/</guid>
+      <description>Hey there!
+ Just this past week I stumbled on a HN comment from 2019. The commenter was fiddling with some scripts to perform some simple math directly on the (bash) terminal.
+ TLDR: Click here to go to the code and skip the backstory.
+ What the commenter proposed was something like this, based on the dc command (comments are mine).
+$ . calc.sh # Load functionality $ * 4 5 # Multiply 4 and 5 20 $ / 21 3 # Divide 21 by 3 7   This sounded interesting.</description>
+    </item>
+    
+    <item>
+      <title>Using libfuzzer in autotools compiled projects</title>
+      <link>https://hackliza.gal/en/posts/libfuzzer_autotools/</link>
+      <pubDate>Fri, 16 Jul 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/libfuzzer_autotools/</guid>
+      <description>Hey there.
+ These days I&amp;#39;ve been playing with libfuzzer, a tool that comes with clang compiler and that allows us to fuzz a program compiled with clang. The fuzzing consists on passing (pseudo-)random data as program input and check if that breaks.
+ To do this with libfuzzer, it is required to define in the program a function called LLVMFuzzerTestOneInput that accepts a buffer of bytes as argument. Then libfuzzer will call this function in a loop with different data.</description>
+    </item>
+    
+    <item>
+      <title>Tricks to improve console programs usability</title>
+      <link>https://hackliza.gal/en/posts/console_usability/</link>
+      <pubDate>Thu, 24 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/console_usability/</guid>
+      <description>Hi folks.
+ In this post I goint to present you some tricks that, in my experience, allow to greatly improve the usability of the console programs. I write them down here to avoid to forget them and in the hope that they can be useful to other people.
+ The key is to make the programs simple, which normally is not as easy as it sounds, but I hope these tricks will help you to achieve that.</description>
+    </item>
+    
+    <item>
+      <title>Virus and Python</title>
+      <link>https://hackliza.gal/en/posts/virus_python/</link>
+      <pubDate>Mon, 14 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/virus_python/</guid>
+      <description>This post will explain several issues when it comes to understanding how a virus works. They will first be explained what they are and how is its life cycle. The main techniques for detecting a virus will be outlined below. After, the main anti-antivirus techniques will be discussed. Then, it will be explained how a virus works by providing examples of code, to finally add various enhancements and protections so that it cannot be detected by signature.</description>
+    </item>
+    
+    <item>
+      <title>Heap analysis with radare2</title>
+      <link>https://hackliza.gal/en/posts/r2heap/</link>
+      <pubDate>Sat, 21 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/r2heap/</guid>
+      <description>Hi everyone.
+ In this post, I&amp;#39;m going to show you how radare2 can be used to perform heap analisys in the glibc. My purpose is to create a reference with examples, that shows what can be done in radare2. I do this cause I haven&amp;#39;t found too much info about this on internet, only the heap module presentation made by n4x0r in the r2con 2016.
+ However, I prefer text, so I&amp;#39;ll write here the commands with examples, ready to be consulted and copypasted.</description>
+    </item>
+    
+  </channel>
+</rss>
