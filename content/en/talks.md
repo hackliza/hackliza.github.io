@@ -1,7 +1,3 @@
----
-title: Hackliza's talks
----
-
 On Hackliza from time to time, we give a talk on some conference, both organized by us or not. Here you have a list of those times. (Slides are in galician)
 
 # Talks

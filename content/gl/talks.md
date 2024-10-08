@@ -1,7 +1,3 @@
----
-title: Hackliza - Charlas
----
-
 En Hackliza de cando en cando damos algunha charla nalgún faladoiro ou conferencia, xa sexa organizado por nós ou non. Aquí tedes as diapositivas de esas veces.
 
 # Charlas
