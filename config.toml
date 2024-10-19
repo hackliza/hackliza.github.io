@@ -22,11 +22,33 @@ twitter = "hackliza"
 [languages]
 [languages.gl]
 contentDir = "content/gl"
+    [languages.gl.menus]
+        [[languages.gl.menus.main]]
+        name = "Charlas"
+        url = "talks/"
+        weight = 3
+        [[languages.gl.menus.main]]
+        name = "Sobre nós"
+        url = "about/"
+        weight = 2
+        [[languages.gl.menus.main]]
+        name = "Blogue"
+        url = "/"
+        weight = 1
 
 [languages.en]
 contentDir = "content/en"
+    [languages.en.menus]
+        [[languages.en.menus.main]]
+        name = "Talks"
+        url = "talks/"
+        weight = 3
 
-[[menu.main]]
-    name = "About"
-    url = "about/"
-    weight = 3
+        [[languages.en.menus.main]]
+        name = "About"
+        url = "about/"
+        weight = 2
+        [[languages.en.menus.main]]
+        name = "Blog"
+        url = "/"
+        weight = 1
