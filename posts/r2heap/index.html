@@ -1,0 +1,2409 @@
+<!DOCTYPE html>
+<html lang="gl" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Análise do heap con radare2 - Hackliza</title>
+  <meta name="description" content="Boas xente.
+ Neste post, vou mostrar como se pode utilizar radare2 para facer análises do heap da glibc. A miña intención é crear unha referencia con exemplos, que permita coñecer que se pode levar a cabo con radare2. Fago isto xa que non atopei moito ao respecto en internet, soamente a presentación do módulo de heap feita por n4x0r na r2con 2016.  Sen embargo, eu son un amante do texto, así que deixarei aquí plasmados os comandos de radare2 con exemplos, listos para ser consultados e copipasteados."><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Hackliza",
+    
+    "url": "https:\/\/hackliza.gal\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "https:\/\/hackliza.gal\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/posts\/r2heap\/",
+          "name": "Análise do heap con radare2"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Eloy Pérez González"
+  },
+  "headline": "Análise do heap con radare2",
+  "description" : "Boas xente.\n Neste post, vou mostrar como se pode utilizar radare2 para facer análises do heap da glibc. A miña intención é crear unha referencia con exemplos, que permita coñecer que se pode levar a cabo con radare2. Fago isto xa que non atopei moito ao respecto en internet, soamente a presentación do módulo de heap feita por n4x0r na r2con 2016.  Sen embargo, eu son un amante do texto, así que deixarei aquí plasmados os comandos de radare2 con exemplos, listos para ser consultados e copipasteados.",
+  "inLanguage" : "gl",
+  "wordCount":  8063 ,
+  "datePublished" : "2020-11-21T00:00:00",
+  "dateModified" : "2020-11-21T00:00:00",
+  "image" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+  "keywords" : [ "pwn, heap, radare2" ],
+  "mainEntityOfPage" : "https:\/\/hackliza.gal\/posts\/r2heap\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "https:\/\/hackliza.gal\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="Análise do heap con radare2" />
+<meta property="og:description" content="Boas xente.
+ Neste post, vou mostrar como se pode utilizar radare2 para facer análises do heap da glibc. A miña intención é crear unha referencia con exemplos, que permita coñecer que se pode levar a cabo con radare2. Fago isto xa que non atopei moito ao respecto en internet, soamente a presentación do módulo de heap feita por n4x0r na r2con 2016.  Sen embargo, eu son un amante do texto, así que deixarei aquí plasmados os comandos de radare2 con exemplos, listos para ser consultados e copipasteados.">
+<meta property="og:image" content="https://hackliza.gal/img/hackliza.png" />
+<meta property="og:url" content="https://hackliza.gal/posts/r2heap/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hackliza" />
+
+  <meta name="twitter:title" content="Análise do heap con radare2" />
+  <meta name="twitter:description" content="Boas xente.
+ Neste post, vou mostrar como se pode utilizar radare2 para facer análises do heap da glibc. A miña intención é crear unha referencia con exemplos, que permita coñecer que se pode levar a …">
+  <meta name="twitter:image" content="https://hackliza.gal/img/hackliza.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@hackliza" />
+  <meta name="twitter:creator" content="@hackliza" />
+  <link href='https://hackliza.gal/img/hackliza.png' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.74.3" />
+  <link rel="alternate" href="https://hackliza.gal/index.xml" type="application/rss+xml" title="Hackliza"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://hackliza.gal/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="https://hackliza.gal/css/syntax.css" /><link rel="stylesheet" href="https://hackliza.gal/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><style>
+ nav {
+     background: #0099CC !important;
+ }
+
+ .navbar-brand, #main-navbar ul li a, footer {
+     color: #fff !important;
+ }
+
+ .navbar-brand:hover, #main-navbar ul li a:hover {
+     color: #ccc !important;
+ }
+
+
+ figure {
+     margin-top: 1.5em; 
+     margin-bottom: 1.5em; 
+ }
+ 
+ figcaption {
+     text-align: center;
+     font-size: 85%;
+ }
+
+ pre {
+     overflow-x: auto !important;
+ }
+
+ .posts-heading {
+     text-align: center;
+ }
+ 
+</style>
+
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Conmuta navegación</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://hackliza.gal/">Hackliza</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blogue" href="/">Blogue</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Sobre nós" href="/about/">Sobre nós</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Charlas" href="/talks/">Charlas</a>
+            </li>
+          
+        
+
+        
+          
+            <li>
+              
+                
+                  <a href="/en" lang="en">en</a>
+                
+              
+                
+              
+            </li>
+          
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Hackliza" href="https://hackliza.gal/">
+            <img class="avatar-img" src="https://hackliza.gal/img/hackliza.png" alt="Hackliza" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>Análise do heap con radare2</h1>
+              
+              
+                <hr class="small">
+              
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        
+<p>
+Boas xente.</p>
+<p>
+Neste post, vou mostrar como se pode utilizar <a href="https://github.com/radareorg/radare2">radare2</a> para facer análises do
+heap da glibc. A miña intención é crear unha referencia con exemplos, que
+permita coñecer que se pode levar a cabo con radare2. Fago isto xa que non
+atopei moito ao respecto en internet, soamente a <a href="https://www.youtube.com/watch?v=Svm5V4leEho">presentación do módulo de heap
+feita por n4x0r</a> na r2con 2016. </p>
+<p>
+Sen embargo, eu son un amante do texto, así que deixarei aquí plasmados os
+comandos de radare2 con exemplos, listos para ser consultados e
+copipasteados.</p>
+<p>
+Se so ves polos comandos, podes velos na <a href="https://gist.github.com/Zer1t0/9a1d6108148e862dd61065ec8ae0c03c">chuleta</a> que preparei baseada no contido
+deste artigo.</p>
+<p>
+Nota: Para unha maior inmersión, recoméndase leer este post con gheada.</p>
+<div id="outline-container-headline-1" class="outline-2">
+<h2 id="headline-1">
+Intro á glibc heap
+</h2>
+<div id="outline-text-headline-1" class="outline-text-2">
+<p>
+Antes de meternos en radare2, vou introducir unha serie de conceptos de <em>heap</em> que
+serán necesarios manexar en conxunto no resto do post. De tódolos xeitos,
+ampliarei máis cada un na súa respectiva sección.</p>
+<dl>
+<dt>
+Allocator
+</dt>
+<dd>
+<p>Un <em>allocator</em> é un módulo que se encarga de xestionar o <em>heap</em>
+dun programa. Este permite a un programador facer un uso fácil do
+mesmo, normalmente a través das funcións <code>malloc</code> e <code>free</code>. Nesta
+ocasión imos revisar o <em>allocator</em> da glibc, que é unha
+modificación do <em>allocator</em> <a href="http://www.malloc.de/en/">ptmalloc2</a>. Pero ten en conta que
+existen máis <em>allocators</em> como <a href="http://jemalloc.net/">jemalloc</a> ou <a href="https://github.com/google/tcmalloc">tcmalloc</a>.</p>
+</dd>
+<dt>
+Chunks
+</dt>
+<dd>
+<p>Os <em>chunks</em> son pedazos de memoria que se poden usar para almacenar
+calquera tipo de datos. Estes son reservados para o programa usando
+as funcións <code>malloc</code>, <code>calloc</code> ou <code>realloc</code> e liberados con
+<code>free</code>. Os <em>chunks</em> atópanse na rexión de memoria coñecida como
+<em>heap</em>.</p>
+</dd>
+<dt>
+Heap
+</dt>
+<dd>
+<p>Un <em>heap</em> é unha rexión de memoria contigua que se divide para xerar
+trozos de memoria chamados <em>chunks</em>, usados polo programa para
+almacenar todo tipo de información. Un <em>heap</em> pertence a unha <em>arena</em> e
+pode haber varios, sendo o principal a rexión de memoria chamada
+<code>[heap]</code>.</p>
+</dd>
+<dt>
+Arena
+</dt>
+<dd>
+<p>Unha <em>arena</em> está formada por unha estructura <a href="https://sourceware.org/git/?p=glibc.git;a=blob;f=malloc/malloc.c;h=5b87bdb081f819c9d2b765b2f8e888e4d749c911;hb=HEAD#l1670">malloc_state</a>, onde se
+almacenan as <em>bins</em>, e un ou varios <em>heaps</em>. Un programa pode ter
+varias <em>arenas</em>, que se xeran coa creación de novos fíos. A <em>arena</em>
+principal chámase <em>main_arena</em>.</p>
+</dd>
+<dt>
+Bins
+</dt>
+<dd>
+<p>Unha <em>bin</em> é unha lista de <em>chunks</em> que está libres para ser
+usados. Existen varios tipos de <em>bins</em>, que son usadas segundo a
+situación. Estas son:</p>
+<ul>
+<li>
+<p><strong><strong>Unsorted bin</strong></strong> -&gt; <em>Bin</em> para insertar <em>chunks</em> de forma rápida, antes de ser
+                insertados noutras <em>bins</em>.</p>
+</li>
+<li>
+<p><strong><strong>Small bins</strong></strong> -&gt; Para <em>chunks</em> de pouco tamaño. </p>
+</li>
+<li>
+<p><strong><strong>Large bins</strong></strong> -&gt; Para <em>chunks</em> de gran tamaño.</p>
+</li>
+<li>
+<p><strong><strong>Fast bins</strong></strong> -&gt; <em>Bins</em> de cache para <em>chunks</em> de moi pequeno tamaño.</p>
+</li>
+<li>
+<p><strong><strong>Tcaches</strong></strong> -&gt; <em>Bins</em> de cache que permiten a diferentes fíos acceder a
+           <em>chunks</em> de pequeno tamaño sen ter que bloquear a <em>arena</em>.</p>
+</li>
+</ul>
+</dd>
+</dl>
+<p>
+Deixo tamén a explicación dalgúns fenómenos interesantes que ocorren na xestión
+da memoria:</p>
+<dl>
+<dt>
+Consolidación 
+</dt>
+<dd>
+<p>Prodúcese cando un proceso solicita un <em>chunk</em> dun tamaño
+maior do que poden albergar as <em>small bins</em> (e tamén as
+<em>fast bins</em>). Na consolidación os <em>chunks</em> das <em>fast 
+bins</em> móvense á <em>unsorted bin</em>, xa que se considera que o
+programa vai a precisar <em>chunks</em> de gran tamaño e polo tanto
+sería beneficioso fusionar os <em>chunks</em> que se atopaban nas
+<em>fast bins</em>, evitando a fragmentación.</p>
+</dd>
+<dt>
+Recarga das tcaches
+</dt>
+<dd>
+<p>Cando o <em>allocator</em> anda buscando <em>chunks</em> nunha <em>fast
+bin</em> ou nunha <em>small bin</em>, aproveita para pasar tódolos <em>chunks</em> que poida
+ás <em>tcaches</em>. Isto tamén ocorre cando se descartan <em>chunks</em> da <em>unsorted
+bin</em>. Deste xeito as <em>tcaches</em> teñen máis <em>chunks</em> e non fai falta bloquear
+as <em>arenas</em> tan frecuentemente.</p>
+</dd>
+</dl>
+<p>
+Neste artigo, darei máis información de cada un de estes entes, pero se non che
+queda claro que é cada un, sempre lle podes botar unha ollada a estes recursos:</p>
+<ul>
+<li>
+<p><a href="https://sourceware.org/glibc/wiki/MallocInternals">glibc wiki: MallocInternals</a></p>
+</li>
+<li>
+<p><a href="https://heap-exploitation.dhavalkapil.com/">Heap exploitation book</a></p>
+</li>
+<li>
+<p><a href="https://azeria-labs.com/heap-exploitation-part-1-understanding-the-glibc-heap-implementation/">Azeria Labs: Understanding the glibc heap implementation</a></p>
+</li>
+<li>
+<p><a href="https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/">Understanding glibc malloc</a></p>
+</li>
+</ul>
+<p>E para prácticar, podes revisar o repo <a href="https://github.com/shellphish/how2heap">how2heap</a>, que amosa diferentes técnicas
+de explotación do heap. Moi recomendable.</p>
+<p>
+Por outra parte, tamén me gustaría aclarar que os datos que aparecen neste
+artigo foron obtidos fruto da miña experimentación e revisión do código de
+diferentes versións da <a href="https://www.gnu.org/software/libc/">glibc</a>. Para as probas empíricas, usei as versións da
+glibc 2.32, 2.28 e 2.19, nunha arquitectura x86, con programas tanto en 64 coma
+32 bits.</p>
+<p>
+Sen embargo, a glibc permite o <a href="https://www.gnu.org/software/libc/manual/html_node/Tunables.html">axuste de varios parámetros</a> que poden
+cambiar o seu comportamento, polo que usa isto como unha orientación e non como
+unha verdade absoluta. Se tes algunha dúbida, o mellor sempre é que fagas os
+teus propios experimentos. ;)</p>
+<p>
+Bueno, ao asunto.</p>
+</div>
+</div>
+<div id="outline-container-headline-2" class="outline-2">
+<h2 id="headline-2">
+Iniciando radare2
+</h2>
+<div id="outline-text-headline-2" class="outline-text-2">
+<p>
+O primeiro é o primeiro, haberá que encender radare2 non?</p>
+<p>
+Aviso a navegantes: Inda que sexas principiante con radare2, non creo que teñas
+problemas cos comandos deste artigo, senon sempre podes ver algún tutorial coma
+<a href="https://www.megabeets.net/a-journey-into-radare-2-part-1/">este de Megabeets</a>. </p>
+<p>
+O primeiro, para analizar o heap, precisamos iniciar radare2 co depurador. Para
+iso temos que usar o flag <code>-d</code>:</p>
+<pre class="example">
+r2 -d ./heapshow
+</pre>
+<p>
+Tras iniciar radare2 cun programa (e analizar o código se o precisas), podes
+poñerlle un breakpoint nalgún punto con <code>db</code> para interrumpir a execución e
+explorar a memoria. Tamén podes pulsar <code>Ctrl-c</code> no medio da execución do
+programa para pasarlle o control a radare2.</p>
+<p>
+Unha vez tes a execución do programa detida, para explorar o <em>heap</em> podes usar
+os comandos do grupo <code>dmh</code>. Para quedar mellor coa referencia, os supergrupos
+son:</p>
+<ul>
+<li>
+<p><code>d</code> -&gt; Comandos de debug.</p>
+</li>
+<li>
+<p><code>dm</code> -&gt; Comandos relacionados cos mapas de memoria.</p>
+</li>
+<li>
+<p><code>dmh</code> -&gt; Comandos de heap. </p>
+</li>
+</ul>
+<p>Ademais, para ver a axuda dos comandos de heap, podes executar <code>dmh?</code>:</p>
+<pre class="example">
+[0x5624802e1193]&gt; dmh?
+Usage:  dmh   # Memory map heap
+| dmh                                          List chunks in heap segment
+| dmh @[malloc_state]                          List heap chunks of a particular arena
+| dmha                                         List all malloc_state instances in application
+| dmhb @[malloc_state]                         Display all parsed Double linked list of main_arena&#39;s or a particular arena bins instance
+| dmhb [bin_num|bin_num:malloc_state]          Display parsed double linked list of bins instance from a particular arena
+| dmhbg [bin_num]                              Display double linked list graph of main_arena&#39;s bin [Under developemnt]
+| dmhc @[chunk_addr]                           Display malloc_chunk struct for a given malloc chunk
+| dmhf @[malloc_state]                         Display all parsed fastbins of main_arena&#39;s or a particular arena fastbinY instance
+| dmhf [fastbin_num|fastbin_num:malloc_state]  Display parsed single linked list in fastbinY instance from a particular arena
+| dmhg                                         Display heap graph of heap segment
+| dmhg [malloc_state]                          Display heap graph of a particular arena
+| dmhi @[malloc_state]                         Display heap_info structure/structures for a given arena
+| dmhm                                         List all elements of struct malloc_state of main thread (main_arena)
+| dmhm @[malloc_state]                         List all malloc_state instance of a particular arena
+| dmht                                         Display all parsed thread cache bins of all arena&#39;s tcache instance
+| dmh?                                         Show map heap help
+</pre>
+<p>
+A descripción da unha idea do que se pode facer con cada un, pero para un mellor
+entendemento vou mostrar exemplos de uso.</p>
+<p>
+Nota: podes usar <code>?</code> tras un comando para ver a axuda.</p>
+</div>
+</div>
+<div id="outline-container-headline-3" class="outline-2">
+<h2 id="headline-3">
+Arenas
+</h2>
+<div id="outline-text-headline-3" class="outline-text-2">
+<p>
+Como dixen antes, unha arena ten un <em>malloc_state</em>, e un ou varios
+<em>heaps</em>. Ademais, un proceso pode ter unha ou varias <em>arenas</em>, dependendo se é
+multifio ou non. E cada <em>arena</em> pode ser compartida por varios fíos no caso de ser
+necesario. A <em>arena</em> principal dun programa chámase <em>main_arena</em>.</p>
+<p>
+Para identificar as <em>arenas</em> dun proceso é preciso localizar as estructuras
+<em>malloc_state</em> na memoria. Isto pódese facer co comando <code>dmha</code>:</p>
+<pre class="example">
+[0x55e517c4f1da]&gt; dmha
+main_arena @ 0x7f393d58fc40
+thread arena @ 0x7f3938000020
+</pre>
+<p>
+A saída móstranos as direccións de memoria dos <em>malloc_state</em> das
+<em>arenas</em>. Neste proceso pódese observar que ademais da <em>main_arena</em>, existe
+outra <em>arena</em> a maiores, posiblemente utilizada por un segundo fío.</p>
+<p>
+Coas as <em>arenas</em> localizadas, podes usar radare2 para ver máis
+detalles de cada unha. E como veremos, no caso de querer examinar a
+<em>main_arena</em>, nin sequera é preciso coñecer a súa dirección de memoria, radare2
+xa se encarga de atopala.</p>
+</div>
+</div>
+<div id="outline-container-headline-4" class="outline-2">
+<h2 id="headline-4">
+malloc_state
+</h2>
+<div id="outline-text-headline-4" class="outline-text-2">
+<p>
+Como dixemos, cada <em>arena</em> ten unha estructura <em>malloc_state</em>. A súa definición é a
+seguinte:</p>
+<figure>
+<div class="src src-c">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#75715e"># define INTERNAL_SIZE_T size_t
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> malloc_chunk<span style="color:#f92672">*</span> mchunkptr;
+<span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> malloc_chunk <span style="color:#f92672">*</span>mfastbinptr;
+
+<span style="color:#66d9ef">struct</span> malloc_state
+{
+  <span style="color:#75715e">/* Serialize access.  */</span>
+  __libc_lock_define (, mutex);
+
+  <span style="color:#75715e">/* Flags (formerly in max_fast).  */</span>
+  <span style="color:#66d9ef">int</span> flags;
+
+  <span style="color:#75715e">/* Set if the fastbin chunks contain recently inserted free blocks.  */</span>
+  <span style="color:#75715e">/* Note this is a bool but not all targets support atomics on booleans.  */</span>
+  <span style="color:#66d9ef">int</span> have_fastchunks;
+
+  <span style="color:#75715e">/* Fastbins */</span>
+  mfastbinptr fastbinsY[NFASTBINS];
+
+  <span style="color:#75715e">/* Base of the topmost chunk -- not otherwise kept in a bin */</span>
+  mchunkptr top;
+
+  <span style="color:#75715e">/* The remainder from the most recent split of a small request */</span>
+  mchunkptr last_remainder;
+
+  <span style="color:#75715e">/* Normal bins packed as described above */</span>
+  mchunkptr bins[NBINS <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">2</span>];
+
+  <span style="color:#75715e">/* Bitmap of bins */</span>
+  <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> binmap[BINMAPSIZE];
+
+  <span style="color:#75715e">/* Linked list */</span>
+  <span style="color:#66d9ef">struct</span> malloc_state <span style="color:#f92672">*</span>next;
+
+  <span style="color:#75715e">/* Linked list for free arenas.  Access to this field is serialized
+</span><span style="color:#75715e">     by free_list_lock in arena.c.  */</span>
+  <span style="color:#66d9ef">struct</span> malloc_state <span style="color:#f92672">*</span>next_free;
+
+  <span style="color:#75715e">/* Number of threads attached to this arena.  0 if the arena is on
+</span><span style="color:#75715e">     the free list.  Access to this field is serialized by
+</span><span style="color:#75715e">     free_list_lock in arena.c.  */</span>
+  INTERNAL_SIZE_T attached_threads;
+
+  <span style="color:#75715e">/* Memory allocated from the system in this arena.  */</span>
+  INTERNAL_SIZE_T system_mem;
+  INTERNAL_SIZE_T max_system_mem;
+};</code></pre></div>
+</div>
+<figcaption>
+<em>malloc_state</em> en glibc 2.32.
+</figcaption>
+</figure>
+<p>
+Pódese ver que amosa bastante información da <em>arena</em>. Tal vez os membros que
+máis nos interesan son os seguintes:</p>
+<ul>
+<li>
+<p><code>fastbinsY</code> -&gt; As <em>fast bins</em>, que son 10. Para cada unha contén un punteiro
+que apunta ao primeiro <em>chunk</em> da <em>fast bin</em>. Se non hai <em>chunks</em> o punteiro
+ponse a 0 (<code>NULL</code>). </p>
+</li>
+<li>
+<p><code>top</code> -&gt; A dirección do <em>top chunk</em> do <em>heap</em>.</p>
+</li>
+<li>
+<p><code>last_remainder</code> -&gt; A dirección do <em>chunk</em> <em>last remainder</em>. Cando se divide
+un <em>chunk</em> de gran tamaño en 2 para crear un <em>chunk</em> máis pequeno que devolver
+ao programa, o <em>chunk</em> que sobra é o <em>last remainder</em>. Seica se referencia por
+temas de rendemento.</p>
+</li>
+<li>
+<p><code>bins</code> -&gt; As <em>bins</em>, que son 127, inda que a primeira non se utiliza. Dentro
+deste atributo están contidas a <em>unsorted bin</em>, as <em>small bins</em> e as <em>large
+bins</em>. Por cada <em>bin</em>, úsanse 2 punteiros, <code>fd</code> e <code>bk</code>, que indican o
+primeiro é o último <em>chunk</em> da <em>bin</em>. No caso de estar baleira a <em>bin</em>, estes
+punteiros apuntan á propia entrada.</p>
+</li>
+<li>
+<p><code>next</code> -&gt; Indica a dirección do seguinte <em>malloc_state</em>.</p>
+</li>
+<li>
+<p><code>system_mem</code> -&gt; O tamaño actual do <em>heap</em>.</p>
+</li>
+</ul>
+<p>Para ver o <em>malloc_state</em> dunha <em>arena</em>, úsase o comando <code>dmhm</code>. Se non se lle
+indica unha dirección, amosa a información da <em>arena</em> principal
+(<em>main_arena</em>):</p>
+<pre class="example">
+[0x55e517c4f1da]&gt; dmhm
+malloc_state @ 0x7f3938000020
+
+struct malloc_state main_arena {
+  mutex = 0x00000000
+  flags = 0x00000002
+  fastbinsY = {
+ Fastbin 01
+ chunksize: == 0032 0x0,
+ Fastbin 02
+ chunksize: == 0048 0x0,
+ Fastbin 03
+ chunksize: == 0064 0x0,
+ Fastbin 04
+ chunksize: == 0080 0x0,
+ Fastbin 05
+ chunksize: == 0096 0x0,
+ Fastbin 06
+ chunksize: == 0112 0x0,
+ Fastbin 07
+ chunksize: == 0128 0x0,
+ Fastbin 08
+ chunksize: == 0144 0x0,
+ Fastbin 09
+ chunksize: == 0160 0x0,
+ Fastbin 10
+ chunksize: == 0176 0x0,
+}
+  top = 0x7f3938000f00,
+  last_remainder = 0x0,
+  bins {
+ Bin 001: Unsorted Bin [ chunksize: undefined 0x7f3938000020-&gt;fd = 0x7f3938000080, 0x7f3938000020-&gt;bk = 0x7f3938000080, 
+ Bin 002:              ┌ chunksize: == 000032  0x7f3938000030-&gt;fd = 0x7f3938000090, 0x7f3938000030-&gt;bk = 0x7f3938000090, 
+ Bin 003:              │ chunksize: == 000048  0x7f3938000040-&gt;fd = 0x7f39380000a0, 0x7f3938000040-&gt;bk = 0x7f39380000a0, 
+ ......................│....
+ Bin 031:              │ chunksize: == 000496  0x7f3938000200-&gt;fd = 0x7f3938000260, 0x7f3938000200-&gt;bk = 0x7f3938000260, 
+ Bin 032:   Small Bins │ chunksize: == 000512  0x7f3938000210-&gt;fd = 0x7f3938000270, 0x7f3938000210-&gt;bk = 0x7f3938000270, 
+ Bin 033:              │ chunksize: == 000528  0x7f3938000220-&gt;fd = 0x7f3938000280, 0x7f3938000220-&gt;bk = 0x7f3938000280, 
+ ......................│....
+ Bin 063:              │ chunksize: == 001008  0x7f3938000400-&gt;fd = 0x7f3938000460, 0x7f3938000400-&gt;bk = 0x7f3938000460, 
+ Bin 064:              └ chunksize: == 001024  0x7f3938000410-&gt;fd = 0x7f3938000470, 0x7f3938000410-&gt;bk = 0x7f3938000470, 
+ Bin 065:              ┌ chunksize: &gt;= 001088  0x7f3938000420-&gt;fd = 0x7f3938000480, 0x7f3938000420-&gt;bk = 0x7f3938000480, 
+ Bin 066:              │ chunksize: &gt;= 001152  0x7f3938000430-&gt;fd = 0x7f3938000490, 0x7f3938000430-&gt;bk = 0x7f3938000490, 
+ ......................│....
+ Bin 095:              │ chunksize: &gt;= 003008  0x7f3938000600-&gt;fd = 0x7f3938000660, 0x7f3938000600-&gt;bk = 0x7f3938000660, 
+ Bin 096:   Large Bins │ chunksize: &gt;= 003072  0x7f3938000610-&gt;fd = 0x7f3938000670, 0x7f3938000610-&gt;bk = 0x7f3938000670, 
+ Bin 097:              │ chunksize: &gt;= 003136  0x7f3938000620-&gt;fd = 0x7f3938000680, 0x7f3938000620-&gt;bk = 0x7f3938000680, 
+ ......................│....
+ Bin 126:              │ chunksize: &gt;= 524288  0x7f39380007f0-&gt;fd = 0x7f3938000850, 0x7f39380007f0-&gt;bk = 0x7f3938000850, 
+ Bin 127:              └ chunksize: remaining 0x7f3938000800-&gt;fd = 0x7f3938000860, 0x7f3938000800-&gt;bk = 0x7f3938000860, 
+  }
+  binmap = {0x0,0x0,0x0,0x0}
+  next = 0x7f393d58fc40,
+  next_free = 0x0,
+  system_mem = 0x21000,
+  max_system_mem = 0x21000,
+}
+</pre>
+<p>(A saída do comando esta truncada para non ocupar demasiado espazo)</p>
+<p>
+Na saída xa podemos ver que, por exemplo, non hai <em>chunks</em> nas
+<em>fast bins</em>, que o <em>heap</em> ocupa 0x21000 bytes ou que non hai <em>last remainder</em>.</p>
+<p>
+E onde andan as <em>tcaches</em>? Pois están aparte, xa que a súa finalidade é evitar que os
+fíos bloqueen o acceso ao <em>malloc_state</em>. A súa información almacénase
+noutra estructura, <em>tcache_perthread_struct</em>, que se pode atopar no <em>heap</em> (a
+partir da glibc 2.26).</p>
+</div>
+</div>
+<div id="outline-container-headline-5" class="outline-2">
+<h2 id="headline-5">
+Chunks
+</h2>
+<div id="outline-text-headline-5" class="outline-text-2">
+<p>
+Os <em>chunks</em> son os pedazos de memoria do <em>heap</em> que se van creando mediante chamadas
+á <a href="https://linux.die.net/man/3/malloc">malloc e familia</a> e liberando usando <code>free</code>, cando o programa o require.</p>
+<p>
+Inicialmente o <em>heap</em> so conta cun so <em>chunk</em> denominado <em>top chunk</em>, pero a
+medida que novos <em>chunks</em> se van pedido, este vaise dividindo para crear
+<em>chunks</em> do tamaño necesario. Tamén pode darse o caso de que o <em>chunk</em> pedido
+sexa demasiado grande para o <em>heap</em>, nese caso o <em>chunk</em> é reservado utilizando
+<a href="https://man7.org/linux/man-pages/man2/mmap.2.html">mmap</a>.</p>
+<p>
+Por outra parte, por temas de eficiencia, os <em>chunks</em> do <em>heap</em> atópanse
+alineados na memoria a 8 bytes en programas de 32 bits e a 16 bytes en 64
+bits. Isto quere decir que en 32 bits a dirección de memoria dun <em>chunk</em> é
+sempre un múltiplo de 8 e no caso de programas de 32 é un múltiplo de 16. Sen
+embargo, existe unha excepción. A partires da glibc 2.26, 
+na arquitectura i386 ou x86, usada na maioría de ordenadores persoais e
+servidores, os <em>chunks</em> pasaron a <a href="https://sourceware.org/git/?p=glibc.git;a=commit;h=4e61a6be446026c327aa70cef221c9082bf0085d">estar sempre alineados a 16</a>, tanto en
+programas de 64 como 32 bits.</p>
+<p>
+Por outra parte, que os <em>chunks</em> estén alineados a certas posicións de memoria
+implica que non se pode crear un <em>chunk</em> de calquera tamaño, senón que
+chamadas a <code>malloc</code> con diferentes tamaños nun rango derivan nun <em>chunk</em>
+do mesmo tamaño. </p>
+<p>
+Por exemplo, tanto <code>malloc(100)</code> como <code>malloc(101)</code> reservarían un <em>chunk</em> do mesmo
+tamaño, 112 bytes no caso de 64 bits. Se queres calcular o tamaño dun <em>chunk</em>
+que vai a crear unha chamada a <em>malloc</em>, podes usar <a href="https://gist.github.com/Zer1t0/279c1b585960c7af84746fac196eabb6">o seguinte snippet</a> ou a
+ferramenta <a href="https://github.com/hackliza/gmcalc#malloc-to-chunk">gmcalc</a>.</p>
+<p>
+Para ver a arquitectura e os bits do programa en radare2 podes usar <code>i</code>:</p>
+<pre class="example">
+[0x7f8491e94090]&gt;i~machine[1-]
+AMD x86-64 architecture
+[0x7f8491e94090]&gt; i~bits[1]
+64
+</pre>
+<p>Podes ver que neste caso temos programa x86 de 64 bits.</p>
+<p>
+E para consultar a versión da glibc, podes ver os mapas con <code>dm</code> e buscar <code>libc</code>.
+Normalmente no nome xa se indica a versión. Por exemplo:</p>
+<pre class="example">
+[0x557602f15189]&gt; dm~libc:0[9]
+/usr/lib/x86_64-linux-gnu/libc-2.32.so
+</pre>
+<p>Pódese ver que está mapeado a arquivo <code>libc-2.32.so</code>, o qué indica que estamos a usar
+a glibc versión 2.32.</p>
+<p>
+Volvendo ao tema, cada <em>chunk</em> segue a estructura <em>malloc_chunk</em>:</p>
+<figure>
+<div class="src src-c">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#75715e"># define INTERNAL_SIZE_T size_t
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">struct</span> malloc_chunk {
+
+  INTERNAL_SIZE_T      mchunk_prev_size;  <span style="color:#75715e">/* Size of previous chunk (if free).  */</span>
+  INTERNAL_SIZE_T      mchunk_size;       <span style="color:#75715e">/* Size in bytes, including overhead. */</span>
+
+  <span style="color:#66d9ef">struct</span> malloc_chunk<span style="color:#f92672">*</span> fd;         <span style="color:#75715e">/* double links -- used only if free. */</span>
+  <span style="color:#66d9ef">struct</span> malloc_chunk<span style="color:#f92672">*</span> bk;
+
+  <span style="color:#75715e">/* Only used for large blocks: pointer to next larger size.  */</span>
+  <span style="color:#66d9ef">struct</span> malloc_chunk<span style="color:#f92672">*</span> fd_nextsize; <span style="color:#75715e">/* double links -- used only if free. */</span>
+  <span style="color:#66d9ef">struct</span> malloc_chunk<span style="color:#f92672">*</span> bk_nextsize;
+};
+<span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> malloc_chunk<span style="color:#f92672">*</span> mchunkptr;</code></pre></div>
+</div>
+<figcaption>
+<em>malloc_chunk</em> en glibc 2.32.
+</figcaption>
+</figure>
+<p>
+Nota: O tipo <code>INTERNAL_SIZE_T</code> é un alias de <code>size_t</code>, que ocupa 8 bytes en 64 bits e 4
+bytes en 32 bits.</p>
+<p>
+Nota: O membro <code>mchunk_prev_size</code> chámase <code>prev_size</code> en versions anteriores da
+glibc, polo que usuarei este último nome, xa que é máis curto. O mesmo para
+<code>mchunk_size</code>, que se chamaba <code>size</code>.</p>
+<p>
+O campo <code>prev_size</code> (<code>mchunk_prev_size</code>) serve para indicar o tamaño de <em>chunk</em>
+anterior cando está libre. No caso de estar en uso, o <em>chunk</em> pode usar o campo
+<code>prev_size</code> do <em>chunk</em> seguinte para almacenar datos.</p>
+<pre class="example">
+       .-----------.
+       | prev_size |
+       | size      | free chunk
+ chunk | fd        |
+       | bk        |
+    ---|-----------|---
+       | prev_size | &lt;- previous chunk size
+       | size      | allocated chunk
+ chunk | prevdata  |
+       | prevdata  |
+    ---|-----------|---  
+       | prevdata  | &lt;- previous chunk data
+ chunk | size      |     
+       | ....      |     
+       &#39;-----------&#39;
+</pre>
+<p>
+Cando o <em>chunk</em> anterior é liberado, entón a glibc escribe no campo <code>prev_size</code>
+o tamaño do <em>chunk</em>. E como veremos a continuación, tamén pon a 0 a flag
+PREV_INUSE que se atopa no campo <code>size</code>.</p>
+<p>
+O campo <code>size</code> (<code>mchunk_size</code>) indica o tamaño do <em>chunk</em> actual, incluíndo a
+cabeceira (<code>prev_size</code> + <code>size</code>).</p>
+<p>
+En 32 bits o tamaño mínimo dun <em>chunk</em> é de 16 bytes, e en 64 bits, 32
+bytes. Polo que incluso as chamadas a <code>malloc(0)</code> che devolverán un <em>chunk</em>
+destes tamaños:</p>
+<ul>
+<li>
+<p>32 bits: <code>malloc(0)</code> -&gt; 16 bytes. 8 bytes de datos e 8 de cabeceira.</p>
+</li>
+<li>
+<p>64 bits: <code>malloc(0)</code> -&gt; 32 bytes. 16 bytes de datos e 16 de cabeceira.</p>
+</li>
+</ul>
+<p>Ademais, como tódolos <em>chunks</em> son múltiplos de 8, os 3 bits menos
+significativos non se usan para indicar o tamaño. Estes bits utilízanse como
+flags con significados especiais:</p>
+<ul>
+<li>
+<p><strong><strong>P</strong></strong> (PREV_INUSE) -&gt; O primer bit ponse a 1 (0x1) se o <em>chunk</em> anterior se atopa
+   libre.</p>
+</li>
+<li>
+<p><strong><strong>M</strong></strong> (IS_MMAPPED) -&gt; O segundo bit ponse a 1 (0x2) se o <em>chunk</em> foi creado
+   usando <code>mmap</code>.</p>
+</li>
+<li>
+<p><strong><strong>N</strong></strong> ou <strong><strong>A</strong></strong> (NON_MAIN_ARENA) -&gt; O tercer bit ponse a 1 (0x4) se o <em>chunk</em>
+   non se atopa na arena principal.</p>
+</li>
+</ul>
+<pre class="example">
+      chunk
+ .--------------.
+ | prev_size     |
+ | size  |N|M|P| | &lt;-- special flags
+ | fd            |
+ | bk            |
+ | fd_nextsize   |
+ | bk_nextsize   |
+ &#39;---------------&#39;
+</pre>
+<p>
+Os seguintes campos, <code>fd</code> e <code>bk</code>, son punteiros usados polos <em>chunks</em> libres nas
+<em>bins</em> para crear enlaces apuntando ao seguinte e anterior <em>chunk</em> da mesma
+<em>bin</em>, respectivamente.</p>
+<figure>
+<pre class="example">
+                 .----------------------------------------------------------.
+                 |   entry               chunk                  chunk       |
+                 |   .----.          .-----------.          .-----------.   |
+                 &#39;-&gt; | XX | &lt;-.  .-&gt; | prev_size | &lt;-.  .-&gt; | prev_size | &lt;-|--.
+                     | YY |   |  |   | size      |   |  |   | size      |   |  |
+malloc_state.bins[i] | fd |---|--&#39;   | fd -------|---|--&#39;   | fd -------|---&#39;  |
+                   .-| bk |   &#39;------| bk        |   &#39;------| bk        |      |
+                   | &#39;----&#39;          &#39;-----------&#39;          &#39;-----------&#39;      |
+                   &#39;-----------------------------------------------------------&#39;
+</pre>
+<figcaption>
+Esquema dunha <em>small bin</em>.
+</figcaption>
+</figure>
+<p>
+Se pola contra, o <em>chunk</em> está en uso, estes punteiros non fan falta e o seu
+espazo pode ser usado para escribir datos arbitrarios do programa. De feito,
+cando se reserva un <em>chunk</em> usando <code>malloc</code>, o punteiro devolto non apunta ao
+comezo do <em>chunk</em>, senón á dirección de <code>fd</code>.</p>
+<pre class="example">
+                  chunk
+              .-----------.
+              | prev_size |
+              | size      |
+malloc(x) --&gt; | fd        |
+              | bk        |
+              &#39;-----------&#39;
+</pre>
+<p>
+Por último, están <code>fd_nextsize</code> e <code>bk_nextsize</code>, que so se usan nas <em>large bins</em>
+,que conteñen <em>chunks</em> de diferentes tamaños, para indicar onde está o próximo
+ou anterior <em>chunk</em> dun tamaño maior e menor, respectivamente.</p>
+<figure>
+<pre class="example">
+    .------------&lt;-------------------&lt;-----------------------&lt;----------------------&lt;---.
+    |   entry               chunk                  chunk                    chunk       |
+    |   .----.        .-------------.         .------------.          .-------------.   |
+    &#39;-&gt; | XX |&lt;-.  .-&gt;| prev_size   |&lt;--. .-&gt; | prev_size   |&lt;-.  .--&gt;| prev_size   | &lt;-|--.
+        | YY |  |  |  | size (0x520)|   | |   | size (0x520)|  |  |   | size (0x510)|   |  |
+bins[i] | fd |--|-&gt;&#39;  | fd ---------|&gt;--|-&#39;   | fd          |&gt;-|--|   | fd ---------|&gt;--&#39;  |
+      .-| bk |  &#39;----&lt;| bk          |   |----&lt;| bk          |  &#39;--|--&lt;| bk          |      |
+      | &#39;----&#39;        | fd_nextsize |&gt;. |     | fd_nextsize |     |   | fd_nextsize |&gt;-.   |
+      |             .&lt;| bk_nextsize | | |     | bk_nextsize |     | .&lt;| bk_nextsize |  |   |
+      |             | &#39;-------------&#39; | |     &#39;-------------&#39;     | | &#39;-------------&#39;  |   |
+      |             &#39;-----------&gt;-----&#39;-|-&gt;---------&gt;----------&gt;--&#39; |                  |   |
+      |                                 |                           |                  |   |
+      |                                 &#39;---&lt;---------------&lt;-------&#39;---&lt;-------&lt;------&#39;   |
+      |                                                                                    |
+      &#39;------&gt;---------&gt;-----------------&gt;------------------&gt;-----------------&gt;------------&#39;
+</pre>
+<figcaption>
+Esquema dunha <em>large bin</em>.
+</figcaption>
+</figure>
+<p>
+Ao final, podemos ter diferentes datos no mesmo <em>chunk</em> en función do seu
+estado:</p>
+<pre class="example">
+
+   allocated           free               free
+                                       (large bin)
+ .-----------.     .-----------.     .-------------.
+ | prev_size |     | prev_size |     | prev_size   |
+ | size      |     | size      |     | size        |
+ | userdata  |     | fd        |     | fd          |
+ | userdata  |     | bk        |     | bk          |
+ | userdata  |     | userdata  |     | fd_nextsize |
+ | userdata  |     | userdata  |     | bk_nextsize |
+ | userdata  |     | userdata  |     | userdata    |
+ | userdata  |     | userdata  |     | userdata    |
+ &#39;-----------&#39;     &#39;-----------&#39;     &#39;-------------&#39;
+</pre>
+<p>
+Debe terse en conta que cando un <em>chunk</em> é liberado usando <code>free</code>, os datos que
+contiña permanecen inalterados, a excepción daqueles sobreescritos polos
+punteiros das <em>bins</em>. É responsabilidade do programador borrar estes datos e/ou
+asumir que os <em>chunks</em> poden ter datos &#34;aleatorios&#34; escritos neles ao serén
+reservados.</p>
+<p>
+Para ver un <em>chunk</em> en radare2, podes usar o comando <code>dmhc</code> indicando a sua
+dirección de memoria, precedida por <code>@</code>. Por exemplo <code>dmhc @0x5583f1f1f270</code>:</p>
+<pre class="example">
+[0x5583f0e61282]&gt; dmhc @0x5583f1f1f270
+struct malloc_chunk @ 0x5583f1f1f270 {
+  prev_size = 0x0,
+  size = 0x20,
+  flags: |N:0 |M:0 |P:1,
+  fd = 0x5583f1f1f2a0,
+  bk = 0x5583f1f1f010,
+}
+chunk data = 
+0x5583f1f1f280  0x00005583f1f1f2a0  0x00005583f1f1f010   .....U.......U..
+</pre>
+<p>
+Neste caso o <em>chunk</em> ésta nunha <em>bin</em> (non o pon no <em>chunk</em>, pero xa
+cho digo eu), polo que <code>fd</code> e <code>bk</code> apuntan a outros <em>chunks</em> da <em>bin</em> (ou á
+entrada da <em>bin</em> no <em>malloc_state</em>).</p>
+<p>
+Pódese observar que <code>chunk data</code> amosa os mesmos bytes que <code>fd</code> e <code>bk</code> , xa que
+como dixen antes, é en <code>fd</code> onde se comezan a escribir os datos de usuario cando
+o <em>chunk</em> está sendo usado.</p>
+<p>
+No seguinte exemplo amósase un <em>chunk</em> que está en uso:</p>
+<pre class="example">
+[0x5624802e1193]&gt; dmhc @0x562482199250
+struct malloc_chunk @ 0x562482199250 {
+  prev_size = 0x0,
+  size = 0x410,
+  flags: |N:0 |M:0 |P:1,
+  fd = 0x6f77206f6c6c6568,
+  bk = 0xa646c72,
+  fd-nextsize = 0x0,
+  bk-nextsize = 0x0,
+}
+chunk data = 
+0x562482199260  0x6f77206f6c6c6568  0x000000000a646c72   hello world.....
+0x562482199270  0x0000000000000000  0x0000000000000000   ................
+...
+...
+</pre>
+<p>
+Neste último caso, pódese observar que <code>fd</code> e <code>bk</code> teñen uns valores un tanto
+extraños para estar nunha <em>bin</em>, e <code>chunk data</code> amosa que estes datos representan
+a cadea <code>hello world</code>, polo que, inda que o <em>chunk</em> non indique se está libre ou
+non (habería que consultar a flag <code>P</code> do seguinte <em>chunk</em>), xa se pode intuir
+que está en uso.</p>
+<p>
+En caso de non especificar ningún argumento, <code>dmhc</code> intentará parsear a
+dirección actual de radare2 coma un <em>chunk</em>. E poden pasar cousas extrañas coma
+a seguinte:</p>
+<pre class="example">
+[0x55cb6f22e1cc]&gt; dmhc
+struct malloc_chunk @ 0x55cb6f22e1cc {
+  prev_size = 0xbf00000e7f358d48,
+  size = 0xfffe73e800000000,
+  flags: |N:0 |M:0 |P:1,
+  fd = 0xc3c900000000b8ff,
+  bk = 0x80c48348e5894855,
+  fd-nextsize = 0x358d480000001dba,
+  bk-nextsize = 0x1bf00000e72,
+}
+chunk too big to be displayed
+</pre>
+<p>
+Podemos ver que o <code>size</code> do <em>chunk</em> e ridículamente grande, polo que un xa se
+imaxina un que nesa dirección de memoria non hai un <em>chunk</em>.</p>
+</div>
+</div>
+<div id="outline-container-headline-6" class="outline-2">
+<h2 id="headline-6">
+Heap
+</h2>
+<div id="outline-text-headline-6" class="outline-text-2">
+<p>
+Os <em>heap</em> son grandes rexións continuas de memoria, onde se crean os <em>chunks</em>
+que van a ser usados polo proceso. O <em>heap</em> principal crease usando
+a chamada ao sistema <a href="https://linux.die.net/man/2/sbrk">sbrk</a> e a rexión de memoria que se crea chámase <code>[heap]</code>.
+O resto de <em>heaps</em> creanse mediante <a href="https://man7.org/linux/man-pages/man2/mmap.2.html">mmap</a>.</p>
+<p>
+Como comentei antes, cando se crea, un <em>heap</em> so ten un gran <em>chunk</em> denominado
+<em>top chunk</em>, que se vai dividindo para crear novos <em>chunks</em> segundo se
+precise.</p>
+<p>
+Ademais no caso de ser necesario, o tamaño do <em>heap</em> pode ser
+aumentado, ben usando <a href="https://linux.die.net/man/2/sbrk">sbrk</a> ou <a href="https://man7.org/linux/man-pages/man2/mmap.2.html">mmap</a>, dependendo de como se crease o <em>heap</em>.</p>
+<pre class="example">
+
+    initial heap                 heap                       heap
+   .-----------.             .-----------.             .-----------.
+   |           |   malloc    |   chunk   |             |   chunk   |
+   |           | ----------&gt; |           |             |           |
+   |           |             |-----------|             |-----------|
+   |           |   malloc    |   chunk   |             |   chunk   |
+   |           | ----------&gt; |           |             |           |
+   | top_chunk |             |-----------|             |-----------|
+   |           |             |           |   malloc    |   chunk   |
+   |           |             | top_chunk | ----------&gt; |           |
+   |           |             |           |             |-----------|
+   |           |             |           |   malloc    |   chunk   |
+   &#39;-----------&#39;             &#39;-----------&#39; ----------&gt; |           |
+                                              |        |-----------|
+                                              | sbrk   |           |
+                                              &#39;------&gt; | top_chunk |
+                                                       |           |
+                                                       &#39;-----------&#39;
+</pre>
+<p>
+O esquema amosa como se vai fragmentando o <em>top_chunk</em> con sucesivas chamadas a
+<code>malloc</code> e como <a href="https://linux.die.net/man/2/sbrk">sbrk</a> é invocado cando se necesita máis <em>heap</em>.</p>
+<p>
+Tamén debemos saber que os <em>chunks</em> de gran tamaño será directamente reservados
+con <a href="https://man7.org/linux/man-pages/man2/mmap.2.html">mmap</a>, sen usar os <em>heaps</em>.</p>
+<p>
+Podes comprobar se existe o <em>heap</em> principal examinando os mapas de memoria con
+<code>dm</code>:</p>
+<pre class="example">
+[0x5614183471c2]&gt; dm~heap]
+0x0000561418c3f000 - 0x0000561418c60000 - usr   132K s rw- [heap] [heap]
+</pre>
+<p>
+Para listar os chunks do <em>heap</em> podes usar o comando <code>dmh</code>:</p>
+<pre class="example">
+[0x5564c637d1dd]&gt; dmh
+
+  Malloc chunk @ 0x5564c76f9250 [size: 0x3f0][free]
+  Malloc chunk @ 0x5564c76f9640 [size: 0x120][allocated]
+  Top chunk @ 0x5564c76f9760 - [brk_start: 0x5564c76f9000, brk_end: 0x5564c771a000]
+</pre>
+<p>
+En teoría este comando permite ver o <em>heap</em> de diferentes arenas, sen embargo,
+ao executalo coa dirección da <em>arena</em> dun fío, soamente me devolve que o <em>heap</em>
+está corrupto: </p>
+<pre class="example">
+[0x56159e0e21d8]&gt; dmha
+main_arena @ 0x7f6066b3fc40
+thread arena @ 0x7f6060000020
+[0x56159e0e21d8]&gt; dmh 0x7f6060000020
+
+  Malloc chunk @ 0x7f6060000b50 [corrupted]
+   size: 0x0
+   fd: 0x0, bk: 0x0
+
+  Top chunk @ 0x7f6060000f00 - [brk_start: 0x7f6060000000, brk_end: 0x7f6060021000]
+</pre>
+<p>
+Abrín un <a href="https://github.com/radareorg/radare2/issues/17849">issue en github</a> para reportar este erro, así que confío en que se
+solucione. Ademais, en binarios de 32 bits experimentei o efecto contrario, o
+<em>heap</em> da <em>main_arena</em> non se da parseado, mentres que os <em>heaps</em> dos fíos
+sí. Manda carallo.  ¯\_(ツ)_/¯ </p>
+<p>
+Por outra parte, os <em>heaps</em> creados con <code>mmap</code> (todos salvo o principal) inclúen
+ao principio unha estructura <em>heap_info</em>:</p>
+<div class="src src-c">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> _heap_info
+{
+  mstate ar_ptr; <span style="color:#75715e">/* Arena for this heap. */</span>
+  <span style="color:#66d9ef">struct</span> _heap_info <span style="color:#f92672">*</span>prev; <span style="color:#75715e">/* Previous heap. */</span>
+  size_t size;   <span style="color:#75715e">/* Current size in bytes. */</span>
+  size_t mprotect_size; <span style="color:#75715e">/* Size in bytes that has been mprotected
+</span><span style="color:#75715e">                           PROT_READ|PROT_WRITE.  */</span>
+  <span style="color:#75715e">/* Make sure the following data is properly aligned, particularly
+</span><span style="color:#75715e">     that sizeof (heap_info) + 2 * SIZE_SZ is a multiple of
+</span><span style="color:#75715e">     MALLOC_ALIGNMENT. */</span>
+  <span style="color:#66d9ef">char</span> pad[<span style="color:#f92672">-</span><span style="color:#ae81ff">6</span> <span style="color:#f92672">*</span> SIZE_SZ <span style="color:#f92672">&amp;</span> MALLOC_ALIGN_MASK];
+} heap_info;</code></pre></div>
+</div>
+<p>
+Esta estructura indica, entre outros, a dirección de memoria da <em>arena</em> do
+<em>heap</em> ao que pertence a estructura no membro <code>ar_ptr</code>.</p>
+<p>
+Para ver os <em>heap_info</em> dos <em>heaps</em> dunha <em>arena</em> pódese usar <code>dmhi</code>:</p>
+<pre class="example">
+[0x559dfb80022e]&gt; dmhi @0x7f3bd8000020
+malloc_info @ 0x7f3bd8000000 {
+  ar_ptr = 0x7f3bd8000020
+  prev = 0x0
+  size = 0x21000
+  mprotect_size = 0x21000
+}
+</pre>
+<p>
+Pero recorda que a <a href="https://sourceware.org/git/?p=glibc.git;a=blob;f=malloc/malloc.c;h=5b87bdb081f819c9d2b765b2f8e888e4d749c911;hb=HEAD#l1757"><em>main_arena</em> xa se atopa nunha posición predefinida</a>, polo que
+non lle fai falta un <em>heap_info</em> que indique a súa posición. Así que recibirías
+o seguinte erro se consultas o <em>heap_info</em> da <em>main_arena</em>:</p>
+<pre class="example">
+[0x559dfb80022e]&gt; dmhi @0x7f3bdd14cba0
+main_arena does not have an instance of malloc_info
+</pre>
+<p>
+Qué por que pon <em>malloc_info</em> no canto de <em>heap_info</em>? Pois non che sabería dicir…</p>
+</div>
+</div>
+<div id="outline-container-headline-7" class="outline-2">
+<h2 id="headline-7">
+Bins
+</h2>
+<div id="outline-text-headline-7" class="outline-text-2">
+<p>
+As <em>bins</em> son listas de <em>chunks</em> que non están en uso polo proceso. Un <em>chunk</em> so pode
+estar nunha <em>bin</em> ao mesmo tempo. A <em>bin</em> na que se inserta un <em>chunk</em> é un tema
+complexo, que depende en gran medida do tamaño do <em>chunk</em>, pero tamén de outros
+factores de optimización.</p>
+<p>
+De feito, os algoritmos utilizados para insertar e remover os <em>chunks</em> nas <em>bins</em>
+están deseñados para ser eficientes e poden levar a comportamentos
+contraintuitivos e impredecibles a primeira vista. O mellor sempre é
+experimentar cun programa para habituarse ao comportamento das <em>bins</em>.</p>
+<p>
+Existen 5 tipos de <em>bins</em>, que se poden separar en 2 grupos. As <em>bins</em> &#34;normais&#34;
+ou de dobre enlace e as <em>bins</em> de cache ou de enlace único.</p>
+<p>
+As <em>bins</em> de dobre enlace usan os punteiros <code>fd</code> e <code>bk</code>. Son colas FIFO (First In
+First Out), nas que se insertan os <em>chunks</em> ao principio da cola e se empezan a
+buscar polo final. Estas <em>bins</em> son:</p>
+<ul>
+<li>
+<p><strong><strong>Unsorted bin</strong></strong> -&gt; Unha <em>bin</em> na que se insertan <em>chunks</em> sen orden
+                antes de meterse nas <em>large bins</em> ou nas <em>small bins</em>.</p>
+</li>
+<li>
+<p><strong><strong>Small bins</strong></strong> -&gt; Para os <em>chunks</em> de pequeno tamaño. Tódolos
+              <em>chunks</em> son do mesmo tamaño.</p>
+</li>
+<li>
+<p><strong><strong>Large bins</strong></strong> -&gt; Para os <em>chunks</em> de maior tamaño. Admiten <em>chunks</em> de distintos
+              tamaños que se ordenan en función deste. </p>
+</li>
+</ul>
+<p>Por outra banda as <em>bins</em> de enlace único usan so <code>fd</code> e son colas LIFO (Last In
+First Out) xa que os <em>chunks</em> se insertan e se empezan a buscar pola
+cabeceira. Estas <em>bins</em> son:</p>
+<ul>
+<li>
+<p><strong><strong>Fast bins</strong></strong> -&gt; Son <em>bins</em> de cache para os <em>chunks</em> máis pequenos.</p>
+</li>
+<li>
+<p><strong><strong>Tcaches</strong></strong> (Thread Caches) -&gt; Son <em>bins</em> especiais que permiten a varios fíos
+   acceder a <em>chunks</em> de pequeno tamaño ao mesmo tempo.</p>
+</li>
+</ul>
+<p>Outra cousa a ter en conta é que se un <em>chunk</em> podese meter en varias <em>bins</em>,
+normalmente en <em>tcaches</em>, <em>fast bins</em> e <em>small bins</em> o orde é o seguinte:</p>
+<ol>
+<li>
+<p>Tcaches -&gt; Cando é posible, os <em>chunks</em> métense nas <em>tcaches</em>, tanto nas
+chamadas a <code>free</code> como na recarga de <em>tcaches</em>.</p>
+</li>
+<li>
+<p>Fast bins -&gt; Métense os <em>chunks</em> nas <em>fast bins</em> cando as <em>tcaches</em> están cheas.</p>
+</li>
+<li>
+<p>Small bins -&gt; Os <em>chunks</em> van ás <em>small bins</em> cando as <em>tcaches</em> están cheas
+e estes son demasiado grandes para as <em>fast bins</em>.</p>
+</li>
+</ol>
+<div id="outline-container-headline-8" class="outline-3">
+<h3 id="headline-8">
+Bins de dobre enlace
+</h3>
+<div id="outline-text-headline-8" class="outline-text-3">
+<p>
+As <em>bins</em> de dobre enlace (<code>fd</code> e <code>bk</code>) son:</p>
+<ul>
+<li>
+<p>Unsorted Bin</p>
+</li>
+<li>
+<p>Small bins</p>
+</li>
+<li>
+<p>Large bins</p>
+</li>
+</ul>
+<p>Estas <em>bins</em> atópanse no atributo <code>bins</code> da estructura <em>malloc_state</em>. Este
+atributo contén un punteiro <code>fd</code> e <code>bk</code> para cada <em>bin</em>, que apuntan ao primeiro
+e último <em>chunk</em> da mesma, respectivamente. No caso de non haber <em>chunks</em>, estes
+punteiros apuntan cara a o propio attributo <code>bins</code>.</p>
+<p>
+Para mostrar as <em>bins</em> de dobre enlace podemos usar o comando <code>dmhb</code>:</p>
+<pre class="example">
+[0x7f8491e94090]&gt; dmhb
+  Bin 001:
+  double linked list unsorted bin {
+    0x7f8491df1ca0-&gt;fd = 0x7f8491df1ca0
+    0x7f8491df1ca0-&gt;bk = 0x7f8491df1ca0
+  }
+  Bin 002:
+  double linked list small bin {
+    0x7f8491df1cb0-&gt;fd = 0x7f8491df1cb0
+    0x7f8491df1cb0-&gt;bk = 0x7f8491df1cb0
+  }
+  Bin 003:
+  double linked list small bin {
+    0x7f8491df1cc0-&gt;fd = 0x7f8491df1cc0
+    0x7f8491df1cc0-&gt;bk = 0x7f8491df1cc0
+  }
+..............| Stripped Output |...................
+  Bin 064:
+  double linked list small bin {
+    0x7f8491df2090-&gt;fd = 0x5637a11c0030-&gt;fd = 0x7f8491df2090
+    0x7f8491df2090-&gt;bk = 0x5637a11c0030-&gt;bk = 0x7f8491df2090
+  }
+  Bin 065:
+  double linked list large bin {
+    0x7f8491df20a0-&gt;fd = 0x7f8491df20a0
+    0x7f8491df20a0-&gt;bk = 0x7f8491df20a0
+  }
+..............| Output stripped |...................
+ Bin 126:
+  double linked list large bin {
+    0x7f8491df2470-&gt;fd = 0x7f8491df2470
+    0x7f8491df2470-&gt;bk = 0x7f8491df2470
+  }
+ Bin 127:
+  double linked list large bin {
+    0x7f8491df2480-&gt;fd = 0x7f8491df2480
+    0x7f8491df2480-&gt;bk = 0x7f8491df2480
+  }
+
+}
+</pre>
+<p>(A saída está truncada para non ocupar excesivo espacio)</p>
+<p>
+Para mostrar soamente as <em>bins</em> dobres que conteñen algún <em>chunk</em>, podemos usar
+<code>dmhb</code> e filtrar con <code>grep</code>:</p>
+<pre class="example">
+[0x7f8491e94090]&gt; dmhb | grep -E &#39;fd =.+=&#39; -C 2
+ Bin 064:
+  double linked list small bin {
+    0x7f8491df2090-&gt;fd = 0x5637a11c0030-&gt;fd = 0x7f8491df2090
+    0x7f8491df2090-&gt;bk = 0x5637a11c0030-&gt;bk = 0x7f8491df2090
+  }
+</pre>
+<p>
+Se queres ver unha <em>bin</em> dobremente enlazada en concreto, podes usar <code>dmhb</code> e
+pasarlle o índice do atributo <code>bins</code>:</p>
+<pre class="example">
+[0x7f8491e94090]&gt; dmhb 64
+ Bin 064:
+  double linked list small bin {
+    0x7f8491df2090-&gt;fd = 0x5637a11c0030-&gt;fd = 0x7f8491df2090
+    0x7f8491df2090-&gt;bk = 0x5637a11c0030-&gt;bk = 0x7f8491df2090
+  }
+</pre>
+<div id="outline-container-headline-9" class="outline-4">
+<h4 id="headline-9">
+Unsorted bin
+</h4>
+<div id="outline-text-headline-9" class="outline-text-4">
+<p>
+A <em>unsorted bin</em> é unha <em>bin</em> dobremente enlazada, que se pode percorrer cara
+adiante e cara atrás usando os punteiros <code>fd</code> e <code>bk</code> dos <em>chunks</em>,
+respectivamente. É unha cola FIFO (First In First Out), onde os <em>chunks</em> se
+insertan ao principio, no punteiro <code>fd</code> da entrada da <em>bin</em>, e se buscan dende o
+final, empezando polo punteiro <code>bk</code>.</p>
+<figure>
+<pre class="example">
+                 .----------------------------------------------------------.
+                 |   entry               chunk                  chunk       |
+                 |   .----.          .-----------.          .-----------.   |
+                 &#39;-&gt; | XX | &lt;-.  .-&gt; | prev_size | &lt;-.  .-&gt; | prev_size | &lt;-|--.
+                     | YY |   |  |   | size      |   |  |   | size      |   |  |
+malloc_state.bins[1] | fd |---|--&#39;   | fd -------|---|--&#39;   | fd -------|---&#39;  |
+                   .-| bk |   &#39;------| bk        |   &#39;------| bk        |      |
+                   | &#39;----&#39;          &#39;-----------&#39;          &#39;-----------&#39;      |
+                   &#39;-----------------------------------------------------------&#39;
+</pre>
+<figcaption>
+Esquema <em>unsorted bin</em>.
+</figcaption>
+</figure>
+<p>
+É a primeira <em>bin</em> do membros <code>bins</code> da estructura <em>malloc_state</em> da <em>arena</em>, e
+ten a peculiaridade de que os <em>chunks</em> contidos nela non están ordenados. Isto
+permite que as insercións sexan rápidas e sen gran coste computacional. Polo que
+o modo de actuar da glibc é insertar primeiramente os <em>chunks</em> na <em>unsorted
+bin</em>. Logo, cando esta é percorrida na procura dun <em>chunk</em> dun tamaño
+específico, tódolos <em>chunks</em> que se van examinando e descartando vanse
+insertando na <em>bin</em> que lles corresponda, <em>small</em> ou <em>large</em>.</p>
+<p>
+Sen embargo, normalmente os <em>chunks</em> destinados ás <em>small bins</em> non pasan pola
+<em>unsorted bin</em>, senón que son insertadas directamente no seu destino, xa que é
+doado calcular a <em>small bin</em> á que pertence un <em>chunk</em> concreto e ademais ao
+serén tódolos <em>chunks</em> do mesmo tamaño, non fai falta ordenalos. Nos meus
+experimentos os <em>chunks</em> destinados ás <em>small bins</em> soamente eran insertados
+primeiro na <em>unsorted bin</em> cando se producía unha consolidación.</p>
+<p>
+Para ver a <em>unsorted bin</em> podes usar o comando <code>dmhb 1</code>:</p>
+<pre class="example">
+[0x55b3cb19b27d]&gt; dmhb 1
+  Bin 001:
+  double linked list unsorted bin {
+    0x7ff8f1a9eca0-&gt;fd = 0x55b3cce31370-&gt;fd = 0x55b3cce31f90-&gt;fd = 0x7ff8f1a9eca0
+    0x7ff8f1a9eca0-&gt;bk = 0x55b3cce31f90-&gt;bk = 0x55b3cce31370-&gt;bk = 0x7ff8f1a9eca0
+  }
+</pre>
+<p>Neste exemplo a <em>unsorted bin</em> ten 2 <em>chunks</em> (0x55b3cce31370 e 0x55b3cce31f90).</p>
+<p>
+Tamén podes consultar a <em>unsorted bin</em> doutra <em>arena</em> indicando a dirección do
+<em>malloc_state</em> correspondente, seguindo o formato <code>dmhb 1:malloc_state</code>:</p>
+<pre class="example">
+[0x55f3489b8250]&gt; dmhb 1:0x7fbd44000020
+  Bin 001:
+  double linked list unsorted bin {
+    0x7fbd44000080-&gt;fd = 0x7fbd44000080
+    0x7fbd44000080-&gt;bk = 0x7fbd44000080
+  }
+</pre>
+<p>Neste caso atopamos vacía a <em>unsorted bin</em>.</p>
+</div>
+</div>
+<div id="outline-container-headline-10" class="outline-4">
+<h4 id="headline-10">
+Small bins
+</h4>
+<div id="outline-text-headline-10" class="outline-text-4">
+<p>
+As <em>small bins</em> son colas FIFO (First In First Out), dobremente enlazadas con
+<code>fd</code> e <code>bk</code>, destinadas a <em>chunks</em> de pequeno tamaño. Os <em>chunks</em> insertanse no
+comezo da <em>bin</em>, e recupéranse no final.</p>
+<figure>
+<pre class="example">
+                 .----------------------------------------------------------.
+                 |   entry               chunk                  chunk       |
+                 |   .----.          .-----------.          .-----------.   |
+                 &#39;-&gt; | XX | &lt;-.  .-&gt; | prev_size | &lt;-.  .-&gt; | prev_size | &lt;-|--.
+                     | YY |   |  |   | size      |   |  |   | size      |   |  |
+malloc_state.bins[i] | fd |---|--&#39;   | fd -------|---|--&#39;   | fd -------|---&#39;  |
+                   .-| bk |   &#39;------| bk        |   &#39;------| bk        |      |
+                   | &#39;----&#39;          &#39;-----------&#39;          &#39;-----------&#39;      |
+                   &#39;-----------------------------------------------------------&#39;
+</pre>
+<figcaption>
+Esquema dunha <em>small bin</em>.
+</figcaption>
+</figure>
+<p>
+En 64 bits existen un total de 62 <em>small bins</em>, que abarcan <em>chunks</em> de tamaños
+dende 32 ata 1008 (0x3f0) bytes.</p>
+<p>
+Por outra parte, en 32 bits o tamaño soportado e o número de <em>small bins</em> varía en
+función do aliñamento dos <em>chunks</em>, sendo sempre o menor tamaño 16 bytes. </p>
+<p>
+No caso de que os <em>chunks</em> se aliñen a 8, existen 62 <em>small bins</em> que poden
+aloxar <em>chunks</em> de ata 504 bytes. </p>
+<p>
+Pola contra, se os <em>chunks</em> están aliñados a 16 (no caso de x86 a partires de
+libc 2.26), os <em>chunks</em> almacenados nas <em>small bins</em> abarcan ata 1008 bytes,
+igual que en 64 bits, inda que nesta configuración existen 63 <em>small bins</em>.</p>
+<figure>
+<table>
+<thead>
+<tr>
+<th>small bin (bins index)</th>
+<th>64 bits</th>
+<th>32 bits (align 16)</th>
+<th>32 bits (align 8)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 (2)</td>
+<td>0x20</td>
+<td>0x10</td>
+<td>0x10</td>
+</tr>
+<tr>
+<td>2 (3)</td>
+<td>0x30</td>
+<td>0x20</td>
+<td>0x18</td>
+</tr>
+<tr>
+<td>3 (4)</td>
+<td>0x40</td>
+<td>0x30</td>
+<td>0x20</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>62 (63)</td>
+<td>0x3f0</td>
+<td>0x3e0</td>
+<td>0x1f8</td>
+</tr>
+<tr>
+<td>63 (64)</td>
+<td>N/A</td>
+<td>0x3f0</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<figcaption>
+Tamaños das <em>small bins</em> (bytes).
+</figcaption>
+</figure>
+<p>
+Tamén podes calcular o tamaño dun <em>chunk</em> para unha <em>small bin</em> con <a href="https://github.com/hackliza/gmcalc#bin-to-size">gmcalc</a>.</p>
+<p>
+Para ver as <em>small bins</em>, podes usar o comando <code>dmhb</code>, cun pouco de axuda de
+<code>grep</code>:</p>
+<pre class="example">
+[0x7f8491e94090]&gt; dmhb | grep &#39;small bin&#39; -B 1 -A 3
+ Bin 002:
+  double linked list small bin {
+    0x7f87dc2d77c8-&gt;fd = 0x202f000-&gt;fd = 0x202f040-&gt;fd = 0x7f87dc2d77c8
+    0x7f87dc2d77c8-&gt;bk = 0x202f040-&gt;bk = 0x202f000-&gt;bk = 0x7f87dc2d77c8
+  }
+ Bin 003:
+  double linked list small bin {
+    0x7f87dc2d77d8-&gt;fd = 0x7f87dc2d77d8
+    0x7f87dc2d77d8-&gt;bk = 0x7f87dc2d77d8
+  }
+..............| Output stripped |...................
+ Bin 062:
+  double linked list small bin {
+    0x7f87dc2d7b88-&gt;fd = 0x7f87dc2d7b88
+    0x7f87dc2d7b88-&gt;bk = 0x7f87dc2d7b88
+  }
+ Bin 063:
+  double linked list small bin {
+    0x7f87dc2d7b98-&gt;fd = 0x7f87dc2d7b98
+    0x7f87dc2d7b98-&gt;bk = 0x7f87dc2d7b98
+  }
+ Bin 064:
+  double linked list small bin {
+    0x7f87dc2d7ba8-&gt;fd = 0x7f87dc2d7ba8
+    0x7f87dc2d7ba8-&gt;bk = 0x7f87dc2d7ba8
+  }
+</pre>
+<p>(A saída está truncada para non ocupar excesivo espacio)</p>
+<p>
+Deste xeito podemos ver que a <em>small bin</em> número 2 ten 2 <em>chunks</em>. </p>
+<p>
+Tamén podemos aplicar un filtro para mostrar soamente as <em>small bins</em> que
+conteñen <em>chunks</em>:</p>
+<pre class="example">
+[0x7f87dbf4bc37]&gt; dmhb | grep &#39;small bin&#39; -B 1 -A 3 | grep -E &#39;fd =.+=&#39; -C 2
+ Bin 002:
+  double linked list small bin {
+    0x7f87dc2d77c8-&gt;fd = 0x202f000-&gt;fd = 0x202f040-&gt;fd = 0x7f87dc2d77c8
+    0x7f87dc2d77c8-&gt;bk = 0x202f040-&gt;bk = 0x202f000-&gt;bk = 0x7f87dc2d77c8
+  }
+</pre>
+</div>
+</div>
+<div id="outline-container-headline-11" class="outline-4">
+<h4 id="headline-11">
+Large bins
+</h4>
+<div id="outline-text-headline-11" class="outline-text-4">
+<p>
+As <em>large bins</em> son <em>bins</em> destinadas a conter o os <em>chunks</em> de maior
+tamaño. Son colas FIFO (First In First Out) dobremente enlazadas, mediante os
+punteiros <code>fd</code> e <code>bk</code>. </p>
+<p>
+Ademais, as <em>large bins</em> poden conter <em>chunks</em> de diferente
+tamaño, ordenados de maior a menor. E para aumentar a velocidade ao recorrer a
+<em>bin</em>, os <em>chunks</em> das <em>large bins</em> fan uso dos punteiros <code>fd_nextsize</code> e
+<code>bk_nextsize</code>, que sinalan ós <em>chunks</em> do seguinte ou anterior tamaño,
+respectivamente. Inda que so o primeiro <em>chunk</em> de cada tamaño usa estes punteiros.</p>
+<figure>
+<pre class="example">
+    .------------&lt;-------------------&lt;-----------------------&lt;----------------------&lt;---.
+    |   entry               chunk                  chunk                    chunk       |
+    |   .----.        .-------------.         .------------.          .-------------.   |
+    &#39;-&gt; | XX |&lt;-.  .-&gt;| prev_size   |&lt;--. .-&gt; | prev_size   |&lt;-.  .--&gt;| prev_size   | &lt;-|--.
+        | YY |  |  |  | size (0x520)|   | |   | size (0x520)|  |  |   | size (0x510)|   |  |
+bins[i] | fd |--|-&gt;&#39;  | fd ---------|&gt;--|-&#39;   | fd          |&gt;-|--|   | fd ---------|&gt;--&#39;  |
+      .-| bk |  &#39;----&lt;| bk          |   |----&lt;| bk          |  &#39;--|--&lt;| bk          |      |
+      | &#39;----&#39;        | fd_nextsize |&gt;. |     | fd_nextsize |     |   | fd_nextsize |&gt;-.   |
+      |             .&lt;| bk_nextsize | | |     | bk_nextsize |     | .&lt;| bk_nextsize |  |   |
+      |             | &#39;-------------&#39; | |     &#39;-------------&#39;     | | &#39;-------------&#39;  |   |
+      |             &#39;-----------&gt;-----&#39;-|-&gt;---------&gt;----------&gt;--&#39; |                  |   |
+      |                                 |                           |                  |   |
+      |                                 &#39;---&lt;---------------&lt;-------&#39;---&lt;-------&lt;------&#39;   |
+      |                                                                                    |
+      &#39;------&gt;---------&gt;-----------------&gt;------------------&gt;-----------------&gt;------------&#39;
+</pre>
+<figcaption>
+Esquema dunha <em>large bin</em>.
+</figcaption>
+</figure>
+<p>
+Os rangos de tamaño que abarcan as <em>large bins</em> é o que se atopa o final das <em>small
+bins</em> ata os <em>chunks</em> reservados con <code>mmap</code>.</p>
+<p>
+Cada <em>large bin</em> ten un rango de tamaños que pode almacenar, empezando as
+primeiras con rangos de 64 (0x40) bytes, e aumentando nas últimas. Na seguinte
+táboa amosanse os tamaños de <em>chunk</em> que albergan as diferentes <em>large bins</em> en
+diferentes entornos. Tamén se indican os rangos que abarca cada <em>bin</em>.</p>
+<figure>
+<table>
+<thead>
+<tr>
+<th>large bin</th>
+<th>64 bits</th>
+<th>32 bits (align 16)</th>
+<th>32 bits (align 8)</th>
+</tr>
+<tr>
+<th></th>
+<th>glibc 2.32</th>
+<th>glibc 2.32</th>
+<th>glibc 2.19</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 (64)</td>
+<td>0x400-0x430 (0x40)</td>
+<td>N/A</td>
+<td>0x200-0x238  (0x40)</td>
+</tr>
+<tr>
+<td>1 (65)</td>
+<td>0x440-0x470</td>
+<td>0x400-0x430 (0x40)</td>
+<td>0x240-0x278</td>
+</tr>
+<tr>
+<td>2 (66)</td>
+<td>0x480-0x4b0</td>
+<td>0x400-0x470</td>
+<td>0x280-0x2b8</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>30 (94)</td>
+<td>0xb80-0xbb0</td>
+<td>0xb40-0xb70</td>
+<td>0x980-0x9b8</td>
+</tr>
+<tr>
+<td>31 (95)</td>
+<td>0xbc0-0xbf0</td>
+<td>- (0x0)</td>
+<td>0x9c0-0x9f8</td>
+</tr>
+<tr>
+<td>32 (96)</td>
+<td>0xc00-0xc30</td>
+<td>0xb80-0xbf0 (0x80)</td>
+<td>0xa00-0xbf8 (0x200)</td>
+</tr>
+<tr>
+<td>33 (97)</td>
+<td>0xc40-0xdf0 (0x1c0)</td>
+<td>0xc00-0xdf0 (0x200)</td>
+<td>0xc00-0xdf8</td>
+</tr>
+<tr>
+<td>34 (98)</td>
+<td>0xe00-0xff0 (0x200)</td>
+<td>0xe00-0xff0</td>
+<td>0xe00-0xff8</td>
+</tr>
+<tr>
+<td>35 (99)</td>
+<td>0x1000-0x11f0</td>
+<td>0x1000-0x11f0</td>
+<td>0x1000-0x11f8</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>47 (111)</td>
+<td>0x2800-0x29f0</td>
+<td>0x2800-0x29f0</td>
+<td>0x2800-0x29f8</td>
+</tr>
+<tr>
+<td>48 (112)</td>
+<td>0x2a00-0x2ff0 (0x600)</td>
+<td>0x2a00-0x2ff0 (0x600)</td>
+<td>0x2a00-0x2ff8 (0x600)</td>
+</tr>
+<tr>
+<td>49 (113)</td>
+<td>0x3000-0x3ff0 (0x1000)</td>
+<td>0x3000-0x3ff0 (0x1000)</td>
+<td>0x3000-0x3ff8 (0x1000)</td>
+</tr>
+<tr>
+<td>50 (114)</td>
+<td>0x4000-0x4ff0</td>
+<td>0x4000-0x4ff0</td>
+<td>0x4000-0x4ff8</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>55 (119)</td>
+<td>0x9000-0x9ff0</td>
+<td>0x9000-0x9ff0</td>
+<td>0x9000-0x9ff8</td>
+</tr>
+<tr>
+<td>56 (120)</td>
+<td>0xa000-0xfff0 (0x6000)</td>
+<td>0xa000-0xfff0 (0x6000)</td>
+<td>0xa000-0xfff8 (0x6000)</td>
+</tr>
+<tr>
+<td>57 (121)</td>
+<td>0x10000-0x17ff0 (0x8000)</td>
+<td>0x1000-0x17ff0 (0x8000)</td>
+<td>0x10000-0x17ff8 (0x8000)</td>
+</tr>
+<tr>
+<td>58 (122)</td>
+<td>0x18000-0x1fff0</td>
+<td>0x18000-0x1fff0</td>
+<td>0x18000-0x1fff8</td>
+</tr>
+<tr>
+<td>59 (123)</td>
+<td>0x20000-???</td>
+<td>0x20000-???</td>
+<td>0x20000-???</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+<figcaption>
+Tamaños das <em>large bins</em> (bytes).
+</figcaption>
+</figure>
+<p>
+O máis curioso son as <em>bins</em> entre a 95 e 98, que varían en cada entorno. Parece
+que se introduce algunhas <em>bins</em> con rangos non estándar para conseguir
+homoxenizar os rangos nas <em>bins</em> posteriores. Podes usar <a href="https://github.com/hackliza/gmcalc#bin-to-size">gmcalc</a> para obter os
+tamaños dunha <em>large bin</em> se o precisas.</p>
+<p>
+E inda que existen 126 <em>bins</em>, a partires da bin <em>123</em> foime complicado facer a medición.
+Débese a que moitos <em>chunks</em> son reservados mediante <code>mmap</code> e non se aloxan nas
+<em>bins</em>, posiblemente por falta de espazo no <em>heap</em>. Sen embargo o tamaño a partir
+do cal un <em>chunk</em> é reservado mediante <code>mmap</code> é difuso, xa que en diferentes
+probas que fixen obtiven diferentes tamaños, pero parece que os <em>chunks</em> poden empezar
+a ser reservados con <code>mmap</code> a partires de 0x20000 bytes.</p>
+<p>
+En radare2, para ver as large bins podes usar <code>dmbh</code> e filtrar con <code>grep</code>:</p>
+<pre class="example">
+[0x5583f0e61282]&gt; dmhb | grep &#39;large&#39; -B 1 -A 3
+ Bin 065:
+  double linked list large bin {
+    0x7f981ba440a0-&gt;fd = 0x7f981ba440a0
+    0x7f981ba440a0-&gt;bk = 0x7f981ba440a0
+  }
+ Bin 066:
+  double linked list large bin {
+    0x7f981ba440b0-&gt;fd = 0x7f981ba440b0
+    0x7f981ba440b0-&gt;bk = 0x7f981ba440b0
+  }
+..........................................
+ Bin 110:
+  double linked list large bin {
+    0x7f981ba44370-&gt;fd = 0x5583f1f1ff90-&gt;fd = 0x7f981ba44370
+    0x7f981ba44370-&gt;bk = 0x5583f1f1ff90-&gt;bk = 0x7f981ba44370
+  }
+..........................................
+ Bin 126:
+  double linked list large bin {
+    0x7f981ba44470-&gt;fd = 0x7f981ba44470
+    0x7f981ba44470-&gt;bk = 0x7f981ba44470
+  }
+ Bin 127:
+  double linked list large bin {
+    0x7f981ba44480-&gt;fd = 0x7f981ba44480
+    0x7f981ba44480-&gt;bk = 0x7f981ba44480
+  }
+</pre>
+<p>
+Para ver as <em>large bins</em> que teñen al menos un chunk, podes filtrar os
+resultados de <code>dmhb</code> con <code>grep</code>:</p>
+<pre class="example">
+[0x5583f0e61282]&gt; dmhb | grep &#39;large&#39; -B 1 -A 3 | grep -E &#39;fd =.+=&#39; -C 2
+ Bin 110:
+  double linked list large bin {
+    0x7f981ba44370-&gt;fd = 0x5583f1f1ff90-&gt;fd = 0x7f981ba44370
+    0x7f981ba44370-&gt;bk = 0x5583f1f1ff90-&gt;bk = 0x7f981ba44370
+  }
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-12" class="outline-3">
+<h3 id="headline-12">
+Fast bins
+</h3>
+<div id="outline-text-headline-12" class="outline-text-3">
+<p>
+As <em>fast bins</em> son unhas <em>bins</em> de cache para <em>chunks</em> de pouco tamaño. É común
+nun proceso estar allocateando e liberando pequenos <em>chunks</em> de memoria
+continuamente. E ahí entran as <em>fast bins</em>.</p>
+<p>
+Existen un total de 10 <em>fast bins</em> por <em>arena</em>, inda que na práctica so se usan
+as 7 primeiras (as 7 de menor tamaño). Cada <em>fast bin</em>, ao igual que as <em>small
+bins</em> contén <em>chunks</em> dun so tamaño.</p>
+<p>
+En 64 bits, as <em>fast bins</em> poden almacenar <em>chunks</em> dende 32 bytes ata 128
+bytes. Chegarían ata <em>chunks</em> de 168 no caso de usarse tódalas <em>fast bins</em>.</p>
+<p>
+Por outra parte, en 32 bits, almacenan <em>chunks</em> cun tamaño mínimo de 16 bytes, e
+dependendo da alineación dos <em>chunks</em>, 16 ou 8, poden chegar ata os 112 ou 64
+bytes, respectivamente.</p>
+<figure>
+<table>
+<thead>
+<tr>
+<th class="align-right">fast bin</th>
+<th>64 bits</th>
+<th>32 bits (align 16)</th>
+<th>32 bits (align 8)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="align-right">1</td>
+<td>0x20</td>
+<td>0x10</td>
+<td>0x10</td>
+</tr>
+<tr>
+<td class="align-right">2</td>
+<td>0x30</td>
+<td>0x20</td>
+<td>0x18</td>
+</tr>
+<tr>
+<td class="align-right">3</td>
+<td>0x40</td>
+<td>0x30</td>
+<td>0x20</td>
+</tr>
+<tr>
+<td class="align-right">4</td>
+<td>0x50</td>
+<td>0x40</td>
+<td>0x28</td>
+</tr>
+<tr>
+<td class="align-right">5</td>
+<td>0x60</td>
+<td>0x50</td>
+<td>0x30</td>
+</tr>
+<tr>
+<td class="align-right">6</td>
+<td>0x70</td>
+<td>0x60</td>
+<td>0x38</td>
+</tr>
+<tr>
+<td class="align-right">7</td>
+<td>0x80</td>
+<td>0x70</td>
+<td>0x40</td>
+</tr>
+<tr>
+<td class="align-right">(not used)  8</td>
+<td>0x90</td>
+<td>0x80</td>
+<td>0x48</td>
+</tr>
+<tr>
+<td class="align-right">(not used)  9</td>
+<td>0xa0</td>
+<td>0x90</td>
+<td>0x50</td>
+</tr>
+<tr>
+<td class="align-right">(not used) 10</td>
+<td>0xb0</td>
+<td>0xa0</td>
+<td>0x58</td>
+</tr>
+</tbody>
+</table>
+<figcaption>
+Tamaños dos <em>chunks</em> das <em>fast bins</em>.
+</figcaption>
+</figure>
+<p>
+Tamén podes calcular o tamaño dun <em>chunk</em> para unha <em>fast bin</em> con <a href="https://github.com/hackliza/gmcalc#bin-to-size">gmcalc</a>.</p>
+<p>
+As <em>fast bins</em> son colas LIFO (Last In First Out) cun único enlace, que usa o
+punteiro <code>fd</code> dos <em>chunks</em> para apuntar ao seguinte <em>chunk</em>. Tanto a inserción
+como a obtención de <em>chunks</em> realízase pola cabeceira, seguindo o punteiro
+correspondente do membro <code>fastbinsY</code> do <em>malloc_state</em>.</p>
+<figure>
+<pre class="example">
+                               .-----------.     .-----------.
+                           .-&gt; | prev_size | .-&gt; | prev_size | .-&gt; 0x0
+                           |   | size      | |   | size      | |
+malloc_state.fastbinsY[i] -&#39;   | fd -------|-&#39;   | fd -------|-&#39;
+                               | bk        |     | bk        |
+                               &#39;-----------&#39;     &#39;-----------&#39;
+</pre>
+<figcaption>
+Esquema dunha <em>fast bin</em>.
+</figcaption>
+</figure>
+<p>
+Por outra parte, os <em>chunk</em> insertados nunha <em>fast bin</em> non se marcan como
+libres (flag <code>P</code> na cabeceira do chunk seguinte). Polo que os <em>chunks</em>
+insertados nunha <em>fast bin</em> quedan ahí sen ser fusionados ata que son reusados
+de novo, ou ata que se produce unha consolidación. Deste xeito evítase que un
+<em>chunk</em> que é probable que volva ser usado en breves se poida fusionar con
+outros para crear <em>chunks</em> máis grandes.</p>
+<p>
+Para consultar as <em>fast bins</em>, pódese usar o comando <code>dmhf</code>:</p>
+<pre class="example">
+[0x5627a3a97306]&gt; dmhf
+fastbinY {
+ Fastbin 01
+  fastbin 1 @ 0x7f6e9df65c50 {
+   0x5627a47d9760-&gt;fd = 0x5627a47d9740-&gt;fd = 0x5627a47d9720
+  }
+ Fastbin 02
+  Empty bin  0x0
+ Fastbin 03
+  Empty bin  0x0
+ Fastbin 04
+  Empty bin  0x0
+ Fastbin 05
+  Empty bin  0x0
+ Fastbin 06
+  Empty bin  0x0
+ Fastbin 07
+  Empty bin  0x0
+ Fastbin 08
+  Empty bin  0x0
+ Fastbin 09
+  Empty bin  0x0
+ Fastbin 10
+  Empty bin  0x0
+}
+</pre>
+<p>
+Se queres ver soamente <em>fast bins</em> con chunks podes usar 
+<code>dmhf | grep -w &#39;fastbin&#39; -A 2</code>:</p>
+<pre class="example">
+[0x56173d3ee355]&gt; dmhf | grep -w &#39;fastbin&#39; -A 2
+  fastbin 1 @ 0x7fcf8b64ec50 {
+   0x56173f36d760-&gt;fd = 0x56173f36d740-&gt;fd = 0x56173f36d720
+  }
+--
+  fastbin 4 @ 0x7fcf8b64ec68 {
+   0x56173f36d9b0
+  }
+</pre>
+</div>
+</div>
+<div id="outline-container-headline-13" class="outline-3">
+<h3 id="headline-13">
+Tcaches
+</h3>
+<div id="outline-text-headline-13" class="outline-text-3">
+<p>
+As <em>tcaches</em> (thread caches) son un tipo de <em>bins</em> de cache especial, agregadas na
+glibc 2.26. Poden ser accedidas por un fío sen necesidade de bloquear o
+<em>malloc_state</em> da <em>arena</em>, aumentando o rendemento. Para acadar iso, as entradas
+das <em>tcaches</em> almacénanse nunha estructura externa ao <em>malloc_state</em>. Dita
+estructura é <a href="https://sourceware.org/git/?p=glibc.git;a=blob;f=malloc/malloc.c;h=5b87bdb081f819c9d2b765b2f8e888e4d749c911;hb=HEAD#l2919"><em>tcache_perthread_struct</em></a>:</p>
+<figure>
+<div class="src src-c">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> tcache_entry
+{
+  <span style="color:#66d9ef">struct</span> tcache_entry <span style="color:#f92672">*</span>next;
+  <span style="color:#75715e">/* This field exists to detect double frees.  */</span>
+  <span style="color:#66d9ef">struct</span> tcache_perthread_struct <span style="color:#f92672">*</span>key;
+} tcache_entry;
+
+<span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> tcache_perthread_struct
+{
+  uint16_t counts[TCACHE_MAX_BINS];
+  tcache_entry <span style="color:#f92672">*</span>entries[TCACHE_MAX_BINS];
+} tcache_perthread_struct;</code></pre></div>
+</div>
+<figcaption>
+
+</figcaption>
+</figure>
+<p>
+En <code>entries</code> atopamos un array de <em>tcache_entry</em>, onde cada entrada contén un
+punteiro <code>next</code> ao primeiro <em>chunk</em> da <em>tcache</em> e co campo <code>key</code> usado como
+mecanismo de protección fronte a <a href="https://heap-exploitation.dhavalkapil.com/attacks/double_free">double frees</a>. Por outro lado, o membro <code>count</code> é
+usado para levar a conta dos <em>chunks</em> dispoñibles en cada <em>tcache</em> dunha forma
+eficiente.</p>
+<p>
+As <em>tcaches</em>, como as <em>fast bins</em> están enlazadas por un único enlace, usando
+soamente o punteiro <code>fd</code> dos <em>chunks</em>, que neste caso se interpreta como
+<code>next</code>. Son colas LIFO (Last In First Out), na que tanto as insercións como
+obtención de <em>chunks</em> danse na cabeceira da <em>bin</em>.</p>
+<p>
+E ao contrario co resto das <em>bins</em>, <code>fd</code> (<code>next</code>) apunta ao membro <code>fd</code> (<code>next</code>)
+do seguinte <em>chunk</em> da lista, en vez de ao inicio do <em>chunk</em>. E o último <em>chunk</em>
+apunta a <code>NULL</code> (<code>fd</code> = 0x0). O punteiro <code>bk</code> actúa como <code>key</code>, apuntando á
+estructura <em>tcache_perthread_struct</em>.</p>
+<p>
+O seguinte diagrama amosa unha <em>tcache</em> con 2 <em>chunks</em>:</p>
+<pre class="example">
+                                            .-----------.        .-----------.
+                                            | prev_size |        | prev_size |
+                                            | size      |        | size      |
+tcache_perthread_struct.entries[i].next --&gt; | fd (next) |-------&gt;| fd (next) |---&gt; 0x0
+            ^     ^             .----------&lt;| bk (key)  |  .----&lt;| bk (key)  |
+            |     &#39;-------------&#39;           &#39;-----------&#39;  |     &#39;-----------&#39;
+            &#39;----------------------------------------------&#39;
+</pre>
+<p>
+Existen 64 <em>tcaches</em> por fío, e cada unha pode conter ata 7 <em>chunks</em> do mesmo
+tamaño.</p>
+<p>
+En 64 bits, poden conter <em>chunks</em> dende 32 bytes ata 1040 bytes. Por outra
+banda, en 32 bits, o tamaño mínimo do <em>chunk</em> que se almacena é 16. Despois,
+dependendo se os <em>chunks</em> están alineados a 16 (en x86) ou a 8, as <em>tcaches</em>
+poden conter ata 1024 ou 520 bytes, respectivamente.</p>
+<figure>
+<table>
+<thead>
+<tr>
+<th class="align-right">tcache</th>
+<th>64 bits</th>
+<th>32 bits (align 16)</th>
+<th>32 bits (align 8)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="align-right">0</td>
+<td>0x20</td>
+<td>0x10</td>
+<td>0x10</td>
+</tr>
+<tr>
+<td class="align-right">1</td>
+<td>0x30</td>
+<td>0x20</td>
+<td>0x18</td>
+</tr>
+<tr>
+<td class="align-right">2</td>
+<td>0x40</td>
+<td>0x30</td>
+<td>0x20</td>
+</tr>
+<tr>
+<td class="align-right">…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td class="align-right">62</td>
+<td>0x400</td>
+<td>0x3f0</td>
+<td>0x200</td>
+</tr>
+<tr>
+<td class="align-right">63</td>
+<td>0x410</td>
+<td>0x400</td>
+<td>0x208</td>
+</tr>
+</tbody>
+</table>
+<figcaption>
+Tamaños dos <em>chunks</em> das <em>tcaches</em> (en bytes).
+</figcaption>
+</figure>
+<p>
+No mesmo ca outras <em>bins</em>, podes calcular o tamaño dun <em>chunk</em> para unha
+<em>tcache</em> con <a href="https://github.com/hackliza/gmcalc#bin-to-size">gmcalc</a>.</p>
+<p>
+Outra cousa a ter en conta é que, ao igual que nas <em>fast bins</em>, os <em>chunks</em> que
+se atopan nunha <em>tcache</em> non se marcan como libres, se non que permanecen como
+usados. Isto evita que se fusionen con outros <em>chunks</em>.</p>
+<p>
+Para ver as <em>tcaches</em> que conteñen <em>chunks</em> podes usar <code>dmht</code>:</p>
+<pre class="example">
+[0x7f8491e94090]&gt; dmht
+Tcache main arena @ 0x7f8491df1c40
+bin : 1, items : 3, fd :0x5637a11c0000-&gt;0x5637a11be830-&gt;0x5637a11bffd0
+bin : 2, items : 2, fd :0x5637a11bd910-&gt;0x5637a11bfd30
+bin : 3, items : 2, fd :0x5637a11c0430-&gt;0x5637a11bfd70
+bin : 5, items : 1, fd :0x5637a11bfb20
+bin :33, items : 1, fd :0x5637a11bd620
+bin :59, items : 1, fd :0x5637a11bf6c0
+</pre>
+<p>Neste exemplo pode verse tcaches que conteñen 1, 2 ou 3 <em>chunks</em>.</p>
+<p>
+Se non houbese <em>chunks</em> o output sería algo como o seguinte:</p>
+<pre class="example">
+[0x563d885dc2e4]&gt; dmht
+Tcache main arena @ 0x7f4222dfbba0
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-14" class="outline-2">
+<h2 id="headline-14">
+Erros
+</h2>
+<div id="outline-text-headline-14" class="outline-text-2">
+<p>
+Vou recoller, aparte dos exemplos, algúns erros que poden darse ao executar os
+comandos mencionados.</p>
+<div id="outline-container-headline-15" class="outline-3">
+<h3 id="headline-15">
+Non se atopa glibc
+</h3>
+<div id="outline-text-headline-15" class="outline-text-3">
+<p>Por exemplo, pode ser que mentres executes un comando dos anteriores che salte
+un erro coma o seguinte.</p>
+<pre class="example">
+[0x7f94f6c29090]&gt; dmha?
+Warning: Can&#39;t find glibc mapped in memory (see dm)
+</pre>
+<p>
+Isto pode deberse a varios motivos:</p>
+<ul>
+<li>
+<p>O proceso non está correndo. Proba a executar <code>dc</code>.</p>
+</li>
+<li>
+<p>O proceso está executandose, pero a glibc inda non está mapeanda. Pon un
+breakpoint con <code>db main</code> e entón <code>dc</code>.</p>
+</li>
+<li>
+<p>O programa non usa a glibc. Non estarás en Windows, non?</p>
+</li>
+</ul>
+<p>De calquera xeito, podes comprobar se a glibc está mapeanda con <code>dm</code> (como che
+di radare2):</p>
+<pre class="example">
+[0x557602f15189]&gt; dm~libc:0[9]
+/usr/lib/x86_64-linux-gnu/libc-2.32.so
+</pre>
+</div>
+</div>
+<div id="outline-container-headline-16" class="outline-3">
+<h3 id="headline-16">
+Non se atopa arena
+</h3>
+<div id="outline-text-headline-16" class="outline-text-3">
+<p>
+Podes atoparte con este erro:</p>
+<pre class="example">
+[0x000010c0]&gt; dmha
+dbg.glibc.tcache = 1
+Warning: Can&#39;t find arena mapped in memory (see om)
+</pre>
+<p>
+Este erro apareceume cando me esquecera da flag <code>-d</code> (debug) no comando <code>r2</code>. </p>
+</div>
+</div>
+<div id="outline-container-headline-17" class="outline-3">
+<h3 id="headline-17">
+Non se atopa heap
+</h3>
+<div id="outline-text-headline-17" class="outline-text-3">
+<p>Outro erro que pode devolver r2 é o seguinte:</p>
+<pre class="example">
+[0x55b07c433207]&gt; dmha
+No Heap section
+</pre>
+<p>
+Este erro dase cando inda non hai ningunha <em>arena</em>, e por tanto non hai <em>heap</em>.
+A creación da <em>arena</em> e <em>heap</em> ocorre cando se invoca por primeira vez <code>malloc</code>
+(ou <code>realloc</code>, <code>calloc</code>).</p>
+<p>
+Para verificar que existe o <em>heap</em>, podes buscar o mapa de memoria chamado
+<code>[heap]</code>. Para iso podes usar o comando <code>dm</code>:</p>
+<pre class="example">
+[0x55b07c433221]&gt; dm~heap]
+0x000055b07da3b000 - 0x000055b07da5c000 - usr   132K s rw- [heap] [heap]
+</pre>
+<p>
+A saída mostra que o mapa de memoria <code>[heap]</code> está creado. No caso de non
+estalo, o comando anterior non xeraría saída.</p>
+</div>
+</div>
+<div id="outline-container-headline-18" class="outline-3">
+<h3 id="headline-18">
+tcaches e fastbins protexidas con Safe-Linking
+</h3>
+<div id="outline-text-headline-18" class="outline-text-3">
+<p>
+Ao consultar unha <em>tcache</em> pódeste atopar co seguinte:</p>
+<pre class="example">
+[0x7f9694a1b8cb]&gt; dmht
+Tcache main arena @ 0x7f9694bbdba0
+bin : 3, items : 7, fd :0x55d1c5dfc530-&gt;0x55d498c3991c-&gt;0xffffffffffffffef
+</pre>
+<p>
+Ou no caso dunha <em>fast bin</em>:</p>
+<pre class="example">
+[0x7f9694a1b8cb]&gt; dmhf | grep -w &#39;fastbin&#39; -A 2
+  fastbin 4 @ 0x7f9694bbdbc8 {
+   0x55d1c5dfc8b0-&gt;fd = 0x55d498c395bc Linked list corrupted
+</pre>
+<p>
+En ámbolos dous casos pódese ver que a lista está corrupta (na <em>tcache</em> dedúcese
+dese punteiro 0xffffffffffffffef tan extraño). Isto débese a que na <strong><strong>glibc 2.32</strong></strong> (a
+última no momento de escribir isto) implementouse o mecanismo <a href="https://sourceware.org/git/?p=glibc.git;a=blob;f=malloc/malloc.c;h=5b87bdb081f819c9d2b765b2f8e888e4d749c911;hb=75a193b7611bade31a150dfcc528b973e3d46231#l330">Safe-Linking</a> para
+protexer os punteiros das <em>tcaches</em> e as <em>fast bins</em>.</p>
+<p>
+Safe-Linking fai uso das seguintes rutinas:</p>
+<div class="src src-c">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#75715e">#define PROTECT_PTR(pos, ptr) \
+</span><span style="color:#75715e">  ((__typeof (ptr)) ((((size_t) pos) &gt;&gt; 12) ^ ((size_t) ptr)))
+</span><span style="color:#75715e">#define REVEAL_PTR(ptr)  PROTECT_PTR (&amp;ptr, ptr)</span></code></pre></div>
+</div>
+<p>
+Como se pode observar, para ocultar e revelar o verdadeiro valor do punteiro con
+<code>PROTECT_PTR</code> e <code>REVEAL_PTR</code> faise un XOR entre valor do punteiro é a dirección
+do propio punteiro. Para máis info podes botarlle unha ollada <a href="https://research.checkpoint.com/2020/safe-linking-eliminating-a-20-year-old-malloc-exploit-primitive/">ao post de
+CheckPoint</a>, os autores desta técnica.</p>
+<p>
+Para que radare2 calcule o valor verdadeiro dos punteiros temos que por a <code>true</code>
+a variable <code>dbg.glibc.demangle</code>:</p>
+<pre class="example">
+[0x7f9694a1b8cb]&gt; e dbg.glibc.demangle = true
+</pre>
+<p>
+Despois disto, as <em>bins</em> móstranse correctamente:</p>
+<pre class="example">
+[0x7f9694a1b8cb]&gt; dmht
+Tcache main arena @ 0x7f9694bbdba0
+bin : 3, items : 7, fd :0x55d1c5dfc530-&gt;0x55d1c5dfc4c0-&gt;0x55d1c5dfc450-&gt;0x55d1c5dfc3e0-&gt;0x55d1c5dfc370-&gt;0x55d1c5dfc300-&gt;0x55d1c5dfc290
+</pre>
+<pre class="example">
+[0x7f9694a1b8cb]&gt; dmhf | grep -w &#39;fastbin&#39; -A 2
+  fastbin 4 @ 0x7f9694bbdbc8 {
+   0x55d1c5dfc8b0-&gt;fd = 0x55d1c5dfc840-&gt;fd = 0x55d1c5dfc7d0-&gt;fd = 0x55d1c5dfc760-&gt;fd = 0x55d1c5dfc6f0-&gt;fd = 0x55d1c5dfc680-&gt;fd = 0x55d1c5dfc610-&gt;fd = 0x55d1c5dfc5a0
+  }
+</pre>
+<p>
+Gustaríame agradecerlle a <a href="https://github.com/meowmeowxw">@meowmeowxw</a> por amosarme a <a href="https://github.com/radareorg/radare2/issues/17915#issuecomment-729799640">solución a este problema</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-19" class="outline-2">
+<h2 id="headline-19">
+Conclusión
+</h2>
+<div id="outline-text-headline-19" class="outline-text-2">
+<p>
+Bueno, espero que este paseiño polo heap con radare2 che axude a facer análises
+do heap no futuro.</p>
+<p>
+Veña, a pasalo ben.</p>
+</div>
+</div>
+<div id="outline-container-headline-20" class="outline-2">
+<h2 id="headline-20">
+Recursos
+</h2>
+<div id="outline-text-headline-20" class="outline-text-2">
+<ul>
+<li>
+<p><a href="https://github.com/radareorg/radare2">radare2</a></p>
+</li>
+<li>
+<p><a href="https://www.youtube.com/watch?v=Svm5V4leEho">r2con 2016 - n4x0r Heap Analysis</a></p>
+</li>
+<li>
+<p><a href="https://sourceware.org/glibc/wiki/MallocInternals">glibc wiki: MallocInternals</a></p>
+</li>
+<li>
+<p><a href="https://heap-exploitation.dhavalkapil.com/">Heap exploitation book</a></p>
+</li>
+<li>
+<p><a href="https://azeria-labs.com/heap-exploitation-part-1-understanding-the-glibc-heap-implementation/">Azeria Labs</a></p>
+</li>
+<li>
+<p><a href="https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/">Understanding glibc malloc</a></p>
+</li>
+<li>
+<p><a href="https://github.com/shellphish/how2heap">how2heap</a></p>
+</li>
+<li>
+<p><a href="https://www.megabeets.net/a-journey-into-radare-2-part-1/">tutorial de Megabeets</a></p>
+</li>
+<li>
+<p><a href="https://research.checkpoint.com/2020/safe-linking-eliminating-a-20-year-old-malloc-exploit-primitive/">Safe-Linking</a></p>
+</li>
+<li>
+<p><a href="https://gist.github.com/Zer1t0/9a1d6108148e862dd61065ec8ae0c03c">cheatsheet</a></p>
+</li>
+</ul>
+</div>
+</div>
+
+
+        
+          <div class="blog-tags">
+            
+              <a href="https://hackliza.gal//tags/pwn/">pwn</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/heap/">heap</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/radare2/">radare2</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+          
+            <li class="next">
+              <a href="https://hackliza.gal/posts/hacker_manifesto/" data-toggle="tooltip" data-placement="top" title="Manifesto Hacker">Artigo siguiente &rarr;</a>
+            </li>
+          
+        </ul>
+      
+
+
+      
+        
+          
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hackliza" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+          
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://github.com/hackliza" title="GitHub">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/hackliza" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2024
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="https://hackliza.gal/">Hackliza</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.74.3</a> alimentada &nbsp;&bull;&nbsp; Tema <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adaptado de <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="https://hackliza.gal/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://hackliza.gal/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

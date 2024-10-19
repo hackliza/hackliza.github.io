@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>flamegraph on Hackliza</title>
+    <link>https://hackliza.gal/tags/flamegraph/</link>
+    <description>Recent content in flamegraph on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Mon, 27 Jun 2022 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/tags/flamegraph/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Profiling visual para Python</title>
+      <link>https://hackliza.gal/posts/python-visual-profiling/</link>
+      <pubDate>Mon, 27 Jun 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/python-visual-profiling/</guid>
+      <description>Boas, xente.
+ Hoxe veño cun exemplo práctico de como podemos analizar os nosos programas de Python para atopar facilmente pescozos de botella.
+ Fálase moito de como as optimizacións non se deben facer a cegas, senón que hai que medir que partes dun programa son as problemáticas para conseguir mellorar a execución do código de xeito eficiente. Hoxe veremos como facelo de forma cómoda e práctica.
+Gráficos de lapas (Flame Graphs)  Hai moitos xeitos de medir e visualizar o comportamento dunha aplicación, pero persoalmente o que máis cómodo me parece é a técnica dos Gráficos de lapas (Flame Graphs) descrito por Brendan Gregg.</description>
+    </item>
+    
+  </channel>
+</rss>

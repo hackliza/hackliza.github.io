@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>wardriving on Hackliza</title>
+    <link>https://hackliza.gal/tags/wardriving/</link>
+    <description>Recent content in wardriving on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Sun, 23 Apr 2023 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/tags/wardriving/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Wardriving coa Raspi no 2023</title>
+      <link>https://hackliza.gal/posts/wardriving/</link>
+      <pubDate>Sun, 23 Apr 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/wardriving/</guid>
+      <description>Intro  Boas xente, nesta entrada imos a revisar unha vella técnica de seguridade de redes wifi, o wardriving. O wardriving consiste en localizar redes wifis dentro dun lugar, que pode ser unha rúa ou unha cidade.
+ Para iso imos precisar certo equipo. Por unha parte, unha antena wifi para capturar o sinal dos puntos de acceso (aka routers), e pola outra un dispositivo GPS que nos axude a recoller a localización dende onde estamos capturando o sinal.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>obfuscation on Hackliza</title>
+    <link>https://hackliza.gal/en/tags/obfuscation/</link>
+    <description>Recent content in obfuscation on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Thu, 02 Nov 2023 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/en/tags/obfuscation/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>PUME: a tool to mutate Python source code</title>
+      <link>https://hackliza.gal/en/posts/pume/</link>
+      <pubDate>Thu, 02 Nov 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/pume/</guid>
+      <description>This article will explain what PUME (Python Universal Mutation Engine) is and how it works and after that some examples of use will be given.
+Introduction PUME is a tool that randombly modifies the source code of a program made with Python without change the orginal features. This is mainly achived by doing modifications in the Abstract Syntax Tree (AST) of the program but it should be noted that exist a modification that is made directly in the source code.</description>
+    </item>
+    
+    <item>
+      <title>Virus and Python</title>
+      <link>https://hackliza.gal/en/posts/virus_python/</link>
+      <pubDate>Mon, 14 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/virus_python/</guid>
+      <description>This post will explain several issues when it comes to understanding how a virus works. They will first be explained what they are and how is its life cycle. The main techniques for detecting a virus will be outlined below. After, the main anti-antivirus techniques will be discussed. Then, it will be explained how a virus works by providing examples of code, to finally add various enhancements and protections so that it cannot be detected by signature.</description>
+    </item>
+    
+  </channel>
+</rss>

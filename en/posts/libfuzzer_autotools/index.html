@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Using libfuzzer in autotools compiled projects - Hackliza</title>
+  <meta name="description" content="Hey there.
+ These days I&#39;ve been playing with libfuzzer, a tool that comes with clang compiler and that allows us to fuzz a program compiled with clang. The fuzzing consists on passing (pseudo-)random data as program input and check if that breaks.
+ To do this with libfuzzer, it is required to define in the program a function called LLVMFuzzerTestOneInput that accepts a buffer of bytes as argument. Then libfuzzer will call this function in a loop with different data."><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Hackliza",
+    
+    "url": "https:\/\/hackliza.gal\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "https:\/\/hackliza.gal\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/en\/posts\/libfuzzer_autotools\/",
+          "name": "Using libfuzzer in autotools compiled projects"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Eloy Pérez González"
+  },
+  "headline": "Using libfuzzer in autotools compiled projects",
+  "description" : "Hey there.\n These days I\u0026#39;ve been playing with libfuzzer, a tool that comes with clang compiler and that allows us to fuzz a program compiled with clang. The fuzzing consists on passing (pseudo-)random data as program input and check if that breaks.\n To do this with libfuzzer, it is required to define in the program a function called LLVMFuzzerTestOneInput that accepts a buffer of bytes as argument. Then libfuzzer will call this function in a loop with different data.",
+  "inLanguage" : "en",
+  "wordCount":  1983 ,
+  "datePublished" : "2021-07-16T00:00:00",
+  "dateModified" : "2021-07-16T00:00:00",
+  "image" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+  "keywords" : [ "fuzzing, libfuzzer" ],
+  "mainEntityOfPage" : "https:\/\/hackliza.gal\/en\/posts\/libfuzzer_autotools\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "https:\/\/hackliza.gal\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="Using libfuzzer in autotools compiled projects" />
+<meta property="og:description" content="Hey there.
+ These days I&#39;ve been playing with libfuzzer, a tool that comes with clang compiler and that allows us to fuzz a program compiled with clang. The fuzzing consists on passing (pseudo-)random data as program input and check if that breaks.
+ To do this with libfuzzer, it is required to define in the program a function called LLVMFuzzerTestOneInput that accepts a buffer of bytes as argument. Then libfuzzer will call this function in a loop with different data.">
+<meta property="og:image" content="https://hackliza.gal/img/hackliza.png" />
+<meta property="og:url" content="https://hackliza.gal/en/posts/libfuzzer_autotools/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hackliza" />
+
+  <meta name="twitter:title" content="Using libfuzzer in autotools compiled projects" />
+  <meta name="twitter:description" content="Hey there.
+ These days I&#39;ve been playing with libfuzzer, a tool that comes with clang compiler and that allows us to fuzz a program compiled with clang. The fuzzing consists on passing …">
+  <meta name="twitter:image" content="https://hackliza.gal/img/hackliza.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@hackliza" />
+  <meta name="twitter:creator" content="@hackliza" />
+  <link href='https://hackliza.gal/img/hackliza.png' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.74.3" />
+  <link rel="alternate" href="https://hackliza.gal/en/index.xml" type="application/rss+xml" title="Hackliza"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://hackliza.gal/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="https://hackliza.gal/css/syntax.css" /><link rel="stylesheet" href="https://hackliza.gal/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><style>
+ nav {
+     background: #0099CC !important;
+ }
+
+ .navbar-brand, #main-navbar ul li a, footer {
+     color: #fff !important;
+ }
+
+ .navbar-brand:hover, #main-navbar ul li a:hover {
+     color: #ccc !important;
+ }
+
+
+ figure {
+     margin-top: 1.5em; 
+     margin-bottom: 1.5em; 
+ }
+ 
+ figcaption {
+     text-align: center;
+     font-size: 85%;
+ }
+
+ pre {
+     overflow-x: auto !important;
+ }
+
+ .posts-heading {
+     text-align: center;
+ }
+ 
+</style>
+
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://hackliza.gal/en/">Hackliza</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blog" href="/en/">Blog</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="About" href="/en/about/">About</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Talks" href="/en/talks/">Talks</a>
+            </li>
+          
+        
+
+        
+          
+            <li>
+              
+                
+              
+                
+                  <a href="/gl" lang="gl">gl</a>
+                
+              
+            </li>
+          
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Hackliza" href="https://hackliza.gal/en/">
+            <img class="avatar-img" src="https://hackliza.gal/img/hackliza.png" alt="Hackliza" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>Using libfuzzer in autotools compiled projects</h1>
+              
+              
+                <hr class="small">
+              
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        <p>
+Hey there.</p>
+<p>
+These days I&#39;ve been playing with <a href="https://www.llvm.org/docs/LibFuzzer.html">libfuzzer</a>, a tool that comes with clang
+compiler and that allows us to fuzz a program compiled with clang. The fuzzing
+consists on passing (pseudo-)random data as program input and check if that
+breaks.</p>
+<p>
+To do this with libfuzzer, it is required to define in the program a function
+called <code>LLVMFuzzerTestOneInput</code> that accepts a buffer of bytes as argument. Then
+libfuzzer will call this function in a loop with different data. The function
+implementation will be something like this:</p>
+<div class="src src-c">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">extern</span> <span style="color:#e6db74">&#34;C&#34;</span> <span style="color:#66d9ef">int</span> LLVMFuzzerTestOneInput(<span style="color:#66d9ef">const</span> uint8_t <span style="color:#f92672">*</span>Data, size_t Size) {
+  DoSomethingInterestingWithMyAPI(Data, Size);
+  <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;  <span style="color:#75715e">// Non-zero return values are reserved for future use.
+</span><span style="color:#75715e"></span>}</code></pre></div>
+</div>
+<p>
+Afterwards, you need to compile the project with clang and the following
+options:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">clang -g -O1 -fsanitize=fuzzer,address fuzzer-file.c project.c -o fuzz-project</code></pre></div>
+</div>
+<p>
+This way clang will create an executable (<code>fuzz-project</code> in this case) that will
+allow us to fuzz the library. Besides, libfuzzer also adds code to <a href="https://en.wikipedia.org/wiki/Instrumentation_(computer_programming)">instrument</a>
+the program (doing this libfuzzer is able to know what code paths are executed
+in each execution and create more eficient tests that discover new code paths).</p>
+<p>
+If you are interested in libfuzzer, you can check the following tutorials:</p>
+<ul>
+<li>
+<p><a href="https://github.com/google/fuzzing/blob/master/tutorial/libFuzzerTutorial.md">libFuzzerTutorial by Google</a></p>
+</li>
+<li>
+<p><a href="https://github.com/Dor1s/libfuzzer-workshop">Libfuzzer-workshop by Dor1s</a></p>
+</li>
+</ul>
+<p>They are really good, since they already have prepared examples so you can
+focus on learning libfuzzer instead of worrying about compile the target
+programs.</p>
+<p>
+But to show how to compile target programs is the goal of this post, since in
+that is something you will need to do in the real world, and that can be a
+daunting task if don&#39;t know how to do it. In this case, we will see how to
+incorporate libfuzzer to a project that is compiled by using autotools.</p>
+<p>
+You can identify projects using autotools since they require the following steps
+to compile them:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">autoreconf -i -f -v
+./configure
+make</code></pre></div>
+</div>
+<p>
+In my case I wanted to fuzz <a href="https://github.com/OISF/libhtp">libhtp</a>, a library to parse the HTTP protocol in a
+safe and eficient way. This library is used in software like the Suricata IDS so
+it can detect network attacks.</p>
+<p>
+Therefore, libhtp needs to be able to parse even malformed data without
+breaking, since this could be used by an attacker to send a malicious packet
+that breaks software like Suricata.</p>
+<p>
+What libfuzzer does to fuzz is to execute the same function in a loop in the
+same process. This makes libfuzzer faster than other tools like AFL that
+spawns a process per each test case. However, as a consequence, if the program
+breaks by any reason, then libfuzzer ends its execution.</p>
+<p>
+Consequentially libfuzzer should be used in programs/libraries that are not
+allowed to break under any reason, such as libhtp, since if you are able to
+break it, that means that you have detected a failure that needs to be fixed.</p>
+<p>
+On the contrary, if you want to fuzz a software that is allowed to break with
+malformed data, like a video player or pdf reader, libfuzzer is not the best
+option, since it is possible that the fuzzing process will be stopped frequently
+without getting a relevant issue and it would be very complicated to make it
+work. In this scenario a better approach would be to use another fuzzer like <a href="https://github.com/google/AFL">AFL</a>.</p>
+<p>
+Ok, let&#39;s back to the topic. The first thing to do is to clone libhtp with git:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">git clone https://github.com/OISF/libhtp</code></pre></div>
+</div>
+<p>
+And following the instructions in the README, it is possible to compile the
+project with the following commands:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">./autogen.sh
+./configure
+make</code></pre></div>
+</div>
+<blockquote>
+<p>In this case we can know that the project is using autotools since <code>autogen.sh</code>
+executes <code>autoreconf -i -f -v</code> and there are several files like <code class="verbatim">Makefile.am</code>
+and <code class="verbatim">configure.ac</code>, that are used by autotools.</p>
+</blockquote>
+<p>
+Ok, compile the project in the regular way seems easy, but how do I compile this
+with clang and libfuzzer? And where should I put the libfuzzer
+<code>LLVMFuzzerTestOneInput</code> function? In a project file? In an external file? And
+what should I write in the <code>LLVMFuzzerTestOneInput</code> function?</p>
+<p>
+Step by step. Firstly, what should we have to write in <code>LLVMFuzzerTestOneInput</code>?
+That is not an easy question since it depends on the project. The point is that
+we need to pass to the library a data buffer and check if it breaks. This
+probably will involve to initialize the library and then call to a function that
+processes the data buffer. It sounds easier than it actually is.</p>
+<p>
+In this case I was able to write a test following the examples contained in the
+project (specifically in the <code class="verbatim">extras</code> folder). After a while inspecting how it
+works it I was able to write this function:</p>
+<div class="src src-c">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stddef.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdint.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;htp/htp.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;htp/htp_list.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;htp/htp_table.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">LLVMFuzzerTestOneInput</span>(<span style="color:#66d9ef">const</span> uint8_t <span style="color:#f92672">*</span>data, size_t size) {
+    htp_cfg_t <span style="color:#f92672">*</span>cfg <span style="color:#f92672">=</span> htp_config_create();
+    htp_connp_t <span style="color:#f92672">*</span>connp <span style="color:#f92672">=</span> htp_connp_create(cfg);
+
+    htp_connp_req_data(connp, <span style="color:#ae81ff">0</span>, data, size);
+
+    <span style="color:#75715e">// Release
+</span><span style="color:#75715e"></span>    htp_connp_destroy_all(connp);
+    htp_config_destroy(cfg);
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;  <span style="color:#75715e">// Non-zero return values are reserved for future use.
+</span><span style="color:#75715e"></span>}</code></pre></div>
+</div>
+<blockquote>
+<p>Remember that all the memory that we reserve in the <code>LLVMFuzzerTestOneInput</code>
+function must be freed before it ends, since there is a risk to create a memory
+leak and run out of memory after execute this function several times (which is
+what libfuzzer does).</p>
+</blockquote>
+<p>
+Ok, now that we have a function to parse data, where do we put it? We should put
+it in an external file not related with the library (and not in the library code
+as I did firstly). After many attempts and errors, I finally create a the file
+<code class="verbatim">fuzz_htp.c</code> in the project root directory.</p>
+<p>
+Now that our test is ready is time to compile the library with clang and
+libfuzzer. Firstly we indicate that we want to use clang, so we set the <code class="verbatim">clang</code>
+value in the <code>CC</code> environment variable with the <code>export CC=clang</code> command (we
+use <code>CC</code> since it is a C project, in case of a C++ project, we should set
+<code>CXX</code>).</p>
+<p>
+Secondly, we indicate that we want to use libfuzzer in the <code>CFLAGS</code> variable, so
+we execute <code>export CFLAGS=&#34;-g -fsanitize=fuzzer,address&#34;</code> (in case of a C++
+project, we would use the <code>CXXFLAGS</code> variable). These parameters indicate that
+we want to add debug symbols (<code>-g</code>), so the error output gives us information
+about failures in the source code, and on the other side
+<code>-fsanitize=fuzzer,address</code> express that we want to use libfuzzer and
+<a href="https://clang.llvm.org/docs/AddressSanitizer.html">AddressSanitizer</a>.</p>
+<blockquote>
+<p>AddressSanitizer allows to detect more read and write out of limits errors. It
+creates a shadow memory that keeps information related to the current state of
+the normal memory and it is able to discover if the program access to memory
+addresses that are not reserved or out of buffer limits.</p>
+</blockquote>
+<p>
+Then, to compile, the next commands will be used:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">export CC=clang
+export CFLAGS=&#34;-g -fsanitize=fuzzer,address&#34;
+./autogen.sh
+./configure
+make</code></pre></div>
+</div>
+<p>
+Notwithstanding, it raises an error:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">~/libhtp $ export CC=clang
+~/libhtp $ export CFLAGS=&#34;-g -fsanitize=fuzzer,address&#34;
+~/libhtp $ ./autogen.sh 
+autoreconf: Entering directory `.&#39;
+autoreconf: configure.ac: not using Gettext
+autoreconf: running: aclocal --force -I m4
+autoreconf: configure.ac: tracing
+autoreconf: running: libtoolize --copy --force
+libtoolize: putting auxiliary files in &#39;.&#39;.
+libtoolize: copying file &#39;./ltmain.sh&#39;
+libtoolize: putting macros in AC_CONFIG_MACRO_DIRS, &#39;m4&#39;.
+libtoolize: copying file &#39;m4/libtool.m4&#39;
+libtoolize: copying file &#39;m4/ltoptions.m4&#39;
+libtoolize: copying file &#39;m4/ltsugar.m4&#39;
+libtoolize: copying file &#39;m4/ltversion.m4&#39;
+libtoolize: copying file &#39;m4/lt~obsolete.m4&#39;
+autoreconf: running: /usr/bin/autoconf --force
+autoreconf: running: /usr/bin/autoheader --force
+autoreconf: running: automake --add-missing --copy --force-missing
+configure.ac:86: installing &#39;./compile&#39;
+configure.ac:7: installing &#39;./missing&#39;
+htp/Makefile.am: installing &#39;./depcomp&#39;
+autoreconf: Leaving directory `.&#39;
+~/projects/libhtp $ ./configure
+checking for a BSD-compatible install... /usr/bin/install -c
+checking whether build environment is sane... yes
+checking for a thread-safe mkdir -p... /usr/bin/mkdir -p
+checking for gawk... no
+checking for mawk... mawk
+checking whether make sets $(MAKE)... yes
+checking whether make supports nested variables... yes
+checking for gcc... clang
+checking whether the C compiler works... no
+configure: error: in `/home/user/projects/libhtp&#39;:
+configure: error: C compiler cannot create executables
+See `config.log&#39; for more details</code></pre></div>
+</div>
+<p>
+If we check the <code class="verbatim">config.log</code> file, we can find the following:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">configure:3410: checking whether the C compiler works
+configure:3432: clang -g -fsanitize=fuzzer,address -O2  -O2  conftest.c  &gt;&amp;5
+/usr/bin/ld: /tmp/conftest-859fac.o: in function `main&#39;:
+/home/user/projects/libhtp/conftest.c:14: multiple definition of `main&#39;; /usr/lib/llvm-10/lib/clang/10.0.0/lib/linux/libclang_rt.fuzzer-x86_64.a(fuzzer.o):(.text.main+0x0): first defined here
+/usr/bin/ld: /usr/lib/llvm-10/lib/clang/10.0.0/lib/linux/libclang_rt.fuzzer-x86_64.a(fuzzer.o): in function `main&#39;:
+(.text.main+0x12): undefined reference to `LLVMFuzzerTestOneInput&#39;
+clang: error: linker command failed with exit code 1 (use -v to see invocation)</code></pre></div>
+</div>
+<p>
+There are two errors, on one hand <code class="verbatim">multiple definition of `main&#39;</code> and on the
+other <code class="verbatim">undefined reference to `LLVMFuzzerTestOneInput&#39;</code>.</p>
+<p>
+The first error is caused by a conflict between libfuzzer, that wants to create
+a binary with a <code class="verbatim">main</code> function, and autotools, that defines a main function in
+an auxiliar file.</p>
+<p>
+The second error is about libfuzzer trying to link with our function
+<code>LLVMFuzzerTestOneInput</code>, but since our file is not in the compilation process
+(yet), libfuzzer cannot find it.</p>
+<p>
+In order to solve these errors we can divide the compilation in two separate
+steps. Firstly, we need to compile the library and then our fuzzer by linking
+our file <code class="verbatim">fuzz_htp.c</code> with the library.</p>
+<p>
+To do this we need to start by indicating to libfuzzer that we don&#39;t want to
+generate the fuzzer executable with the library, but we want the instrumentation
+code (so libfuzzer can find new code paths). So we change the <code>CFLAGS</code> value
+from <code>-g -fsanitize=fuzzer,address</code> to <code>-g -fsanitize=fuzzer-no-link,address</code>. </p>
+<p>
+Then, the following commands are used to compile the library:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">export CC=clang
+export CFLAGS=&#34;-g -fsanitize=fuzzer-no-link,address&#34;
+./autogen.sh
+./configure
+make</code></pre></div>
+</div>
+<p>
+If we executed this, then it works (I skip the output for the sake of space).
+Now is time to link our fuzzer with the library, but, where is the library?
+Well, autotools usually move the generated libraries to the <code class="verbatim">.libs</code> hidden
+directory, that can be in the root folder or in the source code folder. Anyway,
+we can use <code>find</code> to get the libraries:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">~/libhtp $ find . -name *.a
+./htp/lzma/.libs/liblzma-c.a
+./htp/.libs/libhtp-c.a
+./htp/.libs/libhtp.a  
+#+end_scr
+
+Here they are. We want to test =libhtp.a= so we execute the following:
+#+begin_src 
+clang -g -fsanitize=fuzzer,address fuzz_htp.c -I . htp/.libs/libhtp.a -lz -o fuzz-htp</code></pre></div>
+</div>
+<p>
+In this command we specify that we want to generate the fuzzing binary that
+calls our function in <code class="verbatim">fuzz_htp.c</code>, we link the library <code class="verbatim">htp/.libs/libhtp.a</code> and
+we indicate that we want to use the header files (<code class="verbatim">.h</code>) in this project with
+<code class="verbatim">-I .</code> (<code class="verbatim">-lz</code> is to link a required compression library).</p>
+<p>
+Finally, we execute <code>./fuzz-htp</code> and wait for the library to break.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">~/libhtp$ ./fuzz-htp
+INFO: Seed: 2543270220
+INFO: Loaded 1 modules   (3551 inline 8-bit counters): 3551 [0x5f8f10, 0x5f9cef), 
+INFO: Loaded 1 PC tables (3551 PCs): 3551 [0x5f9cf0,0x607ae0), 
+INFO: -max_len is not provided; libFuzzer will not generate inputs larger than 4096 bytes
+INFO: A corpus is not provided, starting from an empty corpus
+#2	INITED cov: 112 ft: 113 corp: 1/1b exec/s: 0 rss: 31Mb
+	NEW_FUNC[1/12]: 0x55fcd0 in htp_connp_REQ_FINALIZE /home/user/projects/libhtp/htp/htp_request.c:838
+	NEW_FUNC[2/12]: 0x5626d0 in htp_connp_REQ_PROTOCOL /home/user/projects/libhtp/htp/htp_request.c:726
+#4	NEW    cov: 166 ft: 182 corp: 2/5b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 2 ShuffleBytes-CrossOver-
+#6	NEW    cov: 166 ft: 186 corp: 3/9b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 2 CopyPart-ChangeBinInt-
+#8	NEW    cov: 166 ft: 196 corp: 4/11b lim: 4 exec/s: 0 rss: 33Mb L: 2/4 MS: 2 ShuffleBytes-CopyPart-
+#13	NEW    cov: 166 ft: 197 corp: 5/13b lim: 4 exec/s: 0 rss: 33Mb L: 2/4 MS: 5 EraseBytes-ChangeByte-ChangeByte-ChangeByte-InsertByte-
+#20	NEW    cov: 166 ft: 199 corp: 6/16b lim: 4 exec/s: 0 rss: 33Mb L: 3/4 MS: 2 ChangeByte-InsertByte-
+	NEW_FUNC[1/4]: 0x55ee90 in htp_connp_req_receiver_finalize_clear /home/user/projects/libhtp/htp/htp_request.c:131
+	NEW_FUNC[2/4]: 0x5634c0 in htp_connp_REQ_IGNORE_DATA_AFTER_HTTP_0_9 /home/user/projects/libhtp/htp/htp_request.c:910
+#47	NEW    cov: 184 ft: 218 corp: 7/20b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 2 ChangeBinInt-CrossOver-
+#52	NEW    cov: 191 ft: 229 corp: 8/24b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 5 CrossOver-ChangeBit-EraseBytes-ShuffleBytes-CrossOver-
+#53	NEW    cov: 191 ft: 231 corp: 9/28b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 1 CopyPart-
+#56	NEW    cov: 191 ft: 232 corp: 10/30b lim: 4 exec/s: 0 rss: 33Mb L: 2/4 MS: 3 ChangeBit-ShuffleBytes-EraseBytes-
+#83	NEW    cov: 192 ft: 233 corp: 11/34b lim: 4 exec/s: 0 rss: 33Mb L: 4/4 MS: 2 CopyPart-ChangeBit-</code></pre></div>
+</div>
+<p>
+We should generate some initial test cases to improve the fuzzing process, but
+we are going to let that part for another post.</p>
+<p>
+See you and happy fuzzing.</p>
+
+
+        
+          <div class="blog-tags">
+            
+              <a href="https://hackliza.gal/en/tags/fuzzing/">fuzzing</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/libfuzzer/">libfuzzer</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="https://hackliza.gal/en/posts/console_usability/" data-toggle="tooltip" data-placement="top" title="Tricks to improve console programs usability">&larr; Previous Post</a>
+            </li>
+          
+          
+            <li class="next">
+              <a href="https://hackliza.gal/en/posts/quick_math_on_terminal/" data-toggle="tooltip" data-placement="top" title="Quick math on the terminal">Next Post &rarr;</a>
+            </li>
+          
+        </ul>
+      
+
+
+      
+        
+          
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hackliza" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+          
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://github.com/hackliza" title="GitHub">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/hackliza" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2024
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="https://hackliza.gal/en/">Hackliza</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.74.3</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="https://hackliza.gal/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://hackliza.gal/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

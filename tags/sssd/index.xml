@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>sssd on Hackliza</title>
+    <link>https://hackliza.gal/tags/sssd/</link>
+    <description>Recent content in sssd on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Sat, 31 Aug 2024 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/tags/sssd/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Volcado de keyrings con Keydump: Extraendo credenciais en claro de SSSD</title>
+      <link>https://hackliza.gal/posts/keydump/</link>
+      <pubDate>Sat, 31 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/keydump/</guid>
+      <description>Boas xente!!
+ Fai tempo estiven trangallando cos keyrings de Linux para extraer tickets de Kerberos con tickey, e recentemente vinme envolto nun novo proxecto no que precisaba volver a aprender sobre o tema, así que vou a describir aquí o proxecto e os conceptos mais relevantes sobre os keyrings por se eu ou outra persoa ten que aprendelos no futuro.
+ O primeiro que temos que saber é que o que se coñece como keyrings de Linux, é un xestor de chaves.</description>
+    </item>
+    
+  </channel>
+</rss>

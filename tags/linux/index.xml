@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>linux on Hackliza</title>
+    <link>https://hackliza.gal/tags/linux/</link>
+    <description>Recent content in linux on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Sat, 31 Aug 2024 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/tags/linux/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Volcado de keyrings con Keydump: Extraendo credenciais en claro de SSSD</title>
+      <link>https://hackliza.gal/posts/keydump/</link>
+      <pubDate>Sat, 31 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/keydump/</guid>
+      <description>Boas xente!!
+ Fai tempo estiven trangallando cos keyrings de Linux para extraer tickets de Kerberos con tickey, e recentemente vinme envolto nun novo proxecto no que precisaba volver a aprender sobre o tema, así que vou a describir aquí o proxecto e os conceptos mais relevantes sobre os keyrings por se eu ou outra persoa ten que aprendelos no futuro.
+ O primeiro que temos que saber é que o que se coñece como keyrings de Linux, é un xestor de chaves.</description>
+    </item>
+    
+    <item>
+      <title>Como unir Debian a Active Directory</title>
+      <link>https://hackliza.gal/posts/linux-en-ad/</link>
+      <pubDate>Thu, 29 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/linux-en-ad/</guid>
+      <description>Boas xente, neste artigo vou amosar como unir unha máquina GNU/Linux, específicamente unha Debian, a un entorno de Active Directory. Seino, seino, Active Directory (AD) é unha ferramenta comercial do malvado Microsoft, mais por moito que nos pese, é a solución de directorio mais usada do mercado.
+ Sen embargo, non por ter un entorno de Microsoft temos que usar Windows, inda que iso é o que lles gustaría.</description>
+    </item>
+    
+    <item>
+      <title>Que demo pasa co meu DNS? Descubrindo e configurando demos de rede</title>
+      <link>https://hackliza.gal/posts/cambiar_dns_linux/</link>
+      <pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/cambiar_dns_linux/</guid>
+      <description>Boas xente, hoxe veño a falar dun problema que me teño atopado en varias ocasións. O tema é que configuro o equipo para usar un servidor DNS concreto, incluíndo este no /etc/resolv.conf, e dalí a un anaco me atopo que este se borrou e se volveu ao servidor DNS anterior.
+ Neste artigo vou ver porque acontece e quen me está tocando o /etc/resolv.conf e como solucionalo.
+ Este artigo vai dirixido a entornos onde se usa a consola, xa que cando temos unha interface gráfica, polo xeral nas opcións de rede podemos poñer o DNS que queiramos sen problema ningún.</description>
+    </item>
+    
+    <item>
+      <title>Roubando sesións de sudo con ptrace</title>
+      <link>https://hackliza.gal/posts/stealing_sudo_sessions_with_ptrace/</link>
+      <pubDate>Sun, 24 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/stealing_sudo_sessions_with_ptrace/</guid>
+      <description>Boas xentiña.
+ Hoxe traiovos unha vella técnica ca que estiven fuchicando estes días. Trátase dun ataque para obter sudo se outra persoa que estea conectada na mesma máquina ca mesma usuaria ca nos o ten desbloqueado. Esta técnica xa foi documentada por nongiach no seu repo sudo_inject. Sen embargo, na súa implementación requirense varios ficheiros e dependencias para o ataque, polo que para simplificalo, e tamén aprender sobre esta técnica, desenvolvín a ferramenta sudohunt.</description>
+    </item>
+    
+    <item>
+      <title>Truquiños para mellorar a usabilidade de programas de consola</title>
+      <link>https://hackliza.gal/posts/console_usability/</link>
+      <pubDate>Thu, 24 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/console_usability/</guid>
+      <description>Boas xente,
+ Neste post vouvos amosar unha serie de truquiños que, pola miña experiencia, son cremita para aumentar a usabilidade das utilidades de consola. Vounos deixar aquí plasmados para non esquecelos e coa esperanza de que tamén lle poidan servir a máis xente.
+ Ao final a clave e facer os programas simples, o que non é tan fácil como parece, pero agardo que estes truquiños che axuden.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>PUME: a tool to mutate Python source code - Hackliza</title>
+  <meta name="description" content="This article will explain what PUME (Python Universal Mutation Engine) is and how it works and after that some examples of use will be given.
+Introduction PUME is a tool that randombly modifies the source code of a program made with Python without change the orginal features. This is mainly achived by doing modifications in the Abstract Syntax Tree (AST) of the program but it should be noted that exist a modification that is made directly in the source code."><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Hackliza",
+    
+    "url": "https:\/\/hackliza.gal\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "https:\/\/hackliza.gal\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/en\/posts\/pume\/",
+          "name": "P u m e a tool to mutate python source code"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Guzmán Cernadas Pérez"
+  },
+  "headline": "PUME: a tool to mutate Python source code",
+  "description" : "This article will explain what PUME (Python Universal Mutation Engine) is and how it works and after that some examples of use will be given.\nIntroduction PUME is a tool that randombly modifies the source code of a program made with Python without change the orginal features. This is mainly achived by doing modifications in the Abstract Syntax Tree (AST) of the program but it should be noted that exist a modification that is made directly in the source code.",
+  "inLanguage" : "en",
+  "wordCount":  1370 ,
+  "datePublished" : "2023-11-02T00:00:00",
+  "dateModified" : "2023-11-02T00:00:00",
+  "image" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+  "keywords" : [ "python, pume, AST, obfuscation" ],
+  "mainEntityOfPage" : "https:\/\/hackliza.gal\/en\/posts\/pume\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "https:\/\/hackliza.gal\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="PUME: a tool to mutate Python source code" />
+<meta property="og:description" content="This article will explain what PUME (Python Universal Mutation Engine) is and how it works and after that some examples of use will be given.
+Introduction PUME is a tool that randombly modifies the source code of a program made with Python without change the orginal features. This is mainly achived by doing modifications in the Abstract Syntax Tree (AST) of the program but it should be noted that exist a modification that is made directly in the source code.">
+<meta property="og:image" content="https://hackliza.gal/img/hackliza.png" />
+<meta property="og:url" content="https://hackliza.gal/en/posts/pume/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hackliza" />
+
+  <meta name="twitter:title" content="PUME: a tool to mutate Python source code" />
+  <meta name="twitter:description" content="This article will explain what PUME (Python Universal Mutation Engine) is and how it works and after that some examples of use will be given.
+Introduction PUME is a tool that randombly modifies the …">
+  <meta name="twitter:image" content="https://hackliza.gal/img/hackliza.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@hackliza" />
+  <meta name="twitter:creator" content="@hackliza" />
+  <link href='https://hackliza.gal/img/hackliza.png' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.74.3" />
+  <link rel="alternate" href="https://hackliza.gal/en/index.xml" type="application/rss+xml" title="Hackliza"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://hackliza.gal/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="https://hackliza.gal/css/syntax.css" /><link rel="stylesheet" href="https://hackliza.gal/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><style>
+ nav {
+     background: #0099CC !important;
+ }
+
+ .navbar-brand, #main-navbar ul li a, footer {
+     color: #fff !important;
+ }
+
+ .navbar-brand:hover, #main-navbar ul li a:hover {
+     color: #ccc !important;
+ }
+
+
+ figure {
+     margin-top: 1.5em; 
+     margin-bottom: 1.5em; 
+ }
+ 
+ figcaption {
+     text-align: center;
+     font-size: 85%;
+ }
+
+ pre {
+     overflow-x: auto !important;
+ }
+
+ .posts-heading {
+     text-align: center;
+ }
+ 
+</style>
+
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://hackliza.gal/en/">Hackliza</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blog" href="/en/">Blog</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="About" href="/en/about/">About</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Talks" href="/en/talks/">Talks</a>
+            </li>
+          
+        
+
+        
+          
+            <li>
+              
+                
+              
+                
+                  <a href="/gl" lang="gl">gl</a>
+                
+              
+            </li>
+          
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Hackliza" href="https://hackliza.gal/en/">
+            <img class="avatar-img" src="https://hackliza.gal/img/hackliza.png" alt="Hackliza" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>PUME: a tool to mutate Python source code</h1>
+              
+              
+                <hr class="small">
+              
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        <p>This article will explain what <a href="https://github.com/Caralludo/PUME">PUME (Python Universal Mutation Engine)</a> is and how
+it works and after that some examples of use will be given.</p>
+<h1 id="introduction">Introduction</h1>
+<p>PUME is a tool that randombly modifies the source code of a program made with Python without change the orginal
+features. This is mainly achived by doing modifications in the Abstract Syntax Tree (AST) of the program but it should
+be noted that exist a modification that is made directly in the source code. The modifications performed in the AST
+are:</p>
+<ul>
+<li>Change the names of the classes, functions and variables (both local and global).</li>
+<li>Change the possition of the functions.</li>
+<li>Add randombly the reserved word &ldquo;pass&rdquo; in the code.</li>
+<li>Change the integers by a mathematical expression that has the same result.</li>
+<li>Change an string by an addition of substrings.</li>
+</ul>
+<p>The modification made directly in the source code is add mono-line comments with irrelevant content in random lines.
+This is made this way because in the AST of Python comments are not represented.</p>
+<h1 id="modifications-on-ast">Modifications on AST</h1>
+<p>This section will discuss in depth the modifications that PUME is able to make and it will be shown the
+impact in the AST.</p>
+<h2 id="name-changing">Name changing</h2>
+<p>This feature consists in the detection of all the names of variables, functions and classes in the source code and
+change them without break the program. The following code snippets show the effects of this modification. The first
+snippet is the original code and the second is the modified one:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Math</span>:
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add</span>(a, b):
+        <span style="color:#66d9ef">return</span> a <span style="color:#f92672">+</span> b
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calculate</span>():
+    bananas_paul <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>
+    bananas_john <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>
+    math <span style="color:#f92672">=</span> Math()
+    total_bananas <span style="color:#f92672">=</span> math<span style="color:#f92672">.</span>add(bananas_paul, bananas_john)
+    <span style="color:#66d9ef">return</span> total_bananas
+
+calculate()
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Algebra</span>:
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sum</span>(number_1, number_2):
+        <span style="color:#66d9ef">return</span> number_1 <span style="color:#f92672">+</span> number_2
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">count</span>():
+    grapes_ann <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>
+    grapes_emma <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>
+    algebra <span style="color:#f92672">=</span> Algebra()
+    total_grapes <span style="color:#f92672">=</span> algebra<span style="color:#f92672">.</span>sum(grapes_ann, grapes_emma)
+    <span style="color:#66d9ef">return</span> total_grapes
+
+count()
+</code></pre></div><p>In the AST modifications are performed in the <a href="https://docs.python.org/3/library/ast.html#ast.Name">ast.Name</a> nodes
+changing the value of the attribute id. In the following images it is shown the effect in the AST:</p>
+<table>
+<thead>
+<tr>
+<th align="center"><img src="./Original_names.png" alt="Original AST"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">Original AST</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th align="center"><img src="./Changed_names.png" alt="Modified AST"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">Modified AST</td>
+</tr>
+</tbody>
+</table>
+<h2 id="change-possition-of-functions">Change possition of functions</h2>
+<p>As Python allows you to call functions regardles of the location in a file, then it is possible to change the function&rsquo;s
+possition without change the program features. This modification also applies to the functions of a class. The
+following code snippets show the effects of this modification. The first snippet is the original code and the second
+is the modified one:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add</span>(a, b):
+    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">+</span> b
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sub</span>(a, b):
+    <span style="color:#66d9ef">return</span> a <span style="color:#960050;background-color:#1e0010">–</span> b
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">multiply</span>(a, b):
+    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">*</span> b
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">multiply</span>(a, b):
+    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">*</span> b
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add</span>(a, b):
+    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">+</span> b
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sub</span>(a, b):
+    <span style="color:#66d9ef">return</span> a <span style="color:#960050;background-color:#1e0010">–</span> b
+</code></pre></div><p>In the AST the modifications are made in the body attribute of the classes
+<a href="https://docs.python.org/3/library/ast.html#ast.Module">ast.Module</a>
+and <a href="https://docs.python.org/3/library/ast.html#ast.ClassDef">ast.ClassDef</a> changing the possition of the
+<a href="https://docs.python.org/3/library/ast.html#ast.FunctionDef">ast.FunctionDef</a> nodes. In the following images it is shown
+the effect in the AST:</p>
+<table>
+<thead>
+<tr>
+<th align="center"><img src="./Original_function_position.png" alt="Original AST"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">Original AST</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th align="center"><img src="./Changed_function_position.png" alt="Modified AST"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">Modified AST</td>
+</tr>
+</tbody>
+</table>
+<h2 id="add-pass">Add &ldquo;pass&rdquo;</h2>
+<p>The reserved word &ldquo;pass&rdquo; has no effect on the functionality of a program, but in Python AST it has representation. This
+implies that the reserved word &ldquo;pass&rdquo; can be added randombly in the AST without consequences. The following code snippets
+show the effects of this modification. The first snippet is the original code and the second is the modified one:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add</span>(a, b):
+    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">+</span> b
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sub</span>(a, b):
+    <span style="color:#66d9ef">return</span> a <span style="color:#960050;background-color:#1e0010">–</span> b
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">multiply</span>(a, b):
+    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">*</span> b
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">pass</span>
+<span style="color:#66d9ef">pass</span>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add</span>(a, b):
+    <span style="color:#66d9ef">pass</span>
+    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">+</span> b
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sub</span>(a, b):
+    <span style="color:#66d9ef">return</span> a <span style="color:#960050;background-color:#1e0010">–</span> b
+
+<span style="color:#66d9ef">pass</span>
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">multiply</span>(a, b):
+    <span style="color:#66d9ef">pass</span>
+    <span style="color:#66d9ef">pass</span>
+    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">*</span> b
+</code></pre></div><p>In the AST the modifications are made in the body attribute of the classes
+<a href="https://docs.python.org/3/library/ast.html#ast.Module">ast.Module</a>,
+<a href="https://docs.python.org/3/library/ast.html#ast.ClassDef">ast.ClassDef</a>,
+<a href="https://docs.python.org/3/library/ast.html#ast.FunctionDef">ast.FunctionDef</a>,
+<a href="https://docs.python.org/3/library/ast.html#ast.AsyncFunctionDef">ast.AsyncFunctionDef</a>,
+<a href="https://docs.python.org/3/library/ast.html#ast.IfExp">ast.If</a>,
+<a href="https://docs.python.org/3/library/ast.html#ast.For">ast.For</a>,
+<a href="https://docs.python.org/3/library/ast.html#ast.While">ast.While</a>,
+<a href="https://docs.python.org/3/library/ast.html#ast.Try">ast.Try</a> and
+<a href="https://docs.python.org/3/library/ast.html#ast.AsyncFor">ast.AsyncFor</a>. In the following images it is shown the effect
+in the AST:</p>
+<table>
+<thead>
+<tr>
+<th align="center"><img src="./Without_pass.png" alt="Original AST"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">Original AST</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th align="center"><img src="./With_pass.png" alt="Modified AST"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">Modified AST</td>
+</tr>
+</tbody>
+</table>
+<h2 id="change-integers">Change integers</h2>
+<p>This feature consists in the creation of a mathematical expression from an integer that has the same result as the
+integer. The following code snippets show the effects of this modification. The first snippet is the original code and
+the second is the modified one:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">water <span style="color:#f92672">=</span> <span style="color:#ae81ff">15</span>
+intake <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">5</span>
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">water <span style="color:#f92672">=</span> <span style="color:#ae81ff">35</span><span style="color:#f92672">-</span><span style="color:#ae81ff">19</span><span style="color:#f92672">+</span><span style="color:#ae81ff">678</span><span style="color:#f92672">//</span><span style="color:#ae81ff">20</span><span style="color:#f92672">-</span><span style="color:#ae81ff">34</span>
+intake <span style="color:#f92672">=</span> <span style="color:#ae81ff">789</span><span style="color:#f92672">-</span><span style="color:#ae81ff">231</span><span style="color:#f92672">%</span><span style="color:#ae81ff">534</span><span style="color:#f92672">-</span><span style="color:#ae81ff">563</span>
+</code></pre></div><p>In the AST what we get is change the <a href="https://docs.python.org/3/library/ast.html#ast.Constant">ast.Constant</a> classes by
+<a href="https://docs.python.org/3/library/ast.html#ast.BinOp">ast.BinOp</a> ones. In the following images it is shown the effect
+in the AST:</p>
+<table>
+<thead>
+<tr>
+<th align="center"><img src="./Original_integers.png" alt="Original AST"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">Original AST</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th align="center"><img src="./Changed_integers.png" alt="Modified AST"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">Modified AST</td>
+</tr>
+</tbody>
+</table>
+<h2 id="change-strings">Change strings</h2>
+<p>This feature consist in generate a summation of strings from an string. The following code snippets show the effects of
+this modification. The first snippet is the original code and the second is the modified one:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Adela&#39;</span>
+surename <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Mazaricos&#39;</span>
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Ad&#39;</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;ela&#39;</span>
+surename <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Maza&#39;</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;ri&#39;</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;cos&#39;</span>
+</code></pre></div><p>In the AST what we get is change the <a href="https://docs.python.org/3/library/ast.html#ast.Constant">ast.Constant</a> classes by
+<a href="https://docs.python.org/3/library/ast.html#ast.BinOp">ast.BinOp</a> ones. In the following images it is shown the effect
+in the AST:</p>
+<table>
+<thead>
+<tr>
+<th align="center"><img src="./Original_strings.png" alt="Original AST"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">Original AST</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th align="center"><img src="./Changed_strings.png" alt="Modified AST"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">Modified AST</td>
+</tr>
+</tbody>
+</table>
+<h1 id="other-features">Other features</h1>
+<p>The modification of AST is the most interesting part of the tool, but it is worth mentioning some of the features
+whose objective is to facilitate the usability of the tool:</p>
+<ul>
+<li><strong>Multifile</strong>: The tool can handle multiple files at the same time and also takes into account if the files import
+functions, variables or classes between them.</li>
+<li><strong>Reparation of integers and strings</strong>: This feature consist in, before make the changes in the AST, search for
+mathematical expressions and summations of strings to return it back to its original value. This way, a
+disproportionate growth of the final result is avoided in the case of executing the tool over the result of a previous
+execution.</li>
+<li><strong>Deleting &ldquo;pass&rdquo;</strong>: Before adding the reserved word &ldquo;pass&rdquo; in the code, all occurrences in the AST are searched
+and deleted. This way, a disproportionate growth of the final result is avoided in the case of executing the tool over
+the result of a previous execution.</li>
+</ul>
+<h1 id="limitations">Limitations</h1>
+<p>Even if you do not like to talk about the bad things of something, you have to take it into account to get the most
+out of it. Below are the limitations of the program:</p>
+<ul>
+<li><a href="https://docs.python.org/3/tutorial/floatingpoint.html#floating-point-arithmetic-issues-and-limitations">Due to the way real numbers are handled in Python</a>,
+they will not be mutated. In the following image you can see the type of errors that can happen:</li>
+</ul>
+<p><img src="./float_problem.png" alt="A python&rsquo;s error handing floats"></p>
+<ul>
+<li>Due to typing in Python is dynamic, you cannot figure out what type variable the programmer is using until the
+program is running. So when PUME is changing names of functions and two classes have the same name for a
+function, it does not know which function belongs to which class. <strong>So the programmer cannot create two functions with
+the same name in different classes. This also applies to the standard libraries.</strong>
+In the following example, the programmer is creating a class with a function that shares name with other function of
+the standard library. In this situation, PUME cannot differentiate which function is being called.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyClass</span>:
+    <span style="color:#66d9ef">def</span> __init__(self):
+        self<span style="color:#f92672">.</span>data <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;a&#34;</span>, <span style="color:#e6db74">&#34;b&#34;</span>, <span style="color:#e6db74">&#34;c&#34;</span>, <span style="color:#e6db74">&#34;d&#34;</span>]
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">find</span>(self, a):
+        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>data<span style="color:#f92672">.</span>index(a)
+
+my_string <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;The car is big&#34;</span>
+my_string <span style="color:#f92672">=</span> my_string<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;car&#34;</span>)
+my_class <span style="color:#f92672">=</span> MyClass()
+position <span style="color:#f92672">=</span> my_class<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;a&#34;</span>)
+</code></pre></div><p>In order to avoid a bug in the mutated program, the programmer has to change the name of the class function that he
+created:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyClass</span>:
+    <span style="color:#66d9ef">def</span> __init__(self):
+        self<span style="color:#f92672">.</span>data <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;a&#34;</span>, <span style="color:#e6db74">&#34;b&#34;</span>, <span style="color:#e6db74">&#34;c&#34;</span>, <span style="color:#e6db74">&#34;d&#34;</span>]
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">search</span>(self, a):
+        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>data<span style="color:#f92672">.</span>index(a)
+
+my_string <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;The car is big&#34;</span>
+my_string <span style="color:#f92672">=</span> my_string<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;car&#34;</span>)
+my_class <span style="color:#f92672">=</span> MyClass()
+position <span style="color:#f92672">=</span> my_class<span style="color:#f92672">.</span>search(<span style="color:#e6db74">&#34;a&#34;</span>)
+</code></pre></div><h1 id="examples">Examples</h1>
+<p>Finally, now that the main features of the tool have been introduced, here are a few examples of use.</p>
+<h2 id="basic-operation">Basic operation</h2>
+<p>In the following example you can see how a program is executed, how it is modified and how after the modifications the
+program continues to work:</p>
+<p><a href="https://asciinema.org/a/616251"><img src="https://asciinema.org/a/616251.png" alt="asciicast"></a></p>
+<h2 id="antivirus-evasion">Antivirus evasion</h2>
+<p>In the following example, you can see how VirusTotal detects an <a href="https://github.com/fortra/impacket">Impacket</a> script
+as malicious, then PUME modifies it and, after that, I rescan it to see that VirusTotal no longer detects it.</p>
+<p><a href="https://tube.spdns.org/w/dNr7CSc8UAX8zswrydHtSA"><img src="https://tube.spdns.org/lazy-static/previews/5a2f4447-4a2b-402c-9fee-da428a56270b.jpg" alt="video"></a></p>
+<h2 id="virus-creation">Virus creation</h2>
+<p>At last, a <a href="https://hackliza.gal/en/posts/virus_python/">virus</a> called <a href="https://github.com/Caralludo/PUMA">PUMA</a> that
+uses the tool as an engine to mutate its own code was created. In the following video it is shown how it works:</p>
+<p><a href="https://asciinema.org/a/616349"><img src="https://asciinema.org/a/616349.png" alt="asciicast"></a></p>
+<h1 id="final-words">Final words</h1>
+<p>That&rsquo;s all folks! If you liked the tool or you see how to improve it, leave a comment below or open an issue in the
+<a href="https://github.com/Caralludo/PUME">repository</a>.</p>
+<p>Goodbye and see you!</p>
+
+
+        
+          <div class="blog-tags">
+            
+              <a href="https://hackliza.gal/en/tags/python/">python</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/pume/">pume</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/ast/">AST</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/obfuscation/">obfuscation</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="https://hackliza.gal/en/posts/python-visual-profiling/" data-toggle="tooltip" data-placement="top" title="Visual profiling in Python">&larr; Previous Post</a>
+            </li>
+          
+          
+            <li class="next">
+              <a href="https://hackliza.gal/en/posts/stealing_sudo_sessions_with_ptrace/" data-toggle="tooltip" data-placement="top" title="Stealing sudo sessions with ptrace">Next Post &rarr;</a>
+            </li>
+          
+        </ul>
+      
+
+
+      
+        
+          
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hackliza" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+          
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://github.com/hackliza" title="GitHub">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/hackliza" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2024
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="https://hackliza.gal/en/">Hackliza</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.74.3</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="https://hackliza.gal/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://hackliza.gal/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Stealing sudo sessions with ptrace - Hackliza</title>
+  <meta name="description" content="Hi people.
+ Today we are going to deepen an old technique that I have been studying. It is an attack to get sudo in case someone else is connected to the same machine with the same user and has sudo unlocked. This technique was already documented by nongiach in the sudo_inject repository. However, that implementation requires several files and dependences for the attack, so, in order to simplify it and learning about the technique, I have developed sudohunt."><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Hackliza",
+    
+    "url": "https:\/\/hackliza.gal\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "https:\/\/hackliza.gal\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/en\/posts\/stealing_sudo_sessions_with_ptrace\/",
+          "name": "Stealing sudo sessions with ptrace"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Eloy Pérez González"
+  },
+  "headline": "Stealing sudo sessions with ptrace",
+  "description" : "Hi people.\n Today we are going to deepen an old technique that I have been studying. It is an attack to get sudo in case someone else is connected to the same machine with the same user and has sudo unlocked. This technique was already documented by nongiach in the sudo_inject repository. However, that implementation requires several files and dependences for the attack, so, in order to simplify it and learning about the technique, I have developed sudohunt.",
+  "inLanguage" : "en",
+  "wordCount":  1340 ,
+  "datePublished" : "2024-03-24T00:00:00",
+  "dateModified" : "2024-03-24T00:00:00",
+  "image" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+  "keywords" : [ "pentest, linux, sudo, ptrace" ],
+  "mainEntityOfPage" : "https:\/\/hackliza.gal\/en\/posts\/stealing_sudo_sessions_with_ptrace\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "https:\/\/hackliza.gal\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="Stealing sudo sessions with ptrace" />
+<meta property="og:description" content="Hi people.
+ Today we are going to deepen an old technique that I have been studying. It is an attack to get sudo in case someone else is connected to the same machine with the same user and has sudo unlocked. This technique was already documented by nongiach in the sudo_inject repository. However, that implementation requires several files and dependences for the attack, so, in order to simplify it and learning about the technique, I have developed sudohunt.">
+<meta property="og:image" content="https://hackliza.gal/img/hackliza.png" />
+<meta property="og:url" content="https://hackliza.gal/en/posts/stealing_sudo_sessions_with_ptrace/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hackliza" />
+
+  <meta name="twitter:title" content="Stealing sudo sessions with ptrace" />
+  <meta name="twitter:description" content="Hi people.
+ Today we are going to deepen an old technique that I have been studying. It is an attack to get sudo in case someone else is connected to the same machine with the same user and has sudo …">
+  <meta name="twitter:image" content="https://hackliza.gal/img/hackliza.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@hackliza" />
+  <meta name="twitter:creator" content="@hackliza" />
+  <link href='https://hackliza.gal/img/hackliza.png' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.74.3" />
+  <link rel="alternate" href="https://hackliza.gal/en/index.xml" type="application/rss+xml" title="Hackliza"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://hackliza.gal/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="https://hackliza.gal/css/syntax.css" /><link rel="stylesheet" href="https://hackliza.gal/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><style>
+ nav {
+     background: #0099CC !important;
+ }
+
+ .navbar-brand, #main-navbar ul li a, footer {
+     color: #fff !important;
+ }
+
+ .navbar-brand:hover, #main-navbar ul li a:hover {
+     color: #ccc !important;
+ }
+
+
+ figure {
+     margin-top: 1.5em; 
+     margin-bottom: 1.5em; 
+ }
+ 
+ figcaption {
+     text-align: center;
+     font-size: 85%;
+ }
+
+ pre {
+     overflow-x: auto !important;
+ }
+
+ .posts-heading {
+     text-align: center;
+ }
+ 
+</style>
+
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://hackliza.gal/en/">Hackliza</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blog" href="/en/">Blog</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="About" href="/en/about/">About</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Talks" href="/en/talks/">Talks</a>
+            </li>
+          
+        
+
+        
+          
+            <li>
+              
+                
+              
+                
+                  <a href="/gl" lang="gl">gl</a>
+                
+              
+            </li>
+          
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Hackliza" href="https://hackliza.gal/en/">
+            <img class="avatar-img" src="https://hackliza.gal/img/hackliza.png" alt="Hackliza" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>Stealing sudo sessions with ptrace</h1>
+              
+              
+                <hr class="small">
+              
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        <p>
+Hi people.</p>
+<p>
+Today we are going to deepen an old technique that I have been studying. It is
+an attack to get sudo in case someone else is connected to the same machine
+with the same user and has sudo unlocked. This technique was already documented
+by <a href="https://github.com/nongiach/sudo_inject">nongiach</a> in the <a href="https://github.com/nongiach/sudo_inject">sudo_inject</a> repository. However, that implementation requires
+several files and dependences for the attack, so, in order to simplify it and
+learning about the technique, I have developed <a href="https://gitlab.com/Zer1t0/sudohunt">sudohunt</a>.</p>
+<p>
+To get into the subject, <code>sudo</code> is a program used in Unix-like systems (like
+GNU/Linux) that allows to execute programs as another user, root by default.
+There is more info in the <a href="https://www.man7.org/linux/man-pages/man8/sudo.8.html">sudo manual page</a>. Hence, being able to use <code>sudo</code>
+means to be able to do whatever we want in the machine.</p>
+<p>
+Therefore, let&#39;s imagine the following situation: We get a SSH key that allows
+us to connect to a machine with the <code>it</code> user. After connecting to the machine,
+we discover that <code>it</code> user is allowed to use <code>sudo</code>, but a password that we
+don&#39;t know is required.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ssh  -i itkey it@itserver
+it@itserver:~$ sudo id
+[sudo] password for it:</code></pre></div>
+</div>
+<p>
+We can check if there is another person connected to the machine with the <code>it</code>
+user with the <code>w</code> or <code>who</code> commands:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">it@itserver:~$ w
+ 14:16:16 up 15 min,  2 users,  load average: 0.00, 0.00, 0.00
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+it       pts/0    146.89.128.11    12:14    0.00s  0.01s   ?    w
+it       pts/2    192.168.2.12     12:05  20.00s  0.01s  0.01s -bash</code></pre></div>
+</div>
+<p>
+We can see that there is someone else connected as <code>it</code>, so we can try to
+inject a command into that user&#39;s session and unlock <code>sudo</code> if it is
+unlocked in that another session. What do I mean by unlocked <code>sudo</code>? That it
+doesn&#39;t ask for a password. When <code>sudo</code> is executed for the first time, it ask
+for a password, but in order not to disturb the user, for the next 15 minutes by
+default, <code>sudo</code> will executed without asking for a password.</p>
+<p>
+We can validate this behavior by executing <code>sudo</code> twice in a row:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo id
+[sudo] password for user:
+uid=0(root) gid=0(root) groups=0(root)
+$ sudo id
+uid=0(root) gid=0(root) groups=0(root)</code></pre></div>
+</div>
+<p>
+As we can see <code>sudo</code> only asks for a password the first time we execute it. How
+does it do that? And how can we take advantage of this behavior?</p>
+<p>
+Let&#39;s go step by step. To answer the first question, <code>sudo</code> keeps a record of
+all authenticated sessions. It keeps a file for each user under the
+<code class="verbatim">/run/sudo/ts</code> directory. We can list the files:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo ls -l /run/sudo/ts/
+total 4
+-rw------- 1 root it 224 Mar  3 14:51 it</code></pre></div>
+</div>
+<p>
+We can see that there is a file for <code>it</code> user, that can only be read and written
+by root. These files have a binary format described in the <a href="https://man.archlinux.org/man/core/sudo/sudoers_timestamp.5.en">sudoers_timestamp</a>
+manual page. Nevertheless, we can read it with the <code>sudohunt read</code> command:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo ./sudohunt read
+
+
+Timestamp file: /run/sudo/ts/it
+
+version: 2
+size: 56
+type: 4 TS_LOCKEXCL
+flags: 0
+auth_uid: 0
+sid: 0
+start_time: 0.0
+ts: 0.0
+id: 0
+
+version: 2
+size: 56
+type: 2 TS_TTY
+flags: 0
+auth_uid: 1000 it
+sid: 2210 -bash
+start_time: 931.530000000 (1933.998431745 seconds ago)
+ts: 2865.526131254 (0.2300491 seconds ago)
+tty: 34818 /dev/pts/2</code></pre></div>
+</div>
+<p>
+We can notice that there are two records in the <code class="verbatim">run/sudo/ts/it</code> file. The first
+one is a control register that we can ignore. We must focus on the second
+register that shows that <code>sudo</code> is unlocked for the <code>it</code> user (with <code class="verbatim">uid</code> 1000)
+in the session <code class="verbatim">2210</code> (whose leader program is a <code class="verbatim">bash</code> shell) which is executed
+in the <code class="verbatim">/dev/pts/2</code> terminal (that is coherent with the previous <code>w</code> command
+output). Furthermore, we can see that <code class="verbatim">0.23</code> seconds have passed since the last
+time that <code>sudo</code> was used, an expected time since the command was executed to
+read the file.</p>
+<p>
+Taking this into account, and answering our second question, the goal of our
+attack will be writing a new record into the file that indicates that our
+session has unlocked <code>sudo</code> in the last 15 minutes, in order to used it without
+providing a password. <code>sudohunt</code> includes a <code class="verbatim">write</code> command that allows to write
+new records into the <code>sudo</code> session files.</p>
+<p>
+And how are we going to do this knowing that only root can add new records?
+Remember that <code>sudo</code> allows to execute as root. Therefore, what we need to do is
+to force to another session with <code>sudo</code> unlocked to write the new record for
+us. To do this we are going to inject a process into the session of the person
+who unlocked <code>sudo</code> that adds a new record for our session. We need to remember
+that our session and the target session in which we try to inject is executed as
+the same user: <code>it</code>.</p>
+<p>
+By default, some GNU/Linux distros like Debian or Alma Linux allow an user to
+debug any of their processes with the <a href="https://www.man7.org/linux/man-pages/man2/ptrace.2.html">ptrace</a> syscall, even if they are in
+another session. This means that it is possible to read the target process
+memory, modify its registers or setting breakpoints, among other actions, so we
+can inject code (and thus processes) in other sessions.</p>
+<p>
+To verify that, it is possible to use ptrace over processes in other
+sessions we need to check that the value of the
+<code class="verbatim">/proc/sys/kernel/yama/ptrace_scope</code> file is 0. For other cases, injections
+with ptrace to other sessions are not possible.</p>
+<blockquote>
+<p>Additionally to <code class="verbatim">/proc/sys/kernel/yama/ptrace_scope</code> file, there could be other
+security mechanisms like SELinux that will preventing us from use ptrace over
+other session processes. In this case we assume that there aren&#39;t any additional
+security measure.</p>
+</blockquote>
+<p>
+Once we have verified that the requirements have been meet, we are going to try
+to execute the <code>sudo sudohunt write --pid &lt;sesion&gt;</code> command into the session of
+other user. This will write a new record into <code class="verbatim">/run/sudo/ts/&lt;user&gt;</code> file
+that will grant sudo to the session with the <code class="verbatim">&lt;session&gt;</code> identifier (that will
+be replace by our current session).</p>
+<p>
+Therefore, the attack, executed with the <code>sudohunt inject</code> command will have the
+following stages:</p>
+<ol>
+<li>
+<p>Process in other sessions of the same user are searched. We only need a
+process per session, so session leaders will be used, which are those
+processes which the pid is the same as the session identifier (sid) and with
+an associated terminal (interactive session).</p>
+</li>
+<li>
+<p>Once the processes are located, the <code>sudo sudohunt write</code> command is injected
+in each one. In the case that sudo is unblocked in the target session the
+previous command will grant sudo to our current session.</p>
+</li>
+</ol>
+<p>We can check this by executing <code>sudohunt</code> with our <code>it</code> user:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">it@itserver:~$ ./sudohunt inject
+Injection work. sudo may work now. If not, retry injection later.
+it@itserver:~$ sudo id
+uid=0(root) gid=0(root) groups=0(root)</code></pre></div>
+</div>
+<p>
+And we finally get root!!</p>
+<p>
+You can watch an example of this attack in the following asciinema:</p>
+<script src="https://asciinema.org/a/l3CIltwOX30YdGbWVqUdFU8Dx.js" id="asciicast-647682" async="true"></script>
+<p>
+In case you are curious about the process injection, here is a more detailed
+procedure of what happens (if you are looking even for more detail, you should
+inspect the <a href="https://gitlab.com/Zer1t0/sudots">sudohunt</a> source code):</p>
+<ol>
+<li>
+<p>Attach with ptrace to the target process, <code>bash</code> in our case.</p>
+</li>
+<li>
+<p>Force bash to execute the <a href="https://www.man7.org/linux/man-pages/man2/fork.2.html">fork</a> syscall in order to create a child process so
+we can avoid disturb the person using it.</p>
+</li>
+<li>
+<p>Attach to the child process.</p>
+</li>
+<li>
+<p>Detach from the parent process.</p>
+</li>
+<li>
+<p>Force the child process to execute the <code>sudo sudohunt write</code> command through
+the <a href="https://www.man7.org/linux/man-pages/man2/execve.2.html">execve</a> syscall. A curious thing is that we need to detach from the child
+process before execve is called to allow sudo to be spawned as root, since in
+the debugged processes the <code class="verbatim">setuid</code> flag (that allows to execute as root) is
+ignored.</p>
+</li>
+</ol>
+<p>Here is a little schema of the injection process:</p>
+<figure>
+<pre class="example">
+  session: 1001                session: 1337
+.-----------------.  1. attach   .------.
+| sudohunt inject |-------------&gt;| bash |
+&#39;-----------------&#39;  4. detach   &#39;------&#39;
+                |                   |
+                |                   | 2.fork
+                |                   v
+                |  3. attach     .------.
+                &#39;---------------&gt;| bash |
+                   5. detach     &#39;------&#39;
+                                    |
+                                    | 6. execve
+                                    v
+                     .--------------------------------.
+                     | sudo sudohunt write --pid 1001 |
+                     &#39;--------------------------------&#39;
+</pre>
+<figcaption>
+sudohunt injection
+</figcaption>
+</figure>
+<p>
+And that&#39;s all for now friends, I hope you liked this little article and see you!!</p>
+
+
+        
+          <div class="blog-tags">
+            
+              <a href="https://hackliza.gal/en/tags/pentest/">pentest</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/linux/">linux</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/sudo/">sudo</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/ptrace/">ptrace</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="https://hackliza.gal/en/posts/pume/" data-toggle="tooltip" data-placement="top" title="PUME: a tool to mutate Python source code">&larr; Previous Post</a>
+            </li>
+          
+          
+            <li class="next">
+              <a href="https://hackliza.gal/en/posts/cambiar_dns_linux/" data-toggle="tooltip" data-placement="top" title="Who is messing with my DNS server? Discovering and managing network daemons">Next Post &rarr;</a>
+            </li>
+          
+        </ul>
+      
+
+
+      
+        
+          
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hackliza" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+          
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://github.com/hackliza" title="GitHub">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/hackliza" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2024
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="https://hackliza.gal/en/">Hackliza</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.74.3</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="https://hackliza.gal/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://hackliza.gal/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Tricks to improve console programs usability - Hackliza</title>
+  <meta name="description" content="Hi folks.
+ In this post I goint to present you some tricks that, in my experience, allow to greatly improve the usability of the console programs. I write them down here to avoid to forget them and in the hope that they can be useful to other people.
+ The key is to make the programs simple, which normally is not as easy as it sounds, but I hope these tricks will help you to achieve that."><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Hackliza",
+    
+    "url": "https:\/\/hackliza.gal\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "https:\/\/hackliza.gal\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/en\/posts\/console_usability\/",
+          "name": "Tricks to improve console programs usability"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Eloy Pérez González"
+  },
+  "headline": "Tricks to improve console programs usability",
+  "description" : "Hi folks.\n In this post I goint to present you some tricks that, in my experience, allow to greatly improve the usability of the console programs. I write them down here to avoid to forget them and in the hope that they can be useful to other people.\n The key is to make the programs simple, which normally is not as easy as it sounds, but I hope these tricks will help you to achieve that.",
+  "inLanguage" : "en",
+  "wordCount":  3320 ,
+  "datePublished" : "2020-12-24T00:00:00",
+  "dateModified" : "2020-12-24T00:00:00",
+  "image" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+  "keywords" : [ "linux, unix, programming" ],
+  "mainEntityOfPage" : "https:\/\/hackliza.gal\/en\/posts\/console_usability\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "https:\/\/hackliza.gal\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="Tricks to improve console programs usability" />
+<meta property="og:description" content="Hi folks.
+ In this post I goint to present you some tricks that, in my experience, allow to greatly improve the usability of the console programs. I write them down here to avoid to forget them and in the hope that they can be useful to other people.
+ The key is to make the programs simple, which normally is not as easy as it sounds, but I hope these tricks will help you to achieve that.">
+<meta property="og:image" content="https://hackliza.gal/img/hackliza.png" />
+<meta property="og:url" content="https://hackliza.gal/en/posts/console_usability/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hackliza" />
+
+  <meta name="twitter:title" content="Tricks to improve console programs usability" />
+  <meta name="twitter:description" content="Hi folks.
+ In this post I goint to present you some tricks that, in my experience, allow to greatly improve the usability of the console programs. I write them down here to avoid to forget them and in …">
+  <meta name="twitter:image" content="https://hackliza.gal/img/hackliza.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@hackliza" />
+  <meta name="twitter:creator" content="@hackliza" />
+  <link href='https://hackliza.gal/img/hackliza.png' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.74.3" />
+  <link rel="alternate" href="https://hackliza.gal/en/index.xml" type="application/rss+xml" title="Hackliza"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://hackliza.gal/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="https://hackliza.gal/css/syntax.css" /><link rel="stylesheet" href="https://hackliza.gal/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><style>
+ nav {
+     background: #0099CC !important;
+ }
+
+ .navbar-brand, #main-navbar ul li a, footer {
+     color: #fff !important;
+ }
+
+ .navbar-brand:hover, #main-navbar ul li a:hover {
+     color: #ccc !important;
+ }
+
+
+ figure {
+     margin-top: 1.5em; 
+     margin-bottom: 1.5em; 
+ }
+ 
+ figcaption {
+     text-align: center;
+     font-size: 85%;
+ }
+
+ pre {
+     overflow-x: auto !important;
+ }
+
+ .posts-heading {
+     text-align: center;
+ }
+ 
+</style>
+
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://hackliza.gal/en/">Hackliza</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blog" href="/en/">Blog</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="About" href="/en/about/">About</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Talks" href="/en/talks/">Talks</a>
+            </li>
+          
+        
+
+        
+          
+            <li>
+              
+                
+              
+                
+                  <a href="/gl" lang="gl">gl</a>
+                
+              
+            </li>
+          
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Hackliza" href="https://hackliza.gal/en/">
+            <img class="avatar-img" src="https://hackliza.gal/img/hackliza.png" alt="Hackliza" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>Tricks to improve console programs usability</h1>
+              
+              
+                <hr class="small">
+              
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        
+<p>
+Hi folks.</p>
+<p>
+In this post I goint to present you some tricks that, in my experience, allow
+to greatly improve the usability of the console programs. I write them down here
+to avoid to forget them and in the hope that they can be useful to other
+people.</p>
+<p>
+The key is to make the programs simple, which normally is not as easy as it
+sounds, but I hope these tricks will help you to achieve that.</p>
+<p>
+I usually program small tools/scripts in Linux, so these advices
+are focused on that platform, but also can be applied to others.</p>
+<p>
+Besides, many of these practices were inspired by
+<a href="http://www.catb.org/~esr/writings/taoup/html/">The Art of Unix Programming</a>, so if you like programming and Unix/Linux, you
+should check it.</p>
+<p>
+I will asume basic knowledge of Linux systems. If you don&#39;t know Linux, I
+strongly recommend you to <a href="http://www.catb.org/~esr/faqs/hacker-howto.html#skills2">learn how to use it</a>.</p>
+<p>
+Now, let&#39;s go to the topic.</p>
+<div id="outline-container-headline-1" class="outline-2">
+<h2 id="headline-1">
+Make programs easy to install
+</h2>
+<div id="outline-text-headline-1" class="outline-text-2">
+<p>
+Maybe this can be tedious the first time you do cause many times doesn&#39;t imply
+to program, but to prepare your program to be easily deployed. However, it is
+incredibly comfortable when you or other people need to use the program.</p>
+<p>
+The first step should be to make available the program by storing it in a
+repository of a forge like <a href="https://github.com/">Github</a> or <a href="https://about.gitlab.com/">Gitlab</a>.</p>
+<p>
+Once your tool is available to download, it should be easy to
+install/compile. It is a common practice that programs are compiled and
+installed by using makefiles. For example:</p>
+<figure>
+<div class="src src-shell">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">user@debian:~$ cd myprogram/
+user@debian:myprogram$ make
+user@debian:myprogram$ make install</code></pre></div>
+</div>
+<figcaption>
+Common installation process
+</figcaption>
+</figure>
+<p>
+This is a common practice in C programs, where the <code>make</code> command compiles the
+program and the <code>make install</code> command installs it. Even if your program is not
+a C program, I recommend you to create a <a href="https://www.gnu.org/software/make/manual/make.html">makefile</a> for it in order to standarize
+the program installation and make it more comfortable to other users.</p>
+<p>
+For example, if your program is a Python program, it doesn&#39;t need to be
+compiled, but the <code>make</code> command could install the dependencies by executing
+<code>pip install -r requirements.txt</code> and <code>make install</code> could execute 
+<code>pip install .</code> to install your program in the system. </p>
+<figure>
+<div class="src src-makefile">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-makefile" data-lang="makefile"><span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> deps, install
+
+<span style="color:#a6e22e">deps</span><span style="color:#f92672">:</span>
+	pip3 install -r requirements.txt
+
+<span style="color:#a6e22e">install</span><span style="color:#f92672">:</span>
+	pip3 install .
+</code></pre></div>
+</div>
+<figcaption>
+Makefile example
+</figcaption>
+</figure>
+<p>
+Maybe your tool is not a python package but a simply python script, then <code>make
+install</code> could execute <code>cp ./myscript.py /usr/bin/myscript</code> (remember to make
+your script executable (<code>chmod +x</code>) and adding a <a href="https://en.wikipedia.org/wiki/Shebang_(Unix)">shebang</a> to it).</p>
+<p>
+Note: In case you want to install a program for the user (cause you don&#39;t have
+root privileges or whatever), you can copy it to <a href="https://www.freedesktop.org/software/systemd/man/file-hierarchy.html#~/.local/bin/"><code class="verbatim">~/.local/bin</code></a> (remember to add
+this folder to your PATH, and create it if it is necessary).</p>
+<p>
+For Python programs, I recommend you to create a <a href="https://packaging.python.org/tutorials/packaging-projects/"><code class="verbatim">setup.py</code></a> file to allow
+install it easily, even without a makefile. Or, at least, to create a
+<code class="verbatim">requirements.txt</code> file to indicate your dependencies. Do not specify
+your dependencies in your readme, it is incredibly annoying to have to install
+them manually.</p>
+<p>
+Actually, the installation of a program should be as simple as possible. In case
+you think that your tool is useful, you can include it in a package registry to
+make it easy to install for anyone.</p>
+<p>
+For example, with Python tools you can registry them in <a href="https://pypi.org/">pypi</a> to be able to
+install then with <code>pip install mytool</code>. In case of Rust, you can register it in
+the <a href="https://crates.io/">crate registry</a>, to install it with <code>cargo install mytool</code>. Moreover, you
+also can create a package for a Linux distro and install it with <code>apt</code> or <code>yum</code>.</p>
+<p>
+To sum up, even little programs are created to being used, and first step is to
+install them. Make them easy to install, even if it is tedious, saves users a
+lot of headaches.</p>
+</div>
+</div>
+<div id="outline-container-headline-2" class="outline-2">
+<h2 id="headline-2">
+Parameters
+</h2>
+<div id="outline-text-headline-2" class="outline-text-2">
+<p>
+The command line options or parameters are a crucial part of every console
+program. They are one of the main input methods, so it is important to handle
+them correctly. For parameters I like to use the <a href="http://www.catb.org/~esr/writings/taoup/html/ch10s05.html">following rules</a>:</p>
+<p>
+Note: The argument is the value that user pass to the parameter.</p>
+<div id="outline-container-headline-3" class="outline-3">
+<h3 id="headline-3">
+Short/long parameters
+</h3>
+<div id="outline-text-headline-3" class="outline-text-3">
+<p>
+Command line options should always have a long mnemotechnic name easy to
+remember that starts by two hyphens <code class="verbatim">--</code> . For example, <code>--help</code>, <code>--out-file</code>,
+etc.</p>
+<p>
+Sometimes is difficult to choose a name. For example, should I use <code class="verbatim">pass</code>,
+<code class="verbatim">password</code> or <code class="verbatim">passwd</code>? I personally like to choose the more descriptive, in this
+case <code class="verbatim">password</code>, and set the rest as alias.</p>
+<p>
+For the most used command line options and flags a short option should be
+created. The sort option should be only a letter or number, preceded by one
+hyphen <code class="verbatim">-</code>. Usually lowercase letters are used. Uppercase letters are used in
+the case that the intuitive lowercase letter is used. For example, curl uses
+<code>-H</code> to indicate an HTTP header since <code>-h</code> is used for help. </p>
+<p>
+The flags (boolean options without value) normally can be used together with
+just one hyphen <code class="verbatim">-</code>. For example, <code>ls -lah</code> is the same as <code>ls -l -a -h</code>. Some
+programs use short options of two or more letters, like <code class="verbatim">-out</code>, but this limits
+the capacity of joining short flags. </p>
+<p>
+In Windows environments, the slash <code class="verbatim">/</code> used to be used instead of
+hyphen. However, nowadays there are many tools that use hyphens, so I prefer to
+maintain hyphens. Use hyphens also avoid problems with path arguments that
+follows the Unix format, that can begin with an slash.</p>
+</div>
+</div>
+<div id="outline-container-headline-4" class="outline-3">
+<h3 id="headline-4">
+Follow paremeters conventions
+</h3>
+<div id="outline-text-headline-4" class="outline-text-3">
+<p>
+There are certain parameters that have a common meaning known by the
+community and should not be used for other purposes (without a reason). The most
+important are the following:</p>
+<ul>
+<li>
+<p><code>-h/--help</code> -&gt; Show the help of the program. Every program should
+implement this.</p>
+</li>
+<li>
+<p><code>-v/--verbose</code> -&gt; Use to increase the program verbosity. Usually it is
+accumulative, allowing to specify the detail level by using it many times. For
+example, <code>-v</code> for a low detail and <code>-vvv</code> for a high level of detail.</p>
+</li>
+<li>
+<p><code>-V/--version</code> -&gt; Show the version of the program.</p>
+</li>
+</ul>
+<p>Moreover, the tools with similar or related behaviours should use the same name
+for parameters. It is a good practice to use as parameter name those used by
+famous tools. </p>
+<p>
+For example, if you are programming a tool that performs HTTP requests as it
+main functionality, you should use parameters similar to those used by <code>curl</code> or
+<code>wget</code>. In this case, you could use <code>-H</code> to add a custom header as curl or <code>-A</code>
+for setting the user agent. This way it is easier to pick parameter names and also
+helps to reduce the user learning curve.</p>
+</div>
+</div>
+<div id="outline-container-headline-5" class="outline-3">
+<h3 id="headline-5">
+Have flexible parameters
+</h3>
+<div id="outline-text-headline-5" class="outline-text-3">
+<p>
+A feature that I have found incredibly comfortable in programs is when those
+have parameters that are flexible and accept many different argument types or
+deduce the type of argument without being specified.</p>
+<p>
+For instance, imagine a bruteforcing program that accepts list of users and
+passwords. It would be very comfortable that the same parameter <code>-u/--user</code>
+could accept both an username or a file with usernames (and same for
+passwords). This way you don&#39;t have to remember 2 different parameters such as
+<code>-u/--user</code> and <code>-U/--user-list</code> for different type of arguments, and you can do
+something like the following:</p>
+<figure>
+<pre class="example">
+$ ./bruteleaks -u foo -p p4ss
+Valid credentials: foo:p4ss
+</pre>
+<figcaption>
+Check one user/password
+</figcaption>
+</figure>
+<figure>
+<pre class="example">
+$ ./bruteleaks -u users.txt -p p4ss
+Valid credentials: jack:p4ss
+Valid credentials: john:p4ss
+Valid credentials: samuel:p4ss
+</pre>
+<figcaption>
+Password spraying attack, using users in a file
+</figcaption>
+</figure>
+<figure>
+<pre class="example">
+$ ./bruteleaks -u users.txt -p passwords.txt
+Valid credentials: jack:p4ss
+Valid credentials: Batman:Bruc3
+Valid credentials: Flash:1mf4st
+</pre>
+<figcaption>
+Check combination of users and passwords, using both users and passwords files
+</figcaption>
+</figure>
+<p>
+Do you see? Many different attack posibilities without having to remember different
+parameters since the program checks if the arguments are files or not. </p>
+<p>
+I found this so useful, that I have created an sample <a href="https://gitlab.com/-/snippets/2002279">python snippet</a> that allows
+to get the input for a parameter from a file, argument or <a href="https://man7.org/linux/man-pages/man3/stdin.3.html">stdin</a>. </p>
+<p>
+Other example is the <code>tar</code> utility that decompress file without needing to
+specify the format of the target file. E.g <code>tar -xf file.tgz</code> or 
+<code>tar -xf file.tar.xz</code>. Pretty comfortable.</p>
+<p>
+The main idea is that the program should deduce the most from the minimum
+input, saving the user from specifying to much information that could be
+redundant.</p>
+<p>
+Notwithstanding, this flexibility must be intuitive for the user. Be careful
+with parsing parameters in extrange ways that leads to unpredictable
+behaviours.</p>
+</div>
+</div>
+<div id="outline-container-headline-6" class="outline-3">
+<h3 id="headline-6">
+Use a library for handling parameters
+</h3>
+<div id="outline-text-headline-6" class="outline-text-3">
+<p>
+Every programming language has at least one known library to handle
+parameters. Use it. It is easier, faster and cleaner than parse the command line
+by yourself. I let you some examples of libraries that parse parameters:</p>
+<ul>
+<li>
+<p>C -&gt; <a href="https://www.gnu.org/software/libc/manual/html_node/Argp.html">argp</a></p>
+</li>
+<li>
+<p>Haskell -&gt; <a href="https://hackage.haskell.org/package/base-4.14.0.0/docs/System-Console-GetOpt.html">GetOpt</a></p>
+</li>
+<li>
+<p>Python -&gt; <a href="https://docs.python.org/3/library/argparse.html">argparse</a></p>
+</li>
+<li>
+<p>Powershell -&gt; Built-In</p>
+</li>
+<li>
+<p>Rust -&gt; <a href="https://github.com/clap-rs/clap">clap</a></p>
+</li>
+</ul>
+<p>
+Sometimes you have to parse some arguments manually, but try to handle as much
+as you can from command line from inside of the library. They usually include
+many options such as: </p>
+<ul>
+<li>
+<p>Auto generated usage for <code>-h/--help</code></p>
+</li>
+<li>
+<p>Use of flags (boolean parameters that doesn&#39;t accept a value)</p>
+</li>
+<li>
+<p>Parameters that only accept a group of choices</p>
+</li>
+<li>
+<p>Parameters that can be used many times (like verbose)</p>
+</li>
+<li>
+<p>Parameters that cannot be used together (exclusive)</p>
+</li>
+<li>
+<p>Define the value type accepted for a parameter, if it is a number, string,
+file, etc</p>
+</li>
+<li>
+<p>Hooks for adding custom routines to parse parameters (very useful)</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-7" class="outline-2">
+<h2 id="headline-7">
+Configuration files
+</h2>
+<div id="outline-text-headline-7" class="outline-text-2">
+<p>
+Configuration files are widely used by programs, specially by servers
+(nginx, ssh) or daemons (cron), but also clients (git, proxychains) or
+interactive programs (i3, emacs).</p>
+<p>
+In case of using configuration files, following certain rules can improve their
+usability.</p>
+<div id="outline-container-headline-8" class="outline-3">
+<h3 id="headline-8">
+Use easily editable configuration files
+</h3>
+<div id="outline-text-headline-8" class="outline-text-3">
+<p>
+In case you use a configuration file, instead of invent a custom
+format, you can use one of following:  <a href="https://toml.io/en/">TOML</a>, <a href="https://en.wikipedia.org/wiki/INI_file">INI</a> or <a href="https://yaml.org/">YAML</a>. They were designed to
+be human friendly and are perfect for configuration files. They are easy to
+read and to edit with any text editor, and many languages have libraries to parse
+them (be careful parsing <a href="https://blogs.embarcadero.com/yaml-and-remote-code-execution/">YAML since it can lead to arbitrary code
+execution</a>).</p>
+<p>
+There are tools that use <a href="https://en.wikipedia.org/wiki/XML">XML</a> or <a href="https://en.wikipedia.org/wiki/JSON">JSON</a> formats for configuration files, but I
+don&#39;t recommend to use them because of my experience, since to edit and read
+them can be a little cumbersome for a human. I think they are more appropiate to
+be used to exchange data between programs, like in the case of <a href="https://en.wikipedia.org/wiki/Representational_state_transfer">REST</a>/<a href="https://en.wikipedia.org/wiki/SOAP">SOAP</a> APIs or
+databases.</p>
+</div>
+</div>
+<div id="outline-container-headline-9" class="outline-3">
+<h3 id="headline-9">
+Configuration files default places
+</h3>
+<div id="outline-text-headline-9" class="outline-text-3">
+<p>
+When reading configuration files in Linux is a common practice to look in some
+<a href="http://www.catb.org/~esr/writings/taoup/html/ch10s02.html">default places</a>. </p>
+<p>
+The configuration files that contains system configurations are usually stored
+in the <code class="verbatim">/etc</code> directory, where they can be placed in the following places:</p>
+<ul>
+<li>
+<p>File with the program name following by .conf <code class="verbatim">&lt;program&gt;.conf</code>, like
+<code class="verbatim">/etc/krb5.conf</code>.</p>
+</li>
+<li>
+<p>Directory with the program name, like <code class="verbatim">/etc/nginx/</code></p>
+</li>
+<li>
+<p>Directory with the program name following by .d <code class="verbatim">&lt;program&gt;.d</code>, like
+<code class="verbatim">/etc/cron.d</code>. </p>
+</li>
+</ul>
+<p>On the other side, the files with specific user configurations are stored in the
+user directory. Usually these are hidden files (that start with .) that can be
+found in the following places:</p>
+<ul>
+<li>
+<p>File with program name <code class="verbatim">.&lt;program&gt;</code>, like <code class="verbatim">~/.ssh/</code>.</p>
+</li>
+<li>
+<p>Directory with program name following by .d <code class="verbatim">.&lt;program&gt;.d</code>, like
+<code class="verbatim">~/.emacs.d/</code>. </p>
+</li>
+<li>
+<p>In the .config directory, with a directory/file with the program name
+<code class="verbatim">.config/&lt;program&gt;</code>, like <code class="verbatim">~/.config/i3/</code>.</p>
+</li>
+</ul>
+<p>Additionally, many programs also contain a parameter that allows to specify a
+custom location for a configuration file/directory.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-10" class="outline-2">
+<h2 id="headline-10">
+Output
+</h2>
+<div id="outline-text-headline-10" class="outline-text-2">
+<p>
+The program output is one the main channels to interact with the user and other
+programs. Thus, having a clear output that gives useful information is essential
+when creating a program.</p>
+<p>
+Here are some tips about output.</p>
+<div id="outline-container-headline-11" class="outline-3">
+<h3 id="headline-11">
+Use stdout and stderr
+</h3>
+<div id="outline-text-headline-11" class="outline-text-3">
+<p>
+Each program is connected to two output streams: stdout and stderr.</p>
+<p>
+Stdout should be used to write the useful output data of the program, whereas
+stderr should be used to show other additional information like the program
+errors, warnings, debug messages, etc.</p>
+<p>
+In Unix environments, the use of pipes <code class="verbatim">|</code> to connect the program output
+(stdout) to the input of the following (stdin) is a common practice. Therefore,
+if all the output is sent to stdout, including the program banner or warning
+messages, parsing the result with utilities like <code>grep</code> or <code>cut</code> can be more
+difficult or even infeasible. </p>
+<p>
+For example, check this program to test user credentials:</p>
+<pre class="example">
+$ credbrute -u /tmp/users.txt -p superman -v
+&gt;&gt;&gt; Credbrute: The fastest credential checker &lt;&lt;&lt;
+[INFO] Testing admin:superman -&gt; Fail
+[INFO] Testing bar:superman -&gt; Success
+bar:superman
+[INFO] Testing foo:superman -&gt; Success
+foo:superman
+</pre>
+<p>
+If everything is written to stdout and we only want to get the name of the
+successful accounts, things can get ugly: </p>
+<pre class="example">
+$ credbrute -u /tmp/users.txt -p superman -v | cut -d &#39;:&#39; -f 1 &gt; superman_users.txt
+
+$ cat superman_users.txt
+&gt;&gt;&gt; Credbrute
+[INFO] Testing admin
+[INFO] Testing bar
+bar
+[INFO] Testing foo
+foo
+</pre>
+<p>
+Notwithstanding, if only the result is written to stdout, and the rest to
+stderr, then the result is the expected one:</p>
+<pre class="example">
+$ credbrute -u /tmp/users.txt -p superman -v | cut -d &#39;:&#39; -f 1 &gt; superman_users.txt
+&gt;&gt;&gt; Credbrute: The fastest credential checker &lt;&lt;&lt;
+[INFO] Testing admin:superman -&gt; Fail
+[INFO] Testing bar:superman -&gt; Success
+[INFO] Testing foo:superman -&gt; Success
+
+$ cat superman_users.txt
+bar
+foo
+</pre>
+<p>
+As you can see, an output well redirected to stdout and stderr can improve the
+program usability, specially when <a href="http://www.catb.org/~esr/writings/taoup/html/ch01s06.html#id2877684">is used with other programs</a>.</p>
+</div>
+</div>
+<div id="outline-container-headline-12" class="outline-3">
+<h3 id="headline-12">
+Grepable output
+</h3>
+<div id="outline-text-headline-12" class="outline-text-3">
+<p>
+As we have seen, usually the output of a program can be used as the <a href="http://www.catb.org/~esr/writings/taoup/html/ch07s02.html#plumbing">input of
+others</a>, and this is something that Unix hackers know. That&#39;s the reason there are
+so many tools to parse text line such as <code>grep</code>, <code>cut</code>, <code>sed</code>, etc. If you
+format the output of your program in a way that can interact with the rest of
+tools through pipes <code class="verbatim">|</code>, the usability raises.</p>
+<p>
+For example, imagine that you want to get the users that use &#34;superman&#34; as
+password:</p>
+<pre class="example">
+$ credbrute -u /tmp/users.txt -p superman
+&gt;&gt;&gt; Credbrute: The fastest credential checker &lt;&lt;&lt;
+Fail: Incorrect password for user admin -&gt; superman
+Success!! 
+The password of user foo is superman
+
+Success!! 
+The password of user bar is superman
+
+$ credbrute -u /tmp/users.txt -p superman | grep &#34;The password of&#34; | cut -d &#39; &#39; -f 6
+foo
+bar
+</pre>
+<p>
+You can increase the effectivity with a more concise output:</p>
+<pre class="example">
+$ credbrute -u /tmp/users.txt -p superman
+foo:superman
+bar:superman
+
+$ credbrute -u /tmp/users.txt -p superman | cut -d &#39;:&#39; -f 1
+foo
+bar
+</pre>
+<p>
+And, in case you want more detailed, you could print it to stderr:</p>
+<pre class="example">
+$ credbrute -u /tmp/users.txt -p superman | cut -d &#39;:&#39; -f 1
+[INFO] Testing admin:superman -&gt; Fail
+[INFO] Testing foo:superman -&gt; Success
+foo
+[INFO] Testing bar:superman -&gt; Success
+bar
+</pre>
+<p>
+You could also count the number of users that has the password &#34;superman&#34;:</p>
+<pre class="example">
+$ credbrute -u /tmp/users.txt -p superman | wc -l
+2
+</pre>
+<p>
+This way you can use other tools to process your output easily, which leads to
+user to manipulate your data without the need to add new functionalities to your
+program.</p>
+<p>
+Other case is the Powershell console, that in contrast to sh consoles, is an
+expert managing objects instead of text. Then, in Powershell scripts/cmdlets is
+preferable to return objects instead of text.</p>
+</div>
+</div>
+<div id="outline-container-headline-13" class="outline-3">
+<h3 id="headline-13">
+Structured output
+</h3>
+<div id="outline-text-headline-13" class="outline-text-3">
+<p>Some programs returns complex (or not so complex) data that can be useful to
+structure in a format like XML or JSON, in order to be parsed by other programs.</p>
+<p>
+For example, <a href="https://nmap.org/">nmap</a> allows to save the results of the scans in a XML file, which
+is very useful to parse the results of many different scans many times with a
+single program.</p>
+<p>
+I personally prefer to use the JSON format, since it is simpler than
+XML. Besides, it can be filtered/tranformed with tools like <a href="https://stedolan.github.io/jq/">jq</a> or <a href="https://github.com/tomnomnom/gron">gron</a>.</p>
+<p>
+Anyway, if your program produces a structured format output, don&#39;t forget to
+indicate an schema of the output data and types. In XML can be done by using
+DTDs, and <a href="https://json-schema.org/">JSON Schema</a> in case of JSON.</p>
+</div>
+</div>
+<div id="outline-container-headline-14" class="outline-3">
+<h3 id="headline-14">
+Use colors
+</h3>
+<div id="outline-text-headline-14" class="outline-text-3">
+<p>
+When the output is intended to be read by humans, the use of colors can improve
+the reading and identification of important data, specially in programs with
+hundreds of lines.</p>
+<p>
+When used, even if the meaning of the colors depends on the program, it is
+important to be consistent and give only one meaning to each color, so the user
+mind can map the color to an event in the program execution.</p>
+<p>
+For example, red for program errors, green for good news, yellow for
+informational messages and blue for debug.</p>
+</div>
+</div>
+<div id="outline-container-headline-15" class="outline-3">
+<h3 id="headline-15">
+Output detail
+</h3>
+<div id="outline-text-headline-15" class="outline-text-3">
+<p>
+In order to let the user to focus in the important details, the output of a
+program <a href="http://www.catb.org/~esr/writings/taoup/html/ch11s09.html">should be minimum</a>. However, the program also should allow to increase
+its verbosity in case a user want to know what is happening in order to
+understand or debug the program.</p>
+<p>
+For example, the <code>cp</code> utility doesn&#39;t display output if not is requested, it
+just copy files that user indicates. But the verbosity level can be increased
+if required:</p>
+<pre class="example">
+$ cp /tmp/a /tmp/b
+$ cp /tmp/a /tmp/b -v
+&#39;/tmp/a&#39; -&gt; &#39;/tmp/b&#39;
+</pre>
+<p>
+In depends on the program, but a rule I like to follow is, by default, to only
+show the program result and the error messages (if any), and use the verbose
+parameter <code class="verbatim">-v</code> to allow user to see informational or debug messages.</p>
+<p>
+Besides, a practice that I found annoying is to shown a banner.
+A banner is an irrelevant piece of information that and displaces the previous
+command outputs, thus increasing the necessary scrolling to review the previous
+command results and sometimes making impossible to take decent screenshots of
+the terminal with all the relevant information.</p>
+<figure>
+<pre class="example">
+$ awesomeprogram
+   _____                                              
+  /  _  \__  _  __ ____   __________   _____   ____   
+ /  /_\  \ \/ \/ // __ \ /  ___/  _ \ /     \_/ __ \  
+/    |    \     /\  ___/ \___ (  &lt;_&gt; )  Y Y  \  ___/  
+\____|__  /\/\_/  \___  &gt;____  &gt;____/|__|_|  /\___  &gt; 
+        \/            \/     \/            \/     \/  
+__________                                            
+\______   \_______  ____   ________________    _____  
+ |     ___/\_  __ \/  _ \ / ___\_  __ \__  \  /     \ 
+ |    |     |  | \(  &lt;_&gt; ) /_/  &gt;  | \// __ \|  Y Y  \
+ |____|     |__|   \____/\___  /|__|  (____  /__|_|  /
+                        /_____/            \/      \/ 
+
+
+Hey, I&#39;m the useful output, do you see me?
+</pre>
+<figcaption>
+Annoying banner
+</figcaption>
+</figure>
+<p>
+I know it is super cool to design and show a banner, I have did this in the
+past, but it occuppies too much terminal space. Please, do not show banners. Or
+at least create an specific functionality to show it.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-16" class="outline-2">
+<h2 id="headline-16">
+Documentation: Give examples
+</h2>
+<div id="outline-text-headline-16" class="outline-text-2">
+<p>
+Documentation is hard and bored. Everyone knows that. However, a trick to
+make the documentation useful is to provide examples of the program use.
+People is lazy, so if we have an example of use, we can just simply copy,
+paste and modify it for our purposes.</p>
+<p>
+At least you should have examples for the common use of the tool, where you can
+show both the input and output of the tool, allowing the users to know what to
+expect from the result. For instance, the readme of <a href="https://github.com/GhostPack/Rubeus">Rubeus</a> contains many
+examples of what can be done. </p>
+<p>
+Moreover, if you add examples of uses of your in combination with other tools it
+can be give the users an idea of when to use it.</p>
+<p>
+Likewise, give examples of the files used by your program. On one hand, you can
+show templates of the configuration files, like the <a href="https://github.com/lgandx/Responder/blob/master/Responder.conf">configuration of
+Responder</a>. On the other hand, you can give examples and schemas for the
+structured files (JSON, XML, etc) produced by the program, in order to make
+other people aware of the format and thus allowing them to create another
+programs to parse your results.</p>
+<p>
+Other advice in order to make your readme is to not include the output of the
+help command (<code>-h/--help</code>), it can be seen by using the help command and it is
+hard to maintain. This doesn&#39;t mean that you can&#39;t explain the options in Readme
+(and provide examples of use).</p>
+</div>
+</div>
+<div id="outline-container-headline-17" class="outline-2">
+<h2 id="headline-17">
+Conclusion
+</h2>
+<div id="outline-text-headline-17" class="outline-text-2">
+<p>
+Well, that&#39;s all. I hope this practices allow you to make your programs more
+useful for you and the others. In case you know other tricks, please share
+them!!</p>
+<p>
+Enjoy!!</p>
+</div>
+</div>
+
+
+        
+          <div class="blog-tags">
+            
+              <a href="https://hackliza.gal/en/tags/linux/">linux</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/unix/">unix</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/programming/">programming</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="https://hackliza.gal/en/posts/virus_python/" data-toggle="tooltip" data-placement="top" title="Virus and Python">&larr; Previous Post</a>
+            </li>
+          
+          
+            <li class="next">
+              <a href="https://hackliza.gal/en/posts/libfuzzer_autotools/" data-toggle="tooltip" data-placement="top" title="Using libfuzzer in autotools compiled projects">Next Post &rarr;</a>
+            </li>
+          
+        </ul>
+      
+
+
+      
+        
+          
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hackliza" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+          
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://github.com/hackliza" title="GitHub">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/hackliza" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2024
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="https://hackliza.gal/en/">Hackliza</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.74.3</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="https://hackliza.gal/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://hackliza.gal/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

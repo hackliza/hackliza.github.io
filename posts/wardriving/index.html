@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="gl" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Wardriving coa Raspi no 2023 - Hackliza</title>
+  <meta name="description" content="Dando unha volta polos wifis do lugar"><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Hackliza",
+    
+    "url": "https:\/\/hackliza.gal\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "https:\/\/hackliza.gal\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/posts\/wardriving\/",
+          "name": "Wardriving coa raspi no 2023"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Eloy Pérez González"
+  },
+  "headline": "Wardriving coa Raspi no 2023",
+  "description" : "Intro  Boas xente, nesta entrada imos a revisar unha vella técnica de seguridade de redes wifi, o wardriving. O wardriving consiste en localizar redes wifis dentro dun lugar, que pode ser unha rúa ou unha cidade.\n Para iso imos precisar certo equipo. Por unha parte, unha antena wifi para capturar o sinal dos puntos de acceso (aka routers), e pola outra un dispositivo GPS que nos axude a recoller a localización dende onde estamos capturando o sinal.",
+  "inLanguage" : "gl",
+  "wordCount":  3503 ,
+  "datePublished" : "2023-04-23T00:00:00",
+  "dateModified" : "2023-04-23T00:00:00",
+  "image" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+  "keywords" : [ "wardriving, wifi, kismet, bluetooth" ],
+  "mainEntityOfPage" : "https:\/\/hackliza.gal\/posts\/wardriving\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "https:\/\/hackliza.gal\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="Wardriving coa Raspi no 2023" />
+<meta property="og:description" content="Dando unha volta polos wifis do lugar">
+<meta property="og:image" content="https://hackliza.gal/img/hackliza.png" />
+<meta property="og:url" content="https://hackliza.gal/posts/wardriving/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hackliza" />
+
+  <meta name="twitter:title" content="Wardriving coa Raspi no 2023" />
+  <meta name="twitter:description" content="Dando unha volta polos wifis do lugar">
+  <meta name="twitter:image" content="https://hackliza.gal/img/hackliza.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@hackliza" />
+  <meta name="twitter:creator" content="@hackliza" />
+  <link href='https://hackliza.gal/img/hackliza.png' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.74.3" />
+  <link rel="alternate" href="https://hackliza.gal/index.xml" type="application/rss+xml" title="Hackliza"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://hackliza.gal/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="https://hackliza.gal/css/syntax.css" /><link rel="stylesheet" href="https://hackliza.gal/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><style>
+ nav {
+     background: #0099CC !important;
+ }
+
+ .navbar-brand, #main-navbar ul li a, footer {
+     color: #fff !important;
+ }
+
+ .navbar-brand:hover, #main-navbar ul li a:hover {
+     color: #ccc !important;
+ }
+
+
+ figure {
+     margin-top: 1.5em; 
+     margin-bottom: 1.5em; 
+ }
+ 
+ figcaption {
+     text-align: center;
+     font-size: 85%;
+ }
+
+ pre {
+     overflow-x: auto !important;
+ }
+
+ .posts-heading {
+     text-align: center;
+ }
+ 
+</style>
+
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Conmuta navegación</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://hackliza.gal/">Hackliza</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blogue" href="/">Blogue</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Sobre nós" href="/about/">Sobre nós</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Charlas" href="/talks/">Charlas</a>
+            </li>
+          
+        
+
+        
+          
+            <li>
+              
+                
+                  <a href="/en" lang="en">en</a>
+                
+              
+                
+              
+            </li>
+          
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Hackliza" href="https://hackliza.gal/">
+            <img class="avatar-img" src="https://hackliza.gal/img/hackliza.png" alt="Hackliza" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>Wardriving coa Raspi no 2023</h1>
+              
+              
+                <hr class="small">
+              
+              
+                
+                  <h2 class="posts-subheading">Dando unha volta polos wifis do lugar</h2>
+                
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        
+<div id="outline-container-headline-1" class="outline-2">
+<h2 id="headline-1">
+Intro
+</h2>
+<div id="outline-text-headline-1" class="outline-text-2">
+<p>Boas xente, nesta entrada imos a revisar unha vella técnica de seguridade de
+redes wifi, o wardriving. O wardriving consiste en localizar redes wifis
+dentro dun lugar, que pode ser unha rúa ou unha cidade.</p>
+<p>
+Para iso imos precisar certo equipo. Por unha parte, unha antena wifi
+para capturar o sinal dos puntos de acceso (aka routers), e pola outra un
+dispositivo GPS que nos axude a recoller a localización dende onde estamos
+capturando o sinal. Ademais precisamos un ordenador para manexar estes
+cacharros, eu pola miña parte usarei unha Raspberry, que é pequena e
+transportable, mais un ordenador portátil podería servir no caso de non dispoñer
+dunha (dende a crise dos microchips faise complicado conseguilas e van careiras).</p>
+<p>
+En resumo, eu usarei o seguinte hardware para esta tarefa:</p>
+<ul>
+<li>
+<p>Antena wifi: TP-LINK TL-WN722N</p>
+<img src="./tplink-tl-wn722n.jpg" alt="./tplink-tl-wn722n.jpg" title="./tplink-tl-wn722n.jpg" width="300px"/>
+</li>
+<li>
+<p>Localizador GPS: G-Star IV BU-353S4</p>
+<img src="./gps.jpg" alt="./gps.jpg" title="./gps.jpg" width="300px"/>
+</li>
+<li>
+<p>Raspberry Pi 4 (aka raspi)</p>
+<img src="./raspi.jpg" alt="./raspi.jpg" title="./raspi.jpg" width="300px"/>
+</li>
+<li>
+<p>Powerbank: Para a raspi precísase que de <a href="https://www.raspberrypi.com/products/raspberry-pi-4-model-b/specifications/">polo menos 2.5A, e recomendable 3A</a>.
+Eu persoalmente usei unha de 2.1A e funcionou.</p>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-headline-2" class="outline-2">
+<h2 id="headline-2">
+Instalación SO na Raspi
+</h2>
+<div id="outline-text-headline-2" class="outline-text-2">
+<p>
+Imos ó tema entón. O primeiro vai ser preparar correctamente a raspi, para iso
+empezamos por instalarlle un sistema operativo. Eu pola miña parte instalarei
+<a href="https://www.kali.org/get-kali/#kali-arm">Kali Linux</a>, que ven cas ferramentas esenciais que imos precisar para a tarefa.
+Unha alternativa sería <a href="https://www.parrotsec.org/download/">Parrot OS</a>, que tamén penso debería traer xa instalado o
+software apropiado, e senón calquera outra distribución de Linux (<a href="https://www.raspbian.org/">Raspbian</a>,
+<a href="https://ubuntu.com/raspberry-pi">Ubuntu</a>, etc) pode valernos, mais haberá que instalarlle posteriormente as
+ferramentas.</p>
+<p>
+Para descargar e copiar a imaxe de Kali Linux na tarxeta Micro SD da raspi,
+podemos executar os seguintes comandos (Advertencia: asegurate de copiar a imaxe no
+dispositivo da Micro SD, no meu caso <code class="verbatim">/dev/sda</code>, <strong>se o escribes no teu propio
+disco podes borrar os teus datos</strong> ):</p>
+<p>
+Podemos ver os discos USBs co seguinte comando:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">lsblk -o NAME,MOUNTPOINTS,HOTPLUG | grep &#39;1$&#39;
+sda                                                                1
+├─sda1                /media/user/boot                             1
+└─sda2                /media/user/rootfs                           1</code></pre></div>
+</div>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">wget https://kali.download/arm-images/kali-2022.4/kali-linux-2022.4-raspberry-pi-arm64.img.xz
+xz -vd kali-linux-2022.4-raspberry-pi-arm64.img.xz
+sudo dd bs=4M if=kali-linux-2022.4-raspberry-pi-arm64.img of=&lt;/dev/sdx&gt; oflag=sync status=progress
+umount /dev/sdx1
+umount /dev/sdx2</code></pre></div>
+</div>
+<p>
+Con isto descargamos a imaxe (asegurade que o link conduce á última versión
+dispoñible), a descomprimimos, e a gravamos na tarxeta SD (pode ser outro disco
+no teu caso).</p>
+<p>
+Despois introducimos a tarxeta SD na raspi e conectámola a un monitor, teclado e
+rato para empezar a configurala.</p>
+<p>
+O contrasinal e usuario por defecto debería aparecer na información da distro
+que instalaches, no meu caso <code class="verbatim">kali:kali</code>. É unha boa práctica cambiar o
+contrasinal, que se pode facer co comando <code>passwd</code>.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ passwd
+Changing password for kali.
+Current password:
+New password:
+Retype new password:
+passwd: password updated successfully</code></pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-3" class="outline-2">
+<h2 id="headline-3">
+Conexión a raspi dende o PC
+</h2>
+<div id="outline-text-headline-3" class="outline-text-2">
+<p>
+Sen embargo, ter a raspi conectada a un monitor, teclado e rato pode ser un
+engorro. Eu persoalmente prefiro conectarme a ela remotamente a través de SSH, e
+deixar os periféricos para o meu ordenador de mesa.</p>
+<p>
+O primeiro é comprobar se está correndo o servidor de SSH na raspi. No meu caso
+xa está por defecto. Senón, para inicialo e facer que se inicie automáticamente
+no seguinte reinicio executamos:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo systemctl start sshd
+sudo systemctl enable sshd</code></pre></div>
+</div>
+<p>
+Unha vez temos SSH correndo, podemos conectarnos á raspi se estamos na mesma
+rede. Para isto temos varias opcións:</p>
+<ul>
+<li>
+<p>Conectarnos a través do cable Ethernet.</p>
+</li>
+<li>
+<p>Crear un punto de acceso wifi na raspi (se o noso modelo o permite) ao que
+poder conectarnos dende o noso PC.</p>
+</li>
+<li>
+<p>Conectarnos a través do bluetooth (se o noso modelo o permite).</p>
+</li>
+</ul>
+<p>Eu vou optar por conectarme tanto por Ethernet, como por Bluetooth. Deste
+xeito, se algún mecanismo falla, temos un reemplazo. Vou descartar o wifi,
+porque ao estarmos facendo mapeo de redes wifi, no quero levar un punto de
+acceso eu mesmo que poida interferir, e ademais consume mais batería que a
+alternativa por Bluetooth.</p>
+<div id="outline-container-headline-4" class="outline-3">
+<h3 id="headline-4">
+Conexión á Raspi por Ethernet
+</h3>
+<div id="outline-text-headline-4" class="outline-text-3">
+<p>
+Empezamos pola conexión Ethernet. Temos varias opcións para facer isto, no
+sentido de que hai varias opcións de dar unha IP á interface da raspi.</p>
+<ul>
+<li>
+<p>Configurar a IP a través dun servidor DHCP que estea no noso equipo. O bo
+disto é que non precisamos tocar a raspi, pero temos que ter un servidor DHCP
+correndo no noso equipo (que non é o mais adecuado para un pc persoal) e
+é posible que IP da raspi cambie cada vez que nos conectamos a ela.</p>
+</li>
+<li>
+<p>Configurar unha IP estática na raspi. Isto precisa un traballo de
+configuración da raspi, pero nos aforramos andar instalando un servidor DHCP
+no noso equipo e aseguramos que a IP da raspi non vai cambiar.</p>
+</li>
+</ul>
+<p>Vou amosar ambos métodos e vos xa decidides cal vos gusta mais.</p>
+<div id="outline-container-headline-5" class="outline-4">
+<h4 id="headline-5">
+Conexión á Raspi por Ethernet (IP dinámica)
+</h4>
+<div id="outline-text-headline-5" class="outline-text-4">
+<p>
+Para conectarse a unha raspi que non está configurada, podemos enchufala por
+Ethernet ó noso pc e correr neste un servidor DHCP. Eu vou usar <a href="https://gitlab.com/Zer1t0/dhcplayer">dhcplayer</a>, un
+programa para xogar con DHCP que me piquei fai un tempo e que permite lanzar un
+servidor DHCP de forma rápida, sen andar con ficheiros de configuración nin
+caralladas.</p>
+<blockquote>
+<p>Se tes <a href="https://www.rust-lang.org/tools/install">rust instalado</a> podes usar <code>cargo install dhcplayer</code>, e senón podes
+descargalo no <a href="https://gitlab.com/Zer1t0/dhcplayer/-/releases">repositorio de gitlab</a>.</p>
+</blockquote>
+<p>
+Entón, asignámoslle unha IP á nosa interface Ethernet (<code>eno1</code> no meu caso, pero
+pode cambiar) e executamos <code>dhcplayer</code> no noso pc indicándolle dita interface.</p>
+<p>
+E finalmente (senón o fixeches xa) enchufamos o cable Ethernet á raspi e ó noso
+PC. Igual tarda un rato en darlle IP.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo ip addr add 192.168.77.1/24 dev eno1
+$ sudo ~/.cargo/bin/dhcplayer server --iface eno1 --no-dns --no-router
+Assigned IP 192.168.77.223 to e4:5f:01:40:3b:86 (kali-raspberry-pi)</code></pre></div>
+</div>
+<blockquote>
+<p>Indicamos <code>--no-dns</code> <code>--no-router</code> no <code>dhcplayer</code> para evitar configurarlle
+rutas á raspi, xa que non vai sair a internet polo noso pc, inda que podedes
+facelo se queredes.</p>
+</blockquote>
+<p>
+Cando nos apareza a mensaxe indicando que lle dimos IP á raspi, poderemos
+conectarnos por SSH:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">ssh kali@192.168.77.223</code></pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-6" class="outline-4">
+<h4 id="headline-6">
+Conexión á Raspi por Ethernet (IP estática)
+</h4>
+<div id="outline-text-headline-6" class="outline-text-4">
+<p>
+Imos agora ver como configurar a interface Ethernet da raspi cunha IP estática.</p>
+<p>
+Para isto o que podemos facer é crear un ficheiro de configuración en
+<code class="verbatim">/etc/systemd/network/&lt;iface&gt;.network</code> onde <code class="verbatim">&lt;iface&gt;</code> é o nome da interface, no
+meu caso <code class="verbatim">eth0</code>.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo tee /etc/systemd/network/eth0.network &lt;&lt; EOF
+[Match]
+Name=eth0
+
+[Network]
+Address=192.168.77.1/24
+DHCPServer=yes
+
+[DHCPServer]
+EmitRouter=no
+EmitDns=no
+
+EOF</code></pre></div>
+</div>
+<p>
+Cambiade o nome da interface tanto no nome do ficheiro como no parámetro <code class="verbatim">Name</code>.</p>
+<p>
+Este é un ficheiro de configuración de <a href="https://wiki.archlinux.org/title/Systemd-networkd">systemd-network</a> que nos indica o
+seguinte:</p>
+<ul>
+<li>
+<p><code>Name=eth0</code> =&gt; Aplicarlle ás regras ó interface <code>eth0</code></p>
+</li>
+<li>
+<p><code>Address=192.168.77.1/24</code> =&gt; Por a IP <code>192.168.77.1</code> ca máscara <code>/24</code> (<code>255.255.255.0</code>)</p>
+</li>
+<li>
+<p><code>DHCPServer=yes</code> =&gt; Darlle configuración DHCP os clientes que se conecten
+(como unha IP)</p>
+</li>
+<li>
+<p><code>EmitRouter=no</code> =&gt; O servidor DHCP non proporciona a IP do gateway. Isto evita
+que o noso PC cree unha ruta para sair a internet pola raspi e poidamos perder
+conexión con internet.</p>
+</li>
+<li>
+<p><code>EmitDns=no</code> =&gt; O servidor DHCP non proporciona ningún servidor DNS. Non nos interesa.</p>
+</li>
+</ul>
+<p>Unha vez feito, reiniciamos o servizo <code>systemd-networkd</code> e o habilitamos para
+que no seguinte reinicio tamén se execute e configure automáticamente a interface:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo systemctl restart systemd-networkd.service
+sudo systemctl enable systemd-networkd.service</code></pre></div>
+</div>
+<p>
+Se ó comprobar a interface vedes que está &#34;DOWN&#34;, é normal, systemd-networkd so
+activa a interface cando se conectan clientes:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ip a show eth0
+2: eth0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc mq state DOWN group default qlen 1000
+    link/ether e4:5f:01:40:3b:86 brd ff:ff:ff:ff:ff:ff
+    inet6 fe80::e65f:1ff:fefe:78c5/64 scope link
+       valid_lft forever preferred_lft forever</code></pre></div>
+</div>
+<p>
+Agora toca enchufar por Ethernet a raspi e o noso PC e probar o SSH:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">ssh kali@192.168.77.1</code></pre></div>
+</div>
+<p>
+Non fai falta configurar nada no noso pc, xa que o servidor DHCP da raspi xa nos
+asigna unha IP.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-7" class="outline-3">
+<h3 id="headline-7">
+Conexión á raspi por Bluetooth
+</h3>
+<div id="outline-text-headline-7" class="outline-text-3">
+<p>
+Outro método de conexión que pode ser mais cómodo é <a href="https://raspberrypi.stackexchange.com/questions/29504/how-can-i-set-up-a-bluetooth-pan-connection-with-a-raspberry-pi-and-an-ipod">conectarnos á raspi
+por Bluetooth</a>. Deste xeito non precisamos cables e é unha opción que gasta menos
+batería que levantar un punto de acceso wifi.</p>
+<p>
+O primeiro que imos facer é indicarlle a systemd-networkd que queremos crear
+unha interface, que usaremos para a rede Bluetooth.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo tee /etc/systemd/network/pan0.netdev &gt; /dev/null &lt;&lt; EOF
+
+[NetDev]
+Name=pan0
+Kind=bridge
+
+EOF</code></pre></div>
+</div>
+<p>
+Seguidamente, configuramos a interface, dun xeito semellante a como fixemos ca
+de Ethernet:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo tee /etc/systemd/network/pan0.network &gt; /dev/null &lt;&lt; EOF
+
+[Match]
+Name=pan0
+
+[Network]
+Address=192.168.99.1/24
+DHCPServer=yes
+
+[DHCPServer]
+EmitRouter=no
+EmitDns=no
+
+EOF</code></pre></div>
+</div>
+<p>
+Reiniciamos networkd e facemos que se execute ao iniciar a raspi (se non o fixeramos antes).</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo systemctl restart systemd-networkd.service
+sudo systemctl enable systemd-networkd.service</code></pre></div>
+</div>
+<p>
+Agora que xa temos a interface configurada, toca meterlle man á parte bluetooth.
+O primeiro será instalar o paquete <code>bluez-tools</code>, que contén as ferramentas que
+imos usar.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo apt-get install bluez-tools</code></pre></div>
+</div>
+<p>
+Unha vez o teñamos, temos que rexistrar o servizo de rede en Bluetooth, NAP
+(Network Aggregation Point), que nos permite crear unha PAN (Personal Area
+Network). Para iso podemos usar <code>bt-network</code>, o cal lle temos que
+indicar que queremos usar a interface <code>pan0</code> para proporcionar rede ós
+dispositivos que se conecten á raspi.</p>
+<p>
+Podemos facer isto co comando <code>bt-network -s nap pan0</code>. Mais en vez de executalo
+no terminal imos deixar un servizo de systemd que o execute cando arranque a
+raspi.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo tee /etc/systemd/system/bt-network.service &gt; /dev/null &lt;&lt; EOF
+
+[Unit]
+Description=Bluetooth NEP PAN
+After=pan0.network
+
+[Service]
+ExecStart=/usr/bin/bt-network -s nap pan0
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
+
+EOF</code></pre></div>
+</div>
+<p>
+Iniciamos e marcamos o servizo bt-network para inicio automático ao reiniciar.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo systemctl start bt-network.service
+sudo systemctl enable bt-network.service</code></pre></div>
+</div>
+<p>
+Tras isto, podemos comprobar que contamos co servizo Bluetooth NAP no noso
+adaptador:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ bt-adapter --list
+Available adapters:
+kali-raspberry-pi (E4:5F:01:40:3b:86)</code></pre></div>
+</div>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ bt-adapter --adapter kali-raspberry-pi --info
+[hci0]
+  Name: kali-raspberry-pi
+  Address: E4:5F:01:40:3b:86
+  Alias: kali-raspberry-pi [rw]
+  Class: 0x6e0000
+  Discoverable: 0 [rw]
+  DiscoverableTimeout: 0 [rw]
+  Discovering: 0
+  Pairable: 0 [rw]
+  PairableTimeout: 0 [rw]
+  Powered: 1 [rw]
+  UUIDs: [AVRemoteControl, HandsfreeAudioGateway, PnPInformation, AudioSink, Headset, AVRemoteControlTarget, 00001800-0000-1000-8000-00805f9b34fb, AudioSource, 00001801-0000-1000-8000-00805f9b34fb, 0000180a-0000-1000-8000-00805f9b34fb, NAP]</code></pre></div>
+</div>
+<p>
+Podemos comprobar que nos UUIDs aparece listado (neste caso no último lugar) o
+servizo NAP.</p>
+<p>
+Agora o último que temos que facer e conectar o noso PC ca raspi. O que imos
+facer é vincular (pair) o noso pc ca raspi para que logo se poidan conectar no
+futuro sen problemas e sen necesidade de que a raspi vaia anunciando a súa
+presencia.</p>
+<p>
+O primeiro para isto é poñer o adaptador da raspi en modo &#34;Discoverable&#34;. Neste
+modo a raspi vai anunciando a súa presencia.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ bt-adapter --adapter kali-raspberry-pi --set Discoverable 1
+
+(bt-adapter:2158): GLib-CRITICAL **: 21:30:37.880: g_error_free: assertion &#39;error != NULL&#39; failed
+Discoverable: 0 -&gt; 1</code></pre></div>
+</div>
+<p>
+E segundo, rexistramos un axente para manexar as peticións e autorizar a
+dispositivos externos a usar os servizos Bluetooth da raspi.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ bt-agent --capability=DisplayYesNo
+Agent registered
+Default agent requested
+Device: eloy-pc (E0:D4:E8:81:A8:16)
+Confirm passkey: 248332 (yes/no)? yes
+Device: eloy-pc (E0:D4:E8:81:A8:16) for UUID 0000110d-0000-1000-8000-00805f9b34fb
+Device: eloy-pc (E0:D4:E8:81:A8:16) for UUID 0000110e-0000-1000-8000-00805f9b34fb
+Device: eloy-pc (E0:D4:E8:81:A8:16) for UUID 0000000f-0000-1000-8000-00805f9b34fb
+^Cunregistering agent...</code></pre></div>
+</div>
+<p>
+Unha vez o axente esté funcionando o que temos que facer no noso pc (ou móbil), é
+seleccionar a raspi nos dispositivos bluetooth (no meu caso
+<code class="verbatim">kali-raspberry-pi</code>). Cando o fagamos, debía aparecernos un pin na raspi e no pc
+(no meu caso <code class="verbatim">248332</code>), que debería ser igual, confirmamos en ambos sitios e xa
+temos os dispositivos vinculados.</p>
+<blockquote>
+<p>Se tendes curiosidade, os UUIDs do comando anterior correspóndense cos seguintes
+atributos:</p>
+<ul>
+<li>
+<p>0000110d-0000-1000-8000-00805f9b34fb: A2DP (Advanced Audio Distribution
+Profile)</p>
+</li>
+<li>
+<p>0000110e-0000-1000-8000-00805f9b34fb: AVRCP (Audio/Video Remote Control
+Profile)</p>
+</li>
+<li>
+<p>0000000f-0000-1000-8000-00805f9b34fb: BNEP (Bluetooth Network Encapsulation
+Protocol) profile =&gt; Este é o que nos interesa para conectarnos á raspi.</p>
+</li>
+</ul>
+</blockquote>
+<p>
+Agora pechamos <code>bt-agent</code> con Ctrl-C, e poñemos outra vez o adaptador da raspi
+en modo non &#34;Discoverable&#34; (para que non se vaia anunciando). E así xa temos o
+noso dispositivo rexistrado na raspi para non ter que repetir á autenticación co
+PIN.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ bt-adapter --adapter kali-raspberry-pi --set Discoverable 0
+
+(bt-adapter:2631): GLib-CRITICAL **: 21:47:11.878: g_error_free: assertion &#39;error != NULL&#39; failed
+Discoverable: 1 -&gt; 0</code></pre></div>
+</div>
+<p>
+Para acabar á configuración, imos crear tamén un servizo que nos levante o
+axente de autenticación cando se inicie o sistema, xa que o imos precisar para
+conectarnos ós servizos Bluetooth (inda que non volveremos precisar meter o PIN
+dende o dispositivo que xa rexistramos).</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo tee /etc/systemd/system/bt-agent.service &gt; /dev/null &lt;&lt; EOF
+
+[Unit]
+Description=Bluetooth Auth Agent
+
+[Service]
+ExecStart=/usr/bin/bt-agent --capability=DisplayYesNo
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
+
+EOF</code></pre></div>
+</div>
+<p>
+Iniciamos e habilitamos o servizo para que se inicie co sistema:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo systemctl start bt-agent.service
+sudo systemctl enable bt-agent.service</code></pre></div>
+</div>
+<p>
+Unha vez feito isto, o noso dispositivo, será o único capaz de conectarse á
+raspi. No noso pc (ou móbil) haberá unha opción (nas opcións de bluetooth ou
+internet) para conectarnos a internet pola raspi (no noso caso so sirve para
+conectarse a raspi, xa que tal como a configuramos, non nos vai dar internet).
+Seleccionamos dita opción e deberíamos ter un novo adaptador cunha IP no rango
+que configuramos antes (<code>192.168.99.0/24</code>).</p>
+<p>
+Probamos a conectarnos por SSH e debería funcionar:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">ssh kali@192.168.99.1</code></pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-8" class="outline-2">
+<h2 id="headline-8">
+Preparación da antena wifi
+</h2>
+<div id="outline-text-headline-8" class="outline-text-2">
+<p>
+A continuación temos que preparar a tarxeta de rede wireless para ser usada.
+Imos precisar poñer a tarxeta en modo monitor. O modo monitor é un modo no que a
+tarxeta non está conectada a ningunha rede en particular e captura tódolos
+paquetes wifi que van pasando. Isto é útil tanto para detectar puntos de acceso
+wifi e clientes dos mesmos, como para realizar diversos ataques wifi, polo
+que é un paso que é importante comprender.</p>
+<p>
+Moitas tarxetas de rede permiten poñelas en modo monitor sen maior problema,
+mais para a que eu vou usar, <a href="https://nooblinux.com/how-to-enable-monitor-mode-on-tp-link-tl-wn722n-v2-v3/">TL-WN722N, vai ser preciso cambiar o driver</a>.</p>
+<p>
+Podemos comprobalo co seguinte comando:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo iwconfig wlan1 mode monitor
+Error for wireless request &#34;Set Mode&#34; (8B06) :
+    SET failed on device wlan1 ; Invalid argument.</code></pre></div>
+</div>
+<p>
+Se a túa tarxeta de rede non da este erro, podes ir á seguinte sección. E se o
+da pero non é unha tarxeta TL-WN722N, non podo asegurar que isto che sirva de
+algo.</p>
+<p>
+Primeiro imos actualizar o sistema operativo, xa que vamos a instalar un driver
+e queremos compilalo cas cabeceiras adecuadas:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo apt update &amp;&amp; sudo apt upgrade -y
+sudo reboot</code></pre></div>
+</div>
+<p>
+Una vez feito isto, en kali non tes que instalar nada mais (para a tarxeta),
+pero en Raspbian e outros, pode que teñas que instalar as cabeceiras e <code>bc</code>:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo apt install linux-headers-$(uname -r)
+sudo apt install bc</code></pre></div>
+</div>
+<p>
+Entón, descargamos e compilamos o driver do repo de aircrack:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">git clone https://github.com/aircrack-ng/rtl8188eus
+cd rtl8188eus
+make</code></pre></div>
+</div>
+<p>
+Agora temos que deixar de utilzar o driver orixinal e sustituilo polo de
+aircrack. Podes verificar que está correndo o driver con <code>lsmod</code> (ten que estar
+a antena enchufada).</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ lsmod | grep 8188eu
+r8188eu               602112  0</code></pre></div>
+</div>
+<p>
+Para empezar paramos o driver orixinal e bloqueamos o seu inicio ao comezo do
+sistema.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo rmmod r8188eu.ko
+echo &#34;blacklist r8188eu&#34; | sudo tee /etc/modprobe.d/realtek.conf &gt; /dev/null</code></pre></div>
+</div>
+<p>
+E finalmente instalamos o driver de aircrack:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">cd rtl8188eus
+sudo make install
+sudo modprobe 8188eu</code></pre></div>
+</div>
+<p>
+Verificamos que está o novo driver correndo:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ lsmod | grep 8188eu
+8188eu               1220608  0
+cfg80211              872448  2 8188eu,brcmfmac</code></pre></div>
+</div>
+<p>
+E probamos a poñer a antena en modo monitor outra vez:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo iwconfig wlan1 mode monitor</code></pre></div>
+</div>
+<p>
+Feito, pásamos ao seguinte.</p>
+</div>
+</div>
+<div id="outline-container-headline-9" class="outline-2">
+<h2 id="headline-9">
+Preparación do dispositivo GPS
+</h2>
+<div id="outline-text-headline-9" class="outline-text-2">
+<blockquote>
+<p>A maior parte desta sección está sacada de <a href="https://scotthelme.co.uk/wifi-wardriving/">https://scotthelme.co.uk/wifi-wardriving/</a></p>
+</blockquote>
+<p>
+Agora imos a configurar o localizador GPS, no meu caso vou usar o modelo
+&#34;G-Star IV BU-353S4&#34;.</p>
+<p>
+Para empezar, instalamos os paquetes necesarios para probalo:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo apt install gpsd gpsd-clients -y</code></pre></div>
+</div>
+<p>
+Seguidamente, creamos un ficheiro de configuración no que lle indicamos a
+<code>gpsd</code>, entre outras cousas, que USB é o noso localizador GPS, no meu caso é
+<code>/dev/ttyUSB0</code>.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo tee /etc/default/gpsd &gt; /dev/null &lt;&lt; EOF
+
+START_DAEMON=&#34;true&#34;
+GPSD_OPTIONS=&#34;-n&#34;
+DEVICES=&#34;/dev/ttyUSB0&#34;
+USBAUTO=&#34;true&#34;
+GPSD_SOCKET=&#34;/var/run/gpsd.sock&#34;
+
+EOF</code></pre></div>
+</div>
+<p>
+Podes consultar cal é o teu dispositivo GPS comprobando as mensaxes do kernel
+con <code>dmesg</code> tras conectar o localizador GPS:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ dmesg | grep -i ttyUSB
+[    5.586750] usb 1-1.3: pl2303 converter now attached to ttyUSB0
+[    7.887253] pps pps0: source &#34;/dev/ttyUSB0&#34; added</code></pre></div>
+</div>
+<p>
+Unha vez creado o ficheiro de configuración co dispositivo correcto, reiniciamos
+o servizo <code>gpsd</code>:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo systemctl restart gpsd.service</code></pre></div>
+</div>
+<p>
+Probamos a ver se funciona o GPS co comando <code>cgps</code>. Para isto o GPS ten que ter
+visibilidade directa co ceo, non vai funcionar so o probas dentro da casa. Se
+funciona, debería devoler as túas coordenadas, nunha saída coma a seguinte, que
+podes consultar en <a href="https://www.openstreetmap.org">OpenStreetMap</a>.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cgps
+┌───────────────────────────────────────────┐┌──────────────────Seen 11/Used  5┐
+│ Time:        2023-03-19T11:22:01.000Z (0) ││GNSS   PRN  Elev   Azim   SNR Use│
+│ Latitude:         42.88040553 N           ││GP  2    2  24.0  136.5  26.0  Y │
+│ Longitude:         8.54563372 W           ││GP 11   11  18.5   54.0  31.2  Y │
+│ Alt (HAE, MSL):    114.242,     65.000 m  ││GP 28   28  59.0  306.0  35.1  Y │
+│ Speed:             0.00 km/h              ││GP 29   29  72.5  154.5  19.5  Y │
+│ Track (true, var):     0.0,  -2.2     deg ││GP 31   31  44.0  307.5  32.6  Y │
+│ Climb:             0.00 m/min             ││GP  5    5  43.0   99.0   0.0  N │
+│ Status:         3D FIX (22 secs)          ││GP  9    9  73.5   39.0   0.0  N │
+│ Long Err  (XDOP, EPX):  2.08, +/- 31.1 m  ││GP 13   13  36.0  240.0   0.0  N │
+│ Lat Err   (YDOP, EPY):  8.06, +/-  120 m  ││GP 18   18  76.5   61.5   0.0  N │
+│ Alt Err   (VDOP, EPV): 16.82, +/-  386 m  ││GP 30   30  41.5  120.0   0.0  N │
+│ 2D Err    (HDOP, CEP):  1.80, +/- 34.2 m  ││SB123  123  26.0  129.0   0.0  N │
+│ 3D Err    (PDOP, SEP): 18.76, +/-  356 m  ││                                 │
+│ Time Err  (TDOP):       2.09              ││                                 │
+│ Geo Err   (GDOP):      22.06              ││                                 │
+│ ECEF X, VX:    4595190.000 m    0.000 m/s ││                                 │
+│ ECEF Y, VY:    -679217.000 m    0.000 m/s ││                                 │
+│ ECEF Z, VZ:    4356270.000 m    0.000 m/s ││                                 │
+│ Speed Err (EPS):       +/-  870 km/h      ││                                 │
+│ Track Err (EPD):        n/a               ││                                 │
+│ Time offset:            0.606799745 s     ││                                 │
+│ Grid Square:            IN53ti14          ││                                 │
+└───────────────────────────────────────────┘└─────────────────────────────────┘
+{&#34;class&#34;:&#34;TPV&#34;,&#34;device&#34;:&#34;/dev/ttyUSB0&#34;,&#34;mode&#34;:3,&#34;time&#34;:&#34;2023-03-19T11:21:55.460Z&#34;,&#34;ept&#34;:0.005,&#34;lat&#34;:42.880401639,&#34;lon&#34;:-8.545635521,&#34;altHAE&#34;:113.5224,&#34;altMSL&#34;:64.2810,&#34;alt&#34;:64.2810,&#34;epx&#34;:31.138,&#34;epy&#34;:120
+.873,&#34;epv&#34;:386.787,&#34;track&#34;:17.6820,&#34;magtrack&#34;:15.5012,&#34;magvar&#34;:-2.2,&#34;speed&#34;:0.287,&#34;climb&#34;:-0.107,&#34;eps&#34;:241.75,&#34;epc&#34;:773.57,&#34;ecefx&#34;:4595189.00,&#34;ecefy&#34;:-679217.00,&#34;ecefz&#34;:4356270.00,&#34;ecefvx&#34;:-0.25,&#34;ecefvy&#34;
+:0.12,&#34;ecefvz&#34;:0.12,&#34;velN&#34;:0.273,&#34;velE&#34;:0.087,&#34;velD&#34;:0.107,&#34;geoidSep&#34;:49.241,&#34;eph&#34;:34.200,&#34;sep&#34;:356.497}
+{&#34;class&#34;:&#34;SKY&#34;,&#34;device&#34;:&#34;/dev/ttyUSB0&#34;,&#34;time&#34;:&#34;2023-03-19T11:21:56.460Z&#34;,&#34;xdop&#34;:2.08,&#34;ydop&#34;:8.06,&#34;vdop&#34;:16.82,&#34;tdop&#34;:2.09,&#34;hdop&#34;:1.80,&#34;gdop&#34;:22.06,&#34;pdop&#34;:18.76,&#34;nSat&#34;:11,&#34;uSat&#34;:5,&#34;satellites&#34;:[{&#34;PRN&#34;:11,
+&#34;el&#34;:18.5,&#34;az&#34;:54.0,&#34;ss&#34;:31.1,&#34;used&#34;:true,&#34;gnssid&#34;:0,&#34;svid&#34;:11},{&#34;PRN&#34;:28,&#34;el&#34;:59.0,&#34;az&#34;:306.0,&#34;ss&#34;:35.2,&#34;used&#34;:true,&#34;gnssid&#34;:0,&#34;svid&#34;:28},{&#34;PRN&#34;:31,&#34;el&#34;:44.0,&#34;az&#34;:307.5,&#34;ss&#34;:32.5,&#34;used&#34;:true,&#34;gnssid&#34;:0,
+&#34;svid&#34;:31},{&#34;PRN&#34;:29,&#34;el&#34;:72.5,&#34;az&#34;:154.5,&#34;ss&#34;:19.1,&#34;used&#34;:true,&#34;gnssid&#34;:0,&#34;svid&#34;:29},{&#34;PRN&#34;:2,&#34;el&#34;:24.0,&#34;az&#34;:136.5,&#34;ss&#34;:26.2,&#34;used&#34;:true,&#34;gnssid&#34;:0,&#34;svid&#34;:2},{&#34;PRN&#34;:18,&#34;el&#34;:76.5,&#34;az&#34;:61.5,&#34;ss&#34;:0.0,&#34;used
+&#34;:false,&#34;gnssid&#34;:0,&#34;svid&#34;:18},{&#34;PRN&#34;:9,&#34;el&#34;:73.5,&#34;az&#34;:39.0,&#34;ss&#34;:0.0,&#34;used&#34;:false,&#34;gnssid&#34;:0,&#34;svid&#34;:9},{&#34;PRN&#34;:5,&#34;el&#34;:43.0,&#34;az&#34;:99.0,&#34;ss&#34;:0.0,&#34;used&#34;:false,&#34;gnssid&#34;:0,&#34;svid&#34;:5},{&#34;PRN&#34;:30,&#34;el&#34;:41.5,&#34;az&#34;:120.
+0,&#34;ss&#34;:0.0,&#34;used&#34;:false,&#34;gnssid&#34;:0,&#34;svid&#34;:30},{&#34;PRN&#34;:13,&#34;el&#34;:36.0,&#34;az&#34;:240.0,&#34;ss&#34;:0.0,&#34;used&#34;:false,&#34;gnssid&#34;:0,&#34;svid&#34;:13},{&#34;PRN&#34;:123,&#34;el&#34;:26.0,&#34;az&#34;:129.0,&#34;ss&#34;:0.0,&#34;used&#34;:false,&#34;gnssid&#34;:1,&#34;svid&#34;:123}]}
+{&#34;class&#34;:&#34;TPV&#34;,&#34;device&#34;:&#34;/dev/ttyUSB0&#34;,&#34;mode&#34;:3,&#34;time&#34;:&#34;2023-03-19T11:21:56.460Z&#34;,&#34;ept&#34;:0.005,&#34;lat&#34;:42.880401639,&#34;lon&#34;:-8.545635521,&#34;altHAE&#34;:113.5224,&#34;altMSL&#34;:64.2810,&#34;alt&#34;:64.2810,&#34;epx&#34;:31.138,&#34;epy&#34;:120
+.873,&#34;epv&#34;:386.787,&#34;track&#34;:29.2290,&#34;magtrack&#34;:27.0482,&#34;magvar&#34;:-2.2,&#34;speed&#34;:0.216,&#34;climb&#34;:-0.017,&#34;eps&#34;:241.75,&#34;epc&#34;:773.57,&#34;ecefx&#34;:4595189.00,&#34;ecefy&#34;:-679217.00,&#34;ecefz&#34;:4356270.00,&#34;ecefvx&#34;:-0.12,&#34;ecefvy&#34;
+:0.12,&#34;ecefvz&#34;:0.12,&#34;velN&#34;:0.188,&#34;velE&#34;:0.105,&#34;velD&#34;:0.017,&#34;geoidSep&#34;:49.241,&#34;eph&#34;:34.200,&#34;sep&#34;:356.497}</code></pre></div>
+</div>
+<blockquote>
+<p>Ten en conta que lonxitude W (oeste) e latitude S (sur) significa que os valores
+totais son negativos. Exemplo: 8.54 W -&gt; -8.54</p>
+</blockquote>
+<p>
+Ok, xa temos o GPS funcionando tamén.</p>
+</div>
+</div>
+<div id="outline-container-headline-10" class="outline-2">
+<h2 id="headline-10">
+Preparación de Kismet
+</h2>
+<div id="outline-text-headline-10" class="outline-text-2">
+<p>
+Por último, toca configurar e executar <a href="https://www.kismetwireless.net/docs/readme/datasources/wifi-linux/">Kismet</a>, o programa que usaremos para
+localizar os wifis. En Kali linux xa está instalado, pero se usas outra disto
+pode ser que o teñas que instalar.</p>
+<p>
+O primeiro que configuramos é a forma de obter a información GPS. Hai que
+indicarlle a Kismet ca colla de <code>127.0.0.1:2947</code>, que é un porto que habilita
+<code>gpsd</code>.</p>
+<p>
+Engadimos <code>gps=gpsd:host=localhost,port=2947</code> a <code>/etc/kismet/kismet.conf</code> ou
+descomentamos a liña que inclua esa opción, que é o que vou facer eu.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo sed -i &#39;s/# gps=gpsd:host=localhost,port=2947/gps=gpsd:host=localhost,port=2947/&#39; /etc/kismet/kismet.conf</code></pre></div>
+</div>
+<p>
+Por outra parte, tamén lle temos que indicar a tarxeta de rede que queremos
+utilizar. Podemosllo <a href="https://www.kismetwireless.net/docs/readme/datasources/wifi-linux/">indicar na configuración</a> que se atopa en
+<code>/etc/kismet/kismet.conf</code> ou directamente na liña de comandos. Eu vou usar este
+último método porque a veces as interfaces wifi cambian o orde (e a externa pode
+aparecer como <code>wlan0</code> ou <code>wlan1</code>).</p>
+<p>
+Sen embargo, antes de arrancar kismet, vou por a tarxeta en modo monitor con
+<code>airmon-ng</code>. Kismet tamén cha pon en modo monitor automáticamente, mais a <a href="https://forums.raspberrypi.com/viewtopic.php?t=346208">miña
+tarxeta de rede peta cando o fai Kismet</a> e quédanse pilladas as operacións de
+rede da raspi.</p>
+<p>
+Polo tanto, poñemos a tarxeta wifi en modo monitor e arrincamos Kismet cos
+seguintes comandos:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo airmon-ng check kill
+sudo airmon-ng start wlan1
+kismet -c wlan1 --override wardrive</code></pre></div>
+</div>
+<p>
+A opción <code>--override wardrive</code> indica a Kismet que entre en <a href="https://www.kismetwireless.net/docs/readme/configuring/wardrive/">modo wardriving</a>,
+eliminando a captura da maioria dos paquetes e conservando so aqueles que nos
+permiten detectar novas redes.</p>
+<p>
+Hai que ter tamén en conta que Kismet tamén abre un portal web no porto <code>2501</code>
+da raspi ao que se pode acceder dende unha máquina externa (podes cambiar o
+porto é a visibilidade no ficheiro de configuración). É recomendable acceder a
+este portal web alomenos unha vez e crear un usuario cunha contrasinal segura.
+Isto tamén nos permite ir vendo que cousas vai capturando Kismet.</p>
+<p>
+Pois nada, xa estamos localizando puntos de acceso wifi. É recomendable executar
+o comando dentro de <code>screen</code> ou <code>tmux</code> para que se manteña en execución se
+pechamos a nosa conexión SSH ca raspi. No caso de <code>tmux</code>, unha vez executado
+Kismet, podemos sair da terminal premendo <code>Crtl-b</code> e <code>d</code>, logo podemos volver á
+sesión con <code>tmux a</code>, e listar as sesións con <code>tmux ls</code>.</p>
+</div>
+</div>
+<div id="outline-container-headline-11" class="outline-2">
+<h2 id="headline-11">
+Extra: Bluetooth wardriving
+</h2>
+<div id="outline-text-headline-11" class="outline-text-2">
+<p>
+Se quixeramos facer detección de dispositivos bluetooth, en vez de puntos wifi,
+so necesitariamos un USB Bluetooth e pasarllo a Kismet.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">kismet -c hci1 --override wardrive</code></pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-12" class="outline-2">
+<h2 id="headline-12">
+Visualización dos resultados
+</h2>
+<div id="outline-text-headline-12" class="outline-text-2">
+<p>
+Mentres vai capturando novas redes wifi en modo wardriving, Kismet garda os
+resultados nunha base de datos SQLite (<code>.kismet</code>) e nun ficheiro <code>.wiglecsv</code>,
+que se pode subir a <a href="https://www.wigle.net/">wigle</a> para ver e compartir os nosos resultados.</p>
+<p>
+Outro formato de ficheiro moi usado tamén para a visualización de mapas é KML.
+Podemos usar <a href="https://www.kismet-wifi.net/docs/readme/kismetdb/kismetdb_kml/">kismetdb_to_kml</a> para obter un ficheiro KML a partir dos datos que
+se gardan na base de datos de Kismet.</p>
+<p>
+Exemplo de uso de <code class="verbatim">kismet_to_kml</code>:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">kismetdb_to_kml --in Kismet-20230319-18-11-57-1.kismet --out wifis.kml</code></pre></div>
+</div>
+<p>
+O ficheiro KML o podemos usalo para ver os wifis en Google maps ou <a href="https://gitlab.com/Zer1t0/viewifi">viewifi</a>, se
+prefires velos en local.</p>
+<figure>
+<img src="./viewifi.png" alt="./viewifi.png" title="./viewifi.png" width="500px" style="border:1px solid #555;"/>
+<figcaption>
+Wifis da cidade olívica en viewifi
+</figcaption>
+</figure>
+<p>
+<code>viewifi</code> cambiar a cor do icono en función da seguridade do wifi. Podemos ver
+en cor vermello que hai varias wifis abertas. Tamén hai que ter en conta, ou
+polo menos a min pásame, que moitas wifis poden non estar na localización exacta,
+pero servenos para ter unha idea de como é a topoloxía da zona.</p>
+<p>
+Veña, agora toca saír a rúa a que che de o sol e pillar wifis.</p>
+</div>
+</div>
+
+
+        
+          <div class="blog-tags">
+            
+              <a href="https://hackliza.gal//tags/wardriving/">wardriving</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/wifi/">wifi</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/kismet/">kismet</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/bluetooth/">bluetooth</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="https://hackliza.gal/posts/python-visual-profiling/" data-toggle="tooltip" data-placement="top" title="Profiling visual para Python">&larr; Artigo anterior</a>
+            </li>
+          
+          
+            <li class="next">
+              <a href="https://hackliza.gal/posts/pume/" data-toggle="tooltip" data-placement="top" title="PUME: unha ferramenta para mutar código Python">Artigo siguiente &rarr;</a>
+            </li>
+          
+        </ul>
+      
+
+
+      
+        
+          
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hackliza" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+          
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://github.com/hackliza" title="GitHub">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/hackliza" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2024
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="https://hackliza.gal/">Hackliza</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.74.3</a> alimentada &nbsp;&bull;&nbsp; Tema <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adaptado de <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="https://hackliza.gal/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://hackliza.gal/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

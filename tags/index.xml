@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on Hackliza</title>
+    <link>https://hackliza.gal/tags/</link>
+    <description>Recent content in Tags on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Sat, 31 Aug 2024 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/tags/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>keyrings</title>
+      <link>https://hackliza.gal/tags/keyrings/</link>
+      <pubDate>Sat, 31 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/keyrings/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>linux</title>
+      <link>https://hackliza.gal/tags/linux/</link>
+      <pubDate>Sat, 31 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/linux/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>sssd</title>
+      <link>https://hackliza.gal/tags/sssd/</link>
+      <pubDate>Sat, 31 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/sssd/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>ad</title>
+      <link>https://hackliza.gal/tags/ad/</link>
+      <pubDate>Thu, 29 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/ad/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>debian</title>
+      <link>https://hackliza.gal/tags/debian/</link>
+      <pubDate>Thu, 29 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/debian/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>gnu</title>
+      <link>https://hackliza.gal/tags/gnu/</link>
+      <pubDate>Thu, 29 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/gnu/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>bpf</title>
+      <link>https://hackliza.gal/tags/bpf/</link>
+      <pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/bpf/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>dhclient</title>
+      <link>https://hackliza.gal/tags/dhclient/</link>
+      <pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/dhclient/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>dns</title>
+      <link>https://hackliza.gal/tags/dns/</link>
+      <pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/dns/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>networkmanager</title>
+      <link>https://hackliza.gal/tags/networkmanager/</link>
+      <pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/networkmanager/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>systemd</title>
+      <link>https://hackliza.gal/tags/systemd/</link>
+      <pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/systemd/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>pentest</title>
+      <link>https://hackliza.gal/tags/pentest/</link>
+      <pubDate>Sun, 24 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/pentest/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>ptrace</title>
+      <link>https://hackliza.gal/tags/ptrace/</link>
+      <pubDate>Sun, 24 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/ptrace/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>sudo</title>
+      <link>https://hackliza.gal/tags/sudo/</link>
+      <pubDate>Sun, 24 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/sudo/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>AST</title>
+      <link>https://hackliza.gal/tags/ast/</link>
+      <pubDate>Thu, 02 Nov 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/ast/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>obfuscation</title>
+      <link>https://hackliza.gal/tags/obfuscation/</link>
+      <pubDate>Thu, 02 Nov 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/obfuscation/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>pume</title>
+      <link>https://hackliza.gal/tags/pume/</link>
+      <pubDate>Thu, 02 Nov 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/pume/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>python</title>
+      <link>https://hackliza.gal/tags/python/</link>
+      <pubDate>Thu, 02 Nov 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/python/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>bluetooth</title>
+      <link>https://hackliza.gal/tags/bluetooth/</link>
+      <pubDate>Sun, 23 Apr 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/bluetooth/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kismet</title>
+      <link>https://hackliza.gal/tags/kismet/</link>
+      <pubDate>Sun, 23 Apr 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/kismet/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>wardriving</title>
+      <link>https://hackliza.gal/tags/wardriving/</link>
+      <pubDate>Sun, 23 Apr 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/wardriving/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>wifi</title>
+      <link>https://hackliza.gal/tags/wifi/</link>
+      <pubDate>Sun, 23 Apr 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/wifi/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>flamegraph</title>
+      <link>https://hackliza.gal/tags/flamegraph/</link>
+      <pubDate>Mon, 27 Jun 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/flamegraph/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>optimización</title>
+      <link>https://hackliza.gal/tags/optimizaci%C3%B3n/</link>
+      <pubDate>Mon, 27 Jun 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/optimizaci%C3%B3n/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>profiling</title>
+      <link>https://hackliza.gal/tags/profiling/</link>
+      <pubDate>Mon, 27 Jun 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/profiling/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>angr</title>
+      <link>https://hackliza.gal/tags/angr/</link>
+      <pubDate>Sat, 12 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/angr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>ghidra</title>
+      <link>https://hackliza.gal/tags/ghidra/</link>
+      <pubDate>Sat, 12 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/ghidra/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>radare2</title>
+      <link>https://hackliza.gal/tags/radare2/</link>
+      <pubDate>Sat, 12 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/radare2/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>reversing</title>
+      <link>https://hackliza.gal/tags/reversing/</link>
+      <pubDate>Sat, 12 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/reversing/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>exploracións</title>
+      <link>https://hackliza.gal/tags/exploraci%C3%B3ns/</link>
+      <pubDate>Mon, 01 Nov 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/exploraci%C3%B3ns/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>terminal</title>
+      <link>https://hackliza.gal/tags/terminal/</link>
+      <pubDate>Mon, 01 Nov 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/terminal/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>fuzzing</title>
+      <link>https://hackliza.gal/tags/fuzzing/</link>
+      <pubDate>Fri, 16 Jul 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/fuzzing/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>libfuzzer</title>
+      <link>https://hackliza.gal/tags/libfuzzer/</link>
+      <pubDate>Fri, 16 Jul 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/libfuzzer/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>tradución</title>
+      <link>https://hackliza.gal/tags/traduci%C3%B3n/</link>
+      <pubDate>Mon, 19 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/traduci%C3%B3n/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>programming</title>
+      <link>https://hackliza.gal/tags/programming/</link>
+      <pubDate>Thu, 24 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/programming/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>unix</title>
+      <link>https://hackliza.gal/tags/unix/</link>
+      <pubDate>Thu, 24 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/unix/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>malware</title>
+      <link>https://hackliza.gal/tags/malware/</link>
+      <pubDate>Mon, 14 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/malware/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>heap</title>
+      <link>https://hackliza.gal/tags/heap/</link>
+      <pubDate>Sat, 21 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/heap/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>pwn</title>
+      <link>https://hackliza.gal/tags/pwn/</link>
+      <pubDate>Sat, 21 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/tags/pwn/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

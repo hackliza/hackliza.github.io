@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>ad on Hackliza</title>
+    <link>https://hackliza.gal/en/tags/ad/</link>
+    <description>Recent content in ad on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Thu, 29 Aug 2024 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/en/tags/ad/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>How to join Debian to Active Directory</title>
+      <link>https://hackliza.gal/en/posts/linux-en-ad/</link>
+      <pubDate>Thu, 29 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/en/posts/linux-en-ad/</guid>
+      <description>Hi people, in this article I&amp;#39;m going to show how to join a GNU/Linux machine, specifically a Debian one, to an Active Directory environment.I know, I know, Active Directory (AD) is a commercial tool from the evil Microsoft, but we need to admit that is the most used tool in the market.
+ However, not because we are in a Microsoft environment we need to use Windows, even if that&amp;#39;s what they would like.</description>
+    </item>
+    
+  </channel>
+</rss>

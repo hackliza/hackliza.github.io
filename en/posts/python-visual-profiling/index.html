@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Visual profiling in Python - Hackliza</title>
+  <meta name="description" content="Hey there!
+ Today I bring a practical example of how we can analyze our Python programs to efficiently find bottlenecks.
+ There&#39;s a lot of talk on how optimizations shouldn&#39;t be done blindly. That instead one should measure which parts of a program are problematic to improve the code execution in an efficient way. Today we will see how to do that in a practical way.
+Flame Graphs  There are lots of ways to measure and visualize the behavior of a program."><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Hackliza",
+    
+    "url": "https:\/\/hackliza.gal\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "https:\/\/hackliza.gal\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/en\/posts\/python-visual-profiling\/",
+          "name": "Visual profiling in python"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Sergio Martínez Portela"
+  },
+  "headline": "Visual profiling in Python",
+  "description" : "Hey there!\n Today I bring a practical example of how we can analyze our Python programs to efficiently find bottlenecks.\n There\u0026#39;s a lot of talk on how optimizations shouldn\u0026#39;t be done blindly. That instead one should measure which parts of a program are problematic to improve the code execution in an efficient way. Today we will see how to do that in a practical way.\nFlame Graphs  There are lots of ways to measure and visualize the behavior of a program.",
+  "inLanguage" : "en",
+  "wordCount":  1051 ,
+  "datePublished" : "2022-06-27T00:00:00",
+  "dateModified" : "2022-06-27T00:00:00",
+  "image" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+  "keywords" : [ "python, profiling, optimization, flamegraph" ],
+  "mainEntityOfPage" : "https:\/\/hackliza.gal\/en\/posts\/python-visual-profiling\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "https:\/\/hackliza.gal\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="Visual profiling in Python" />
+<meta property="og:description" content="Hey there!
+ Today I bring a practical example of how we can analyze our Python programs to efficiently find bottlenecks.
+ There&#39;s a lot of talk on how optimizations shouldn&#39;t be done blindly. That instead one should measure which parts of a program are problematic to improve the code execution in an efficient way. Today we will see how to do that in a practical way.
+Flame Graphs  There are lots of ways to measure and visualize the behavior of a program.">
+<meta property="og:image" content="https://hackliza.gal/img/hackliza.png" />
+<meta property="og:url" content="https://hackliza.gal/en/posts/python-visual-profiling/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hackliza" />
+
+  <meta name="twitter:title" content="Visual profiling in Python" />
+  <meta name="twitter:description" content="Hey there!
+ Today I bring a practical example of how we can analyze our Python programs to efficiently find bottlenecks.
+ There&#39;s a lot of talk on how optimizations shouldn&#39;t be done blindly. …">
+  <meta name="twitter:image" content="https://hackliza.gal/img/hackliza.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@hackliza" />
+  <meta name="twitter:creator" content="@hackliza" />
+  <link href='https://hackliza.gal/img/hackliza.png' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.74.3" />
+  <link rel="alternate" href="https://hackliza.gal/en/index.xml" type="application/rss+xml" title="Hackliza"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://hackliza.gal/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="https://hackliza.gal/css/syntax.css" /><link rel="stylesheet" href="https://hackliza.gal/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><style>
+ nav {
+     background: #0099CC !important;
+ }
+
+ .navbar-brand, #main-navbar ul li a, footer {
+     color: #fff !important;
+ }
+
+ .navbar-brand:hover, #main-navbar ul li a:hover {
+     color: #ccc !important;
+ }
+
+
+ figure {
+     margin-top: 1.5em; 
+     margin-bottom: 1.5em; 
+ }
+ 
+ figcaption {
+     text-align: center;
+     font-size: 85%;
+ }
+
+ pre {
+     overflow-x: auto !important;
+ }
+
+ .posts-heading {
+     text-align: center;
+ }
+ 
+</style>
+
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://hackliza.gal/en/">Hackliza</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blog" href="/en/">Blog</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="About" href="/en/about/">About</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Talks" href="/en/talks/">Talks</a>
+            </li>
+          
+        
+
+        
+          
+            <li>
+              
+                
+              
+                
+                  <a href="/gl" lang="gl">gl</a>
+                
+              
+            </li>
+          
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Hackliza" href="https://hackliza.gal/en/">
+            <img class="avatar-img" src="https://hackliza.gal/img/hackliza.png" alt="Hackliza" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>Visual profiling in Python</h1>
+              
+              
+                <hr class="small">
+              
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        
+<p>
+Hey there!</p>
+<p>
+Today I bring a practical example of how we can analyze our Python programs to efficiently find bottlenecks.</p>
+<p>
+There&#39;s a lot of talk on how optimizations shouldn&#39;t be done blindly. That instead one should measure which parts of a program are problematic to improve the code execution in an efficient way. Today we will see how to do that in a practical way.</p>
+<div id="outline-container-headline-1" class="outline-2">
+<h2 id="headline-1">
+Flame Graphs
+</h2>
+<div id="outline-text-headline-1" class="outline-text-2">
+<p>There are lots of ways to measure and visualize the behavior of a program. Personally the one I find most useful is the representation known as <a href="https://www.brendangregg.com/flamegraphs.html">Flame Graphs, described by Brendan Gregg</a>. It works by measuring the time spent on executing a function stack and drawing it by stacking the functions that call each other in such a way that a the horizontal space taken by a function is proportional to the amount of time spent executing it.</p>
+<p>
+<img src="https://www.brendangregg.com/FlameGraphs/cpu-mysql-updated.svg" alt="https://www.brendangregg.com/FlameGraphs/cpu-mysql-updated.svg" title="https://www.brendangregg.com/FlameGraphs/cpu-mysql-updated.svg" />
+<a href="https://www.brendangregg.com/FlameGraphs/cpu-mysql-updated.svg">[Click here to see the image in an interactive way]​</a></p>
+<p>
+It&#39;s quite interesting as a way to explore the execution of a program as you can &#34;zoom&#34; interactively in the image itself. Try to open the image by following the link above and press on <code>mysqld`mysql_parse</code>. You can see it will expand that function to take all the horizontal space so you can better find the time it takes to run each function that is called by it.</p>
+<p>
+Also by hovering the cursor over a function, like  <code>mysqld`mysql_exec</code>, we can see the fraction of time of the program spent executing these function, in this case <code class="verbatim">83.77%</code>.</p>
+<p>
+<img src="./zoom_sample_image.png" alt="./zoom_sample_image.png" title="./zoom_sample_image.png" /></p>
+</div>
+</div>
+<div id="outline-container-headline-2" class="outline-2">
+<h2 id="headline-2">
+Getting the data
+</h2>
+<div id="outline-text-headline-2" class="outline-text-2">
+<p>OK, now that we know how to use <em>Flame Graphs</em> let&#39;s see how to generate our own. To measure the program execution we will need a program to run. We will use this one, but the process is the same for any program.</p>
+<p>
+An important thing to keep in mind is that this technique (and a lot of other profiling ones) divide the time spent on a program by its functions. This means that it may be necessary to divide long functions into shorter ones to get better data on which parts of the code take most of the time.</p>
+<p>
+So, this is the program that we will use as example:</p>
+<div class="src src-python">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">  <span style="color:#75715e"># Test program, we will analyze it to understand it&#39;s performance</span>
+  <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">fibonacci</span>(n):
+      <span style="color:#e6db74">&#34;&#34;&#34;Test function.&#34;&#34;&#34;</span>
+      <span style="color:#66d9ef">if</span> n <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+          <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>
+      <span style="color:#66d9ef">elif</span> n <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">2</span>:
+          <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>
+      <span style="color:#66d9ef">else</span>:
+          <span style="color:#66d9ef">return</span> fibonacci(n <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">+</span> fibonacci(n <span style="color:#f92672">-</span> <span style="color:#ae81ff">2</span>)
+
+
+  <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">factorial</span>(n):
+      <span style="color:#e6db74">&#34;&#34;&#34;Another test function.&#34;&#34;&#34;</span>
+      <span style="color:#66d9ef">if</span> n <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">2</span>:
+          <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>
+      <span style="color:#66d9ef">else</span>:
+          <span style="color:#66d9ef">return</span> n <span style="color:#f92672">*</span> factorial(n <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+
+  <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">fibonacci_plus_factorial</span>(n):
+      <span style="color:#e6db74">&#34;&#34;&#34;Function calling the two above.&#34;&#34;&#34;</span>
+      fib <span style="color:#f92672">=</span> fibonacci(n)
+      fact <span style="color:#f92672">=</span> factorial(n)
+      <span style="color:#66d9ef">return</span> fib <span style="color:#f92672">+</span> fact
+
+  <span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+      N <span style="color:#f92672">=</span> <span style="color:#ae81ff">35</span>
+      <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;[Test] Fibonacci(5): {:3d} = 5 ?&#34;</span><span style="color:#f92672">.</span>format(fibonacci(<span style="color:#ae81ff">5</span>)))
+      <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;[Test] Factorial(5): {:3d} = 120 ?&#34;</span><span style="color:#f92672">.</span>format(factorial(<span style="color:#ae81ff">5</span>)))
+      <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Result:&#34;</span>, fibonacci_plus_factorial(N))</code></pre></div>
+</div>
+<p>
+If we run this code we will find out that it&#39;s quite slow:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">  $ time python sample.py
+  [Test] Fibonacci(5):   5 = 5 ?
+  [Test] Factorial(5): 120 = 120 ?
+  Result:  10333147966386144929666651337523209227465
+
+  real	0m3,905s
+  user	0m3,896s
+  sys	0m0,004s</code></pre></div>
+</div>
+<p>
+Let&#39;s see then what&#39;s taking all that time using <em>Flame Graphs</em>.</p>
+</div>
+</div>
+<div id="outline-container-headline-3" class="outline-2">
+<h2 id="headline-3">
+Preparing the environment
+</h2>
+<div id="outline-text-headline-3" class="outline-text-2">
+<p>To measure the program runtime we can use the <a href="https://github.com/evanhempel/python-flamegraph/">python-flamegraph</a> package. Usually it would be preferable to get it from the upstream repository, but it&#39;s outdated and it doesn&#39;t work on a modern Python version.</p>
+<p>
+Luckily <a href="https://github.com/evanhempel/python-flamegraph/network">many people maintain more up-to-date forks</a>. We have to find out one with the necessary changes and with the features we may be intersected on, and review the intermediate commits to make sure no malicious code has been introduced. Usually at this point I prefer to keep it simple and, as long as we don&#39;t actively profile something in production (or exposed to the internet), we can do with the minimal changes that makes it compatible with out Python version. Looking for this <a href="https://github.com/evanhempel/python-flamegraph/compare/master...nickodell:master">I&#39;ve opted for nickodell&#39;s fork</a>. (It you are looking for something more <strong>serious</strong> <a href="https://github.com/IceTDrinker/python-flamegraph/commit/74312897641a3b86f569b40627e3ad0e4f9edd69">check this note</a>).</p>
+<p>
+To install this version of the package directly from GitHub we can run:</p>
+<div class="src src-shell">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">  pip install git+https://github.com/nickodell/python-flamegraph.git</code></pre></div>
+</div>
+<p>
+The last step will be to clone this repository so we can generate the <em>Flame Graph</em> from the measures: <a href="https://github.com/brendangregg/FlameGraph">https://github.com/brendangregg/FlameGraph</a></p>
+<div class="src src-shell">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">  git clone https://github.com/brendangregg/FlameGraph</code></pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-4" class="outline-2">
+<h2 id="headline-4">
+Measuring and analyzing
+</h2>
+<div id="outline-text-headline-4" class="outline-text-2">
+<p>Once everything&#39;s ready we can measure our program with this command:</p>
+<div class="src src-shell">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">  python -m flamegraph -o measure.log sample.py</code></pre></div>
+</div>
+<p>
+This will produce a <code class="verbatim">measure.log</code> file with the necessary data. To convert this into a <em>Flame Graph</em> image we can run this (adapting the initial path to the directory where we have cloned the <a href="https://github.com/brendangregg/FlameGraph">brendangregg/FlameGraph</a> repo):</p>
+<div class="src src-shell">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">  FlameGraph/flamegraph.pl measure.log &gt; measure.svg</code></pre></div>
+</div>
+<p>
+This will produce a <code class="verbatim">measure.svg</code> file that we can open with a browser:</p>
+<p>
+<img src="./medida1.svg" alt="./medida1.svg" title="./medida1.svg" />
+<a href="./medida1.svg">(Click here to open it on interactive mode)</a></p>
+<p>
+We can observe that, disproportionately, most of the execution is spent on the <code>fibonacci</code> function, so let&#39;s optimize it. How we do this varies from function to function, in this case lets convert it from a naive recursion to an iteration:</p>
+<div class="src src-python">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">  <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">fibonacci</span>(n):
+      <span style="color:#e6db74">&#34;&#34;&#34;Test function, now optimized.&#34;&#34;&#34;</span>
+      seq <span style="color:#f92672">=</span> [<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>]
+      <span style="color:#66d9ef">while</span> n <span style="color:#f92672">&gt;=</span> len(seq):
+          seq<span style="color:#f92672">.</span>append(seq[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>] <span style="color:#f92672">+</span> seq[<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>])
+
+      <span style="color:#66d9ef">return</span> seq[n]</code></pre></div>
+</div>
+<p>
+If we run this code we can see that most of the execution time is now gone:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">  $ time python sample.py
+  [Test] Fibonacci(5):   5 = 5 ?
+  [Test] Factorial(5): 120 = 120 ?
+  Result:  10333147966386144929666651337523209227465
+
+  real	0m0,029s
+  user	0m0,017s
+  sys	0m0,012s</code></pre></div>
+</div>
+<p>
+Surprisingly, we can see that it&#39;s not necessary to optimize the <code>factorial</code> function even though it&#39;s also recursive and we may have considered it was necessary before measuring. Running it on a real environment shows that its execution is fairly efficient.</p>
+</div>
+</div>
+<div id="outline-container-headline-5" class="outline-2">
+<h2 id="headline-5">
+Closing thoughts
+</h2>
+<div id="outline-text-headline-5" class="outline-text-2">
+<p>We&#39;ve seen how using these diagrams we can find where on a program we should focus to optimize it.</p>
+<p>
+Usually changing at a single function is not enough to optimize a program, it is an iterative process:</p>
+<ul>
+<li>
+<p>Measure run times</p>
+</li>
+<li>
+<p>Optimize the function taking the most time</p>
+</li>
+<li>
+<p>Repeat until we are satisfied with the program execution time</p>
+</li>
+</ul>
+<p>And, to be honest, the goal of this example was to apply this optimization over the two functions, showing this iteration. Ironically, my own presumption that the <code>factorial</code> function was slow was false, so you will have to trust me when I say that it usually doesn&#39;t work in a single step 😉. This even goes to demonstrate the most important lesson one can learn about code optimization:</p>
+<p>
+<strong>Before changing anything, measure your program!</strong></p>
+<p>
+And that&#39;s all I have for you, I hope it is useful. Bye!</p>
+</div>
+</div>
+
+
+        
+          <div class="blog-tags">
+            
+              <a href="https://hackliza.gal/en/tags/python/">python</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/profiling/">profiling</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/optimization/">optimization</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/flamegraph/">flamegraph</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="https://hackliza.gal/en/posts/quick_math_on_terminal/" data-toggle="tooltip" data-placement="top" title="Quick math on the terminal">&larr; Previous Post</a>
+            </li>
+          
+          
+            <li class="next">
+              <a href="https://hackliza.gal/en/posts/pume/" data-toggle="tooltip" data-placement="top" title="PUME: a tool to mutate Python source code">Next Post &rarr;</a>
+            </li>
+          
+        </ul>
+      
+
+
+      
+        
+          
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hackliza" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+          
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://github.com/hackliza" title="GitHub">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/hackliza" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2024
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="https://hackliza.gal/en/">Hackliza</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.74.3</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="https://hackliza.gal/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://hackliza.gal/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

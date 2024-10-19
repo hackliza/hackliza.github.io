@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hackliza</title>
+    <link>https://hackliza.gal/</link>
+    <description>Recent content on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Sat, 31 Aug 2024 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Volcado de keyrings con Keydump: Extraendo credenciais en claro de SSSD</title>
+      <link>https://hackliza.gal/posts/keydump/</link>
+      <pubDate>Sat, 31 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/keydump/</guid>
+      <description>Boas xente!!
+ Fai tempo estiven trangallando cos keyrings de Linux para extraer tickets de Kerberos con tickey, e recentemente vinme envolto nun novo proxecto no que precisaba volver a aprender sobre o tema, así que vou a describir aquí o proxecto e os conceptos mais relevantes sobre os keyrings por se eu ou outra persoa ten que aprendelos no futuro.
+ O primeiro que temos que saber é que o que se coñece como keyrings de Linux, é un xestor de chaves.</description>
+    </item>
+    
+    <item>
+      <title>Como unir Debian a Active Directory</title>
+      <link>https://hackliza.gal/posts/linux-en-ad/</link>
+      <pubDate>Thu, 29 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/linux-en-ad/</guid>
+      <description>Boas xente, neste artigo vou amosar como unir unha máquina GNU/Linux, específicamente unha Debian, a un entorno de Active Directory. Seino, seino, Active Directory (AD) é unha ferramenta comercial do malvado Microsoft, mais por moito que nos pese, é a solución de directorio mais usada do mercado.
+ Sen embargo, non por ter un entorno de Microsoft temos que usar Windows, inda que iso é o que lles gustaría.</description>
+    </item>
+    
+    <item>
+      <title>Que demo pasa co meu DNS? Descubrindo e configurando demos de rede</title>
+      <link>https://hackliza.gal/posts/cambiar_dns_linux/</link>
+      <pubDate>Sun, 18 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/cambiar_dns_linux/</guid>
+      <description>Boas xente, hoxe veño a falar dun problema que me teño atopado en varias ocasións. O tema é que configuro o equipo para usar un servidor DNS concreto, incluíndo este no /etc/resolv.conf, e dalí a un anaco me atopo que este se borrou e se volveu ao servidor DNS anterior.
+ Neste artigo vou ver porque acontece e quen me está tocando o /etc/resolv.conf e como solucionalo.
+ Este artigo vai dirixido a entornos onde se usa a consola, xa que cando temos unha interface gráfica, polo xeral nas opcións de rede podemos poñer o DNS que queiramos sen problema ningún.</description>
+    </item>
+    
+    <item>
+      <title>Roubando sesións de sudo con ptrace</title>
+      <link>https://hackliza.gal/posts/stealing_sudo_sessions_with_ptrace/</link>
+      <pubDate>Sun, 24 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/stealing_sudo_sessions_with_ptrace/</guid>
+      <description>Boas xentiña.
+ Hoxe traiovos unha vella técnica ca que estiven fuchicando estes días. Trátase dun ataque para obter sudo se outra persoa que estea conectada na mesma máquina ca mesma usuaria ca nos o ten desbloqueado. Esta técnica xa foi documentada por nongiach no seu repo sudo_inject. Sen embargo, na súa implementación requirense varios ficheiros e dependencias para o ataque, polo que para simplificalo, e tamén aprender sobre esta técnica, desenvolvín a ferramenta sudohunt.</description>
+    </item>
+    
+    <item>
+      <title>PUME: unha ferramenta para mutar código Python</title>
+      <link>https://hackliza.gal/posts/pume/</link>
+      <pubDate>Thu, 02 Nov 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/pume/</guid>
+      <description>Neste artigo explicarase que é e como funciona a ferramenta PUME (Python Universal Mutation Engine), dando tamén algún exemplo de uso para que se vexa ata onde chega.
+Introdución PUME é unha ferramenta que modifica aleatoriamente o código fonte dun script ou programa feito en Python sen cambiar a funcionalidade do programa orixinal. Isto conséguese principalmente facendo modificacións sobre a Árbore Sintáctica Abstracta (AST polas súas siglas en inglés) do programa.</description>
+    </item>
+    
+    <item>
+      <title>Wardriving coa Raspi no 2023</title>
+      <link>https://hackliza.gal/posts/wardriving/</link>
+      <pubDate>Sun, 23 Apr 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/wardriving/</guid>
+      <description>Intro  Boas xente, nesta entrada imos a revisar unha vella técnica de seguridade de redes wifi, o wardriving. O wardriving consiste en localizar redes wifis dentro dun lugar, que pode ser unha rúa ou unha cidade.
+ Para iso imos precisar certo equipo. Por unha parte, unha antena wifi para capturar o sinal dos puntos de acceso (aka routers), e pola outra un dispositivo GPS que nos axude a recoller a localización dende onde estamos capturando o sinal.</description>
+    </item>
+    
+    <item>
+      <title>Profiling visual para Python</title>
+      <link>https://hackliza.gal/posts/python-visual-profiling/</link>
+      <pubDate>Mon, 27 Jun 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/python-visual-profiling/</guid>
+      <description>Boas, xente.
+ Hoxe veño cun exemplo práctico de como podemos analizar os nosos programas de Python para atopar facilmente pescozos de botella.
+ Fálase moito de como as optimizacións non se deben facer a cegas, senón que hai que medir que partes dun programa son as problemáticas para conseguir mellorar a execución do código de xeito eficiente. Hoxe veremos como facelo de forma cómoda e práctica.
+Gráficos de lapas (Flame Graphs)  Hai moitos xeitos de medir e visualizar o comportamento dunha aplicación, pero persoalmente o que máis cómodo me parece é a técnica dos Gráficos de lapas (Flame Graphs) descrito por Brendan Gregg.</description>
+    </item>
+    
+    <item>
+      <title>Reversing con carraxe</title>
+      <link>https://hackliza.gal/posts/reversing_con_carraxe/</link>
+      <pubDate>Sat, 12 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/reversing_con_carraxe/</guid>
+      <description>Boas xente,
+ Estes dias andei cacharreando con angr e aprendendo un pouco sobre execución simbólica.
+Que diaños é angr? E a execución simbólica?   angr é unha ferramenta para análise dinámico de programas. Concretamente é un emulador que executa o programa aplicando execución simbólica. Deste xeito podemos só executar a parte do programa que nos interesa e non todo o programa.
+ A execución simbólica ven sendo executar o programa ou unha parte del para coñecer que valor precisamos nun símbolo (algo parecido a unha variábel) para podermos chegar dunha parte ou estado do programa a outro.</description>
+    </item>
+    
+    <item>
+      <title>Contas rápidas no terminal</title>
+      <link>https://hackliza.gal/posts/contas_rapidas_no_terminal/</link>
+      <pubDate>Mon, 01 Nov 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/contas_rapidas_no_terminal/</guid>
+      <description>Boas, xente.
+ A semana pasada pasei por un comentario en HN do 2019. O usuario estaba experimentando cuns script pra facer algunhas contas directamente no terminal bash.
+ TLDR: Clica aquí pra saltar a historia e ir directamente ao código.
+ O que o usuario propoñía era usar algo coma isto, baseado no comando dc (os comentarios son meus).
+$ . calc.sh # Cargar funcións $ * 4 5 # Multiplica 4 e 5 20 $ / 21 3 # Divide 21 por 3 7   Isto soaba interesante.</description>
+    </item>
+    
+    <item>
+      <title>Usando libfuzzer en proxectos compilados con autotools</title>
+      <link>https://hackliza.gal/posts/libfuzzer_autotools/</link>
+      <pubDate>Fri, 16 Jul 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/libfuzzer_autotools/</guid>
+      <description>Boas xente.
+ Estes días estiven xogando con libfuzzer, unha ferramenta incorporada no compilador clang que nos permite fuzzear un programa que se compile con clang. O fuzzing é pasarlle datos (pseudo-)aleatorios a un programa e ver se casca.
+ Para facer isto con libfuzzer, tes que definir no programa unha función chamada LLVMFuzzerTestOneInput que acepte un buffer de bytes que libfuzzer invocará en repetidamente en bucle pasando diferentes datos.</description>
+    </item>
+    
+    <item>
+      <title>Como Converterse En Hacker</title>
+      <link>https://hackliza.gal/posts/como_converterse_en_hacker/</link>
+      <pubDate>Mon, 19 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/como_converterse_en_hacker/</guid>
+      <description>Boas xente.
+ Este post é unha tradución do How To Become A Hacker de Eric Steven Raymond, publicado orixinariamente no 2001 (a última actualización a día de hoxe fíxose no 2020).
+ Eric Raymond, autor de grandes pezas como The Cathedral &amp;amp; the Bazaar ou The Art of Unix Programming , amósanos neste icónico texto o que é un hacker, cal é a súa filosofía e os valores que defende, así como a actitude e coñecementos que se precisan para ser un deles.</description>
+    </item>
+    
+    <item>
+      <title>Truquiños para mellorar a usabilidade de programas de consola</title>
+      <link>https://hackliza.gal/posts/console_usability/</link>
+      <pubDate>Thu, 24 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/console_usability/</guid>
+      <description>Boas xente,
+ Neste post vouvos amosar unha serie de truquiños que, pola miña experiencia, son cremita para aumentar a usabilidade das utilidades de consola. Vounos deixar aquí plasmados para non esquecelos e coa esperanza de que tamén lle poidan servir a máis xente.
+ Ao final a clave e facer os programas simples, o que non é tan fácil como parece, pero agardo que estes truquiños che axuden.</description>
+    </item>
+    
+    <item>
+      <title>Virus e Python</title>
+      <link>https://hackliza.gal/posts/virus_python/</link>
+      <pubDate>Mon, 14 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/virus_python/</guid>
+      <description>Nesta publicación explicarase varias cuestións a hora de entender como funciona un virus. Primeiro explicaranse que son e como é o seu ciclo de vida. A continuación, esbozaranse as principais técnicas para detectar un virus. Despois, comentaranse as principais técnicas anti-antivirus. Logo, explicarase como funciona un virus aportando exemplos de código, para finalmente, engadir varias melloras e proteccións para que non se poida detectar mediante sinatura.
+Advertencia: a finalidade desta publicación é educativa.</description>
+    </item>
+    
+    <item>
+      <title>Manifesto Hacker</title>
+      <link>https://hackliza.gal/posts/hacker_manifesto/</link>
+      <pubDate>Sun, 06 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/hacker_manifesto/</guid>
+      <description>Boas xente,
+Hoxe traemos a tradución dun dos textos máis icónicos da cultura hacker, o manifesto hacker, publicado orixinalmente na revista Phrack en 1986. Inda que xa choveu dende aquela, ideas como a liberdade de coñecemento e a curiosidade insaciable seguen moi presentes na comunidade hacker hoxe en día.
+Esperamos que vos guste esta homenaxe.
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= O seguinte foi escrito pouco despois do meu arresto... \/\A conciencia dun Hacker/\/ by +++The Mentor+++ (traducido por Hackliza) Escrito o 8 de Xaneiro do 1986 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Outro foi capturado hoxe, está en todos os xornais.</description>
+    </item>
+    
+    <item>
+      <title>Análise do heap con radare2</title>
+      <link>https://hackliza.gal/posts/r2heap/</link>
+      <pubDate>Sat, 21 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/r2heap/</guid>
+      <description>Boas xente.
+ Neste post, vou mostrar como se pode utilizar radare2 para facer análises do heap da glibc. A miña intención é crear unha referencia con exemplos, que permita coñecer que se pode levar a cabo con radare2. Fago isto xa que non atopei moito ao respecto en internet, soamente a presentación do módulo de heap feita por n4x0r na r2con 2016.  Sen embargo, eu son un amante do texto, así que deixarei aquí plasmados os comandos de radare2 con exemplos, listos para ser consultados e copipasteados.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://hackliza.gal/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/about/</guid>
+      <description>Hackliza é unha comunidade de xente galega interesada en infórmatica e cultura hacker. Estás lendo o blogue, aquí atoparás diversa información sobre software libre, programación, seguridade, privacidade, e outras herbas.
+Se che cunde e queres colaborar, contacta connosco. A idea é publicar en galego, a nosa lingua (e opcionalmente en inglés, a lingua dos hackers).
+Contacto  Web: hackliza.gal Mastodon: @hackliza@defcon.social Email: hackliza@hackliza.gal Github: hackliza  </description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://hackliza.gal/talks/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/talks/</guid>
+      <description>En Hackliza de cando en cando damos algunha charla nalgún faladoiro ou conferencia, xa sexa organizado por nós ou non. Aquí tedes as diapositivas de esas veces.
+Charlas PyConEs - Outubro 2024  [ODP] [PDF] Introdución as inxeccións de código en Python - por @doncaralludo e @zer1t0  EsLibre - Maio 2024  [ODP] [PDF] Un paseo pola seguridade de GNU/Linux - por @zer1t0  Faladoiro Hackliza - Marzo 2024  [ODP] [PDF] Opsec no día a día - por @hacklego [ODP] [PDF] Pi-Hole - por @doncaralludo [ODP] [PDF] Roubando sudo con ptrace - por @zer1t0 [ODP] [PDF] Software Maleable - por @kenkeiras  </description>
+    </item>
+    
+  </channel>
+</rss>

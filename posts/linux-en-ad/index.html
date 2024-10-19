@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="gl" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Como unir Debian a Active Directory - Hackliza</title>
+  <meta name="description" content="Boas xente, neste artigo vou amosar como unir unha máquina GNU/Linux, específicamente unha Debian, a un entorno de Active Directory. Seino, seino, Active Directory (AD) é unha ferramenta comercial do malvado Microsoft, mais por moito que nos pese, é a solución de directorio mais usada do mercado.
+ Sen embargo, non por ter un entorno de Microsoft temos que usar Windows, inda que iso é o que lles gustaría."><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Hackliza",
+    
+    "url": "https:\/\/hackliza.gal\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "https:\/\/hackliza.gal\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/posts\/linux-en-ad\/",
+          "name": "Como unir debian a active directory"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Eloy Pérez González"
+  },
+  "headline": "Como unir Debian a Active Directory",
+  "description" : "Boas xente, neste artigo vou amosar como unir unha máquina GNU\/Linux, específicamente unha Debian, a un entorno de Active Directory. Seino, seino, Active Directory (AD) é unha ferramenta comercial do malvado Microsoft, mais por moito que nos pese, é a solución de directorio mais usada do mercado.\n Sen embargo, non por ter un entorno de Microsoft temos que usar Windows, inda que iso é o que lles gustaría.",
+  "inLanguage" : "gl",
+  "wordCount":  4538 ,
+  "datePublished" : "2024-08-29T00:00:00",
+  "dateModified" : "2024-08-29T00:00:00",
+  "image" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+  "keywords" : [ "linux, gnu, ad, debian" ],
+  "mainEntityOfPage" : "https:\/\/hackliza.gal\/posts\/linux-en-ad\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "https:\/\/hackliza.gal\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="Como unir Debian a Active Directory" />
+<meta property="og:description" content="Boas xente, neste artigo vou amosar como unir unha máquina GNU/Linux, específicamente unha Debian, a un entorno de Active Directory. Seino, seino, Active Directory (AD) é unha ferramenta comercial do malvado Microsoft, mais por moito que nos pese, é a solución de directorio mais usada do mercado.
+ Sen embargo, non por ter un entorno de Microsoft temos que usar Windows, inda que iso é o que lles gustaría.">
+<meta property="og:image" content="https://hackliza.gal/img/hackliza.png" />
+<meta property="og:url" content="https://hackliza.gal/posts/linux-en-ad/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hackliza" />
+
+  <meta name="twitter:title" content="Como unir Debian a Active Directory" />
+  <meta name="twitter:description" content="Boas xente, neste artigo vou amosar como unir unha máquina GNU/Linux, específicamente unha Debian, a un entorno de Active Directory. Seino, seino, Active Directory (AD) é unha ferramenta comercial do …">
+  <meta name="twitter:image" content="https://hackliza.gal/img/hackliza.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@hackliza" />
+  <meta name="twitter:creator" content="@hackliza" />
+  <link href='https://hackliza.gal/img/hackliza.png' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.74.3" />
+  <link rel="alternate" href="https://hackliza.gal/index.xml" type="application/rss+xml" title="Hackliza"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://hackliza.gal/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="https://hackliza.gal/css/syntax.css" /><link rel="stylesheet" href="https://hackliza.gal/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><style>
+ nav {
+     background: #0099CC !important;
+ }
+
+ .navbar-brand, #main-navbar ul li a, footer {
+     color: #fff !important;
+ }
+
+ .navbar-brand:hover, #main-navbar ul li a:hover {
+     color: #ccc !important;
+ }
+
+
+ figure {
+     margin-top: 1.5em; 
+     margin-bottom: 1.5em; 
+ }
+ 
+ figcaption {
+     text-align: center;
+     font-size: 85%;
+ }
+
+ pre {
+     overflow-x: auto !important;
+ }
+
+ .posts-heading {
+     text-align: center;
+ }
+ 
+</style>
+
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Conmuta navegación</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://hackliza.gal/">Hackliza</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blogue" href="/">Blogue</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Sobre nós" href="/about/">Sobre nós</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Charlas" href="/talks/">Charlas</a>
+            </li>
+          
+        
+
+        
+          
+            <li>
+              
+                
+                  <a href="/en" lang="en">en</a>
+                
+              
+                
+              
+            </li>
+          
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Hackliza" href="https://hackliza.gal/">
+            <img class="avatar-img" src="https://hackliza.gal/img/hackliza.png" alt="Hackliza" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>Como unir Debian a Active Directory</h1>
+              
+              
+                <hr class="small">
+              
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        
+<p>
+Boas xente, neste artigo vou amosar como unir unha máquina GNU/Linux,
+específicamente unha Debian, a un entorno de Active Directory. Seino, seino,
+Active Directory (AD) é unha ferramenta comercial do malvado Microsoft, mais por
+moito que nos pese, é a solución de directorio mais usada do mercado.</p>
+<p>
+Sen embargo, non por ter un entorno de Microsoft temos que usar Windows,
+inda que iso é o que lles gustaría. Polo tanto, neste artigo vou describir como se
+pode integrar un GNU/Linux con AD. Os mesmos principios deberían servir para
+integralo con outras alternativas de directorio, como <a href="https://www.freeipa.org/page/Main_Page">FreeIPA</a> ou un servizo
+<a href="https://gl.wikipedia.org/wiki/LDAP">LDAP</a>.</p>
+<p>
+Hai que ter en conta que vou poñer exemplos do Active Directory que teño no meu
+laboratorio e que terás que adaptar os exemplos e comandos ao teu caso
+particular. Eu usarei os seguintes datos:</p>
+<ul>
+<li>
+<p>Dominio: <code>dev.lab</code></p>
+</li>
+<li>
+<p>Administrador de dominio: <code>Administrator</code></p>
+</li>
+<li>
+<p>Controlador de dominio: <code>dc01.dev.lab</code> - <code>192.168.122.135</code></p>
+</li>
+</ul>
+<p>Unha vez aclarado isto, imos ao tema.</p>
+<div id="outline-container-resolvendo-o-dominio-por-dns" class="outline-2">
+<h2 id="resolvendo-o-dominio-por-dns">
+Resolvendo o dominio por DNS
+</h2>
+<div id="outline-text-resolvendo-o-dominio-por-dns" class="outline-text-2">
+<p>
+O primeiro que precisamos é ser capaces de resolver por DNS o nome do noso
+dominio. Para isto a opción mais sinxela é establecer como servidor DNS o noso
+Controlador de Dominio (DC), que é a máquina que contén toda a base de datos do
+directorio e prové os servicios do mesmo, coma o DNS.</p>
+<blockquote>
+<p>Nun entorno de Active Directory pode haber varios controladores de dominio, con
+que escollamos un para facer de servidor DNS chega. Tal vez dous se queremos un
+DNS de respaldo.</p>
+</blockquote>
+<p>
+No meu caso o DC está na IP <code>192.168.122.135</code>. O primeiro é comprobar que temos
+conectividade co mesmo podemos facerlle <a href="https://gl.wikipedia.org/wiki/Ping">ping</a> (e se nos poñemos exquisitos
+podemos usar netcat ou nmap para verificar que alcanzamos o porto 53/UDP, que é
+o usado para DNS):</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ping -c4 192.168.122.135
+PING 192.168.122.135 (192.168.122.135) 56(84) bytes of data.
+64 bytes from 192.168.122.135: icmp_seq=1 ttl=128 time=0.645 ms
+64 bytes from 192.168.122.135: icmp_seq=2 ttl=128 time=0.600 ms
+64 bytes from 192.168.122.135: icmp_seq=3 ttl=128 time=0.563 ms
+64 bytes from 192.168.122.135: icmp_seq=4 ttl=128 time=0.659 ms
+
+--- 192.168.122.135 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3061ms
+rtt min/avg/max/mdev = 0.563/0.616/0.659/0.037 ms</code></pre></div>
+</div>
+<figcaption>
+Ping ao controlador de dominio
+</figcaption>
+</figure>
+<p>
+Unha vez verificamos que temos conexión, engadimos o DC como servidor DNS. No
+meu caso vouno engadir en <a href="https://linux.die.net/man/5/dhclient.conf">/etc/dhcp/dhclient.conf</a> para que <a href="https://linux.die.net/man/8/dhclient">dhclient</a> mo inclúa en
+<a href="https://www.man7.org/linux/man-pages/man5/resolv.conf.5.html">/etc/resolv.conf</a>, que é o ficheiro usado en GNU/Linux (concretamente na <a href="https://www.man7.org/linux/man-pages/man7/libc.7.html">libc</a>)
+para obter os servidores DNS.</p>
+<blockquote>
+<p>Pode que no teu caso non sexa <code>dhclient</code> o encargado da configuración DNS, polo
+que deberás descubrir que programa é. Polo xeral as alternativas son
+NetworkManager e systemd-resolved. Podes botarlle un ollo ao noso artigo
+<a href="https://hackliza.gal/posts/cambiar_dns_linux/">Que demo pasa co meu DNS?</a> para ver como configurar o teu DNS.</p>
+</blockquote>
+<p>
+Os comando para engadir o meu DC coma servidor DNS sería o seguinte:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ echo &#34;prepend domain-name-servers 192.168.122.135;&#34; | sudo tee -a /etc/dhcp/dhclient.conf 
+prepend domain-name-servers 192.168.122.135;</code></pre></div>
+</div>
+<figcaption>
+Establecendo o controlador de dominio coma servidor DNS
+</figcaption>
+</figure>
+<p>
+Ademais tamén lle vou indicar ao xestor DNS que se intento resolver a IP dun
+nome de máquina como <code>dc01</code> a secas, sen a parte do dominio, mo busque dentro do
+meu dominio, <code>dev.lab</code>:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ echo &#39;prepend domain-search &#34;dev.lab&#34;;&#39; | sudo tee -a /etc/dhcp/dhclient.conf
+prepend domain-search &#34;dev.lab&#34;;</code></pre></div>
+</div>
+<figcaption>
+Usando o dominio por defecto a buscar
+</figcaption>
+</figure>
+<p>
+E finalmente reiniciamos o servizo para aplicar a nova configuración DNS:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo systemctl restart ifup@enp1s0.service</code></pre></div>
+</div>
+<figcaption>
+Reiniciando o demo de rede
+</figcaption>
+</figure>
+<p>
+Ten en conta que o servizo <code>ifup</code>, que se encarga de executar <code>dhclient</code>, recibe
+como parámetro unha interface de rede, no meu caso <code>enp1s0</code>, pero pode ser
+diferente na túa máquina.</p>
+<p>
+E para confirmar que o noso DC se engadiu correctamente coma servidor DNS
+podemos probar a resolver o noso dominio:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /etc/resolv.conf
+search dev.lab.
+nameserver 192.168.122.135
+nameserver 192.168.122.1
+$ host dev.lab
+dev.lab has address 192.168.122.135</code></pre></div>
+</div>
+<figcaption>
+Resolución DNS no noso dominio
+</figcaption>
+</figure>
+<p>
+Tamén comprobamos que se busca ben o nome de máquinas no dominio incluso se so
+especificamos o nome sen o dominio:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ host dc01.dev.lab
+dc01.dev.lab has address 192.168.122.135
+$ host dc01
+dc01.dev.lab has address 192.168.122.135</code></pre></div>
+</div>
+<figcaption>
+Resolvendo nomes de máquinas do dominio
+</figcaption>
+</figure>
+</div>
+</div>
+<div id="outline-container-un-pouco-de-teoria-os-componentes-para-conectar" class="outline-2">
+<h2 id="un-pouco-de-teoria-os-componentes-para-conectar">
+Un pouco de teoría: Os compoñentes para conectar
+</h2>
+<div id="outline-text-un-pouco-de-teoria-os-componentes-para-conectar" class="outline-text-2">
+<p>
+Agora que xa temos conectividade co dominio, toca instalar todas as utilidades e
+librarías que implementan os diferentes protocolos (que son uns cantos) que lle
+van permitir a nosa máquina interactuar co Controlador de Dominio.</p>
+<p>
+Mais antes de continuar, vou dar un pouco de teoría, xa que me gustaría facer un
+repaso das diferentes utilidades e protocolos que son necesarias para esta
+comunicación e integración con Active Directory, de xeito que podamos comprender
+o obxetivo das diferentes ferramentas deste complexo sistema. </p>
+<div id="outline-container-headline-3" class="outline-3">
+<h3 id="headline-3">
+Protocolos usados en Active Directory
+</h3>
+<div id="outline-text-headline-3" class="outline-text-3">
+<p>Para comezar, hai varios protocolos esenciais que temos que coñecer para
+entender a comunicación co Controlador de Dominio:</p>
+<div id="outline-container-dns" class="outline-4">
+<h4 id="dns">
+DNS
+</h4>
+<div id="outline-text-dns" class="outline-text-4">
+<p>
+Este xa o tocamos. O <a href="https://gl.wikipedia.org/wiki/Domain_Name_System">DNS</a> (Sistema de Nomes de Dominio) é o protocol fundamental
+usado no dominio para obter as direccións IPs das diferentes máquinas do
+mesmo. A autoridade central de nomes no dominio é o Controlador de Dominio.</p>
+<p>
+Calquera utilidade que use nomes de máquina resolverá estes de xeito
+transparente para nos, mais se queremos obter a ip explícitamente, podemos usar
+utilidades coma <a href="https://linux.die.net/man/1/host">host</a>, <a href="https://linux.die.net/man/1/nslookup">nslookup</a> ou <a href="https://linux.die.net/man/1/dig">dig</a>:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ host dc01.dev.lab
+dc01.dev.lab has address 192.168.122.135</code></pre></div>
+</div>
+<figcaption>
+Resolvendo nomes de máquinas do dominio
+</figcaption>
+</figure>
+</div>
+</div>
+<div id="outline-container-kerberos" class="outline-4">
+<h4 id="kerberos">
+Kerberos
+</h4>
+<div id="outline-text-kerberos" class="outline-text-4">
+<p>
+<a href="https://en.wikipedia.org/wiki/Kerberos_(protocol)">Kerberos</a> é un protocolo para a autenticación remota de usuarias. É
+un sistema baseado na obtención duns tokens chamados <strong>tickets</strong>, que dispensa o
+Controlador de Dominio cando unha usuaria se autentica por primeira vez ca súa
+usuaria e contrasinal, e que posteriormente se poden presentar a outras
+máquinas do dominio para a autenticación da usuaria.</p>
+<p>
+Hai dous tipos de tickets:</p>
+<ul>
+<li>
+<p><strong>TGT</strong> (Ticket Granting Ticket): É o ticket que o Controlador de Dominio (DC)
+entrega cando unha usuaria se autentica co seu nome e contrasinal. Pódese usar
+para pedir tickets para os diferentes servizos, coñecidos como ST, sen ter que
+andar metendo de novo o contrasinal.</p>
+</li>
+</ul>
+<figure>
+<pre class="example">
+                                                .---.
+    _____                                      /   /|
+   |     |   &gt;----Usuaria e contrasnal----&gt;   .---. |
+   |_____|                                    |   | &#39;
+   /:::::/   &lt;--------------TGT-----------&lt;   |   |/ 
+  cliente                                     &#39;---&#39;  
+                                                DC
+</pre>
+<figcaption>
+Obtención dun TGT
+</figcaption>
+</figure>
+<ul>
+<li>
+<p><strong>ST</strong> (Service Ticket): É un ticket que serve para un servizo en concreto, como
+SMB (tamén coñecido como CIFS) ou LDAP, que imos ver a continuación. O ST nolo
+entrega o Controlador de Dominio cando presentamos o noso TGT.</p>
+</li>
+</ul>
+<figure>
+<pre class="example">
+                                          .---.
+    _____                                /   /|
+   |     |   &gt;----------TGT---------&gt;   .---. |
+   |_____|                              |   | &#39;
+   /:::::/   &lt;-----ST para CIFS-----&lt;   |   |/ 
+  cliente                               &#39;---&#39;  
+    ^  v                                 DC
+    |  |
+    |  |                          .---. 
+    |  &#39;-----ST para CIFS-----&gt;  /   /|                                          
+    |                           .---. | 
+    &#39;---carpeta compartida----&lt; |   | &#39;                                          
+                                |   |/  
+                                &#39;---&#39;   
+                            Servidor SMB/CIFS
+</pre>
+<figcaption>
+Obtención e uso dun ST
+</figcaption>
+</figure>
+<p>
+O uso de tickets evita ter que estar escribindo de novo a usuaria e contraseña
+cada vez que se quera establecer unha conexión a unha máquina. Ademais, os
+tickets poden incluir información de seguridade para os protocolos de capas
+mais altas como indicadores de se deberían usar <strong>cifrado e firmado</strong> dos paquetes
+nas comunicacións. Por último, os tickets tamén permiten incluir información das
+usuarias como os seus <strong>grupos no dominio</strong>, nunha estructura coñecida como PAC
+(Privilege Attribute Certificate). </p>
+<p>
+Kerberos é un protocolo que se integra con outros protocolos como SMB e LDAP,
+polo que non é o normal interactuar directamente con él, mais o paquete
+<code>krb5-user</code> (en Debian) inclúe varias ferramentas que podemos usar para pedir e
+listar os tickets dos que dispoñemos, como no seguinte exemplo:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ klist
+Ticket cache: FILE:/tmp/krb5cc_1190600500_fwQbdO
+Default principal: Administrator@DEV.LAB
+
+Valid starting       Expires              Service principal
+08/22/2024 20:32:19  08/23/2024 06:32:19  krbtgt/DEV.LAB@DEV.LAB
+	renew until 08/23/2024 20:32:19
+08/22/2024 20:32:20  08/23/2024 06:32:19  cifs/dc01.dev.lab@
+	renew until 08/23/2024 20:32:19
+	Ticket server: cifs/dc01.dev.lab@DEV.LAB</code></pre></div>
+</div>
+<figcaption>
+Listando os tickets de Kerberos da sesión actual con klist
+</figcaption>
+</figure>
+<p>
+Neste caso observamos dous tickets, un para <code>krbtgt/DEV.LAB@DEV.LAB</code>, o que nos
+indica que é un TGT para o dominio <code>dev.lab</code>, e outro para <code>cifs/dc01.dev.lab</code>,
+que indica que se trata de un ticket para obter acceso ás carpetas compartidas
+(mediante SMB ou CIFS) do servidor <code>dc01.dev.lab</code>. Coñecer os tickets que temos
+pode sernos útil á hora de resolver problemas.</p>
+</div>
+</div>
+<div id="outline-container-ldap" class="outline-4">
+<h4 id="ldap">
+LDAP
+</h4>
+<div id="outline-text-ldap" class="outline-text-4">
+<p>
+<a href="https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol">LDAP</a> é un protocolo moi usado en servizos de directorio. Permite facer
+consultas sobre a base de datos do directorio, para obter e modificar
+información sobre as diferentes entidades do directorio, como por exemplo,
+usuarias ou ordenadores. Podería dicirse que é o SQL dos servicios de
+directorio.</p>
+<p>
+No caso de Active Directory, usa Kerberos para autenticar ás usuarias.
+En concreto, cada vez que se establece unha nova conexión LDAP, envíase un
+ticket de Kerberos para autenticar á usuaria.</p>
+<p>
+A implementación open source de LDAP é OpenLDAP, que se inclúe no paquete
+<code>libldap-&lt;version&gt;</code>, que teñen como dependencia moitos outros paquetes
+relacionados co protocolo. Ademais, se queremos consultar a base de datos do
+directorio, podemos usar ferramentas como <code>ldapsearch</code>, que pertence ao paquete
+<code>ldap-utils</code>. Deixo aquí un exemplo no que listo os ordenadores do dominio:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ldapsearch -H ldap://dc01.dev.lab -b &#39;DC=dev,DC=lab&#39;  &#39;(objectClass=computer)&#39; name 2&gt;/dev/null | grep name:
+name: DC01
+name: DEBIAN12</code></pre></div>
+</div>
+<figcaption>
+Listando os ordenadores do dominio
+</figcaption>
+</figure>
+</div>
+</div>
+<div id="outline-container-samba-smb" class="outline-4">
+<h4 id="samba-smb">
+Samba/SMB
+</h4>
+<div id="outline-text-samba-smb" class="outline-text-4">
+<p>
+<a href="https://linux.die.net/man/7/samba">Samba</a> é a implementación libre de <a href="https://en.wikipedia.org/wiki/Server_Message_Block">SMB</a>, que é un protocolo para compartir
+carpetas e ficheiros moi utilizado en entornos Windows como é Active
+Directory.</p>
+<blockquote>
+<p>Ademais de SMB, tamén é común usar o termo CIFS para referirse ao mesmo
+protocolo, inda que CIFS foi un protocolo anterior a SMB (un pouco o mesmo que
+acontece con SSL e TLS). De feito o servizo de SMB en Active Directory chámase
+CIFS.</p>
+</blockquote>
+<p>
+Como mencionei antes, SMB utiliza por debaixo Kerberos como protocolo de
+autenticación, e ao igual que LDAP, envía un ticket cada vez que se establece
+unha nova conexión.</p>
+<p>
+No caso de Debian, o paquete <code>samba-tools</code> contén as utilidades e librarías
+necesarias para comunicarse como cliente de SMB. Por exemplo, podemos usar
+<code>smbclient</code> para listar as carpetas compartidas en servidores do dominio:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ smbclient --use-krb5-ccache=$KRB5CCNAME -L dc01.dev.lab
+
+	Sharename       Type      Comment
+	---------       ----      -------
+	ADMIN$          Disk      Remote Admin
+	C$              Disk      Default share
+	IPC$            IPC       Remote IPC
+	NETLOGON        Disk      Logon server share 
+	SYSVOL          Disk      Logon server share 
+SMB1 disabled -- no workgroup available</code></pre></div>
+</div>
+<figcaption>
+Listando carpetas compartidas dun servidor SMB con smbclient
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-ferramentas-para-integrar-gnulinux-en-active-directory" class="outline-3">
+<h3 id="ferramentas-para-integrar-gnulinux-en-active-directory">
+Ferramentas para integrar GNU/Linux en Active Directory
+</h3>
+<div id="outline-text-ferramentas-para-integrar-gnulinux-en-active-directory" class="outline-text-3">
+<p>
+Unha vez visto os protocolos subxacentes, imos a revisar algúns das ferramentas
+e compoñentes do sistema claves á hora de integrar unha máquina GNU/Linux a un
+servicio de directorio.</p>
+<div id="outline-container-pam" class="outline-4">
+<h4 id="pam">
+PAM
+</h4>
+<div id="outline-text-pam" class="outline-text-4">
+<p>
+<a href="https://www.man7.org/linux/man-pages/man8/pam.8.html">PAM</a> (Pluggable Authentication Modules) é un conxunto de librerías de
+GNU/Linux que permiten integrar os diferentes mecanismos de autenticación do
+sistema. Os programas que teñen que usar autenticación, como pode ser SSH ou
+<a href="https://www.man7.org/linux/man-pages/man1/login.1.html">login</a>, poden facer uso de PAM para integrar os mecanismos de autenticación
+dispoñibles, como contrasinal, pin, certificado, etc, con pouco esforzo.</p>
+<blockquote>
+<p>Curiosidade: As claves SSH non forman parte de PAM, senón que son un
+mecanismo propio de SSH.</p>
+</blockquote>
+<p>
+PAM permite tanto autenticación local, como pode ser revisar o contrasinal no
+<a href="https://www.man7.org/linux/man-pages/man5/shadow.5.html">/etc/shadow</a>, como autenticación remota, mediante protocolos coma Kerberos (a
+través de sssd neste caso).</p>
+<p>
+Ademais, PAM tamén se encarga doutras tarefas como o cambio de contrasinal ou
+configurar as variables de entorno e montar o directorio da usuaria cando este
+inicia sesión.</p>
+<p>
+No cartafol <code>/etc/pam.d/</code> podes ver que modulos de PAM interveñen en cada inicio
+de sesión.</p>
+</div>
+</div>
+<div id="outline-container-nss" class="outline-4">
+<h4 id="nss">
+NSS
+</h4>
+<div id="outline-text-nss" class="outline-text-4">
+<p>
+<a href="https://www.man7.org/linux/man-pages/man5/nss.5.html">NSS</a> (Name Service Switch) é un mecanismo usado en GNU/Linux para saber
+onde buscar información relativa a diferentes items do sistema, como poden ser
+usuarias ou nomes de dominio. Para este propósito úsase como referencia o
+ficheiro de configuración <a href="https://www.man7.org/linux/man-pages/man5/nsswitch.conf.5.html">/etc/nsswitch.conf</a>.</p>
+<p>
+Por exemplo, cando unha aplicación quere obter información sobre unha usuaria,
+nsswitch indica de que fontes se pode extraer os seus datos, coma o ficheiro
+local como <a href="https://linux.die.net/man/5/passwd">/etc/passwd</a> ou o servicio sssd.</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /etc/nsswitch.conf | grep passwd
+passwd:         files systemd sss</code></pre></div>
+</div>
+<figcaption>
+Configuración para obter os nomes de usuaria
+</figcaption>
+</figure>
+<p>
+Outro caso común é que para resolver un nome de dominio, nsswitch indica que
+primeiro se consulte o <a href="https://www.man7.org/linux/man-pages/man5/hosts.5.html">/etc/hosts</a>, e se non se atopa se faga unha petición DNS.</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /etc/nsswitch.conf | grep hosts
+hosts:          files dns</code></pre></div>
+</div>
+<figcaption>
+Configuración para resolver os nomes de dominio
+</figcaption>
+</figure>
+</div>
+</div>
+<div id="outline-container-sssd" class="outline-4">
+<h4 id="sssd">
+sssd
+</h4>
+<div id="outline-text-sssd" class="outline-text-4">
+<p>
+<a href="https://linux.die.net/man/8/sssd">sssd</a> (System Security Services Daemon) é o pegamento que une todos os programas
+e protocolos discutidos ata agora, pois se trata dunha ferramenta que utiliza
+todas as utilidades e librerías necesarias para interactuar con entornos de
+directorio como Active Directory ou FreeIPA, e ademais permite a integración das
+mesmas con mecanismos do sistema como <a href="https://www.man7.org/linux/man-pages/man8/pam.8.html">PAM</a> e <a href="https://www.man7.org/linux/man-pages/man5/nss.5.html">NSS</a>.</p>
+<p>
+A integración sería algo parecido ao seguinte:</p>
+<figure>
+<pre class="example">
+                                             +-----------+
+ +---------------+                      .--&gt; | Samba/SMB |
+ | PAM - pam_sss | ----.                |    +-----------+
+ +---------------+     |                |        v
+                       |                |        &#39;------------.
+                       |                |                     v
+                       |    +------+    |                +----------+
+                       |--&gt; | sssd | ---|--------------&gt; | Kerberos |
+                       |    +------+    |                +----------+
+                       |                |                     ^ 
+                       |                |       .-------------&#39; 
+ +------------------+  |                |       ^ 
+ | NSS - libnss_sss | -&#39;                |    +------+
+ +------------------+                   &#39;--&gt; | LDAP |
+                                             +------+
+</pre>
+<figcaption>
+Integración de sssd co resto de compoñentes
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-unindo-a-maquina-ao-dominio" class="outline-2">
+<h2 id="unindo-a-maquina-ao-dominio">
+Unindo a máquina ao dominio
+</h2>
+<div id="outline-text-unindo-a-maquina-ao-dominio" class="outline-text-2">
+<p>
+Para unir a nosa máquina ao dominio podemos usar a ferramenta <a href="https://manpages.org/realm/8">realm</a>, que se
+encarga de configurar sssd de xeito que podamos usalo para autenticar as
+usuarias contra o dominio.</p>
+<p>
+Aquí vos deixo un breve resumo dos paquetes que imos instalar, para entender cal
+é a utilidade de cada un:</p>
+<ul>
+<li>
+<p><code>sssd</code>: Instala o demo de sssd e os módulos para comunicarse cos servicios de
+directorio.</p>
+</li>
+<li>
+<p><code>sssd-tools</code>: Instala ferramentas para controlar sssd, como <a href="https://man.archlinux.org/man/sssctl.8.en">sssctl</a>.</p>
+</li>
+<li>
+<p><code>libnss-sss</code>: Instala a librería de NSS que lle permite comunicarse con sssd.</p>
+</li>
+<li>
+<p><code>libpam-sss</code>: Instala a librería de PAM que lle permite comunicarse con sssd.</p>
+</li>
+<li>
+<p><code>adcli</code>: Permite unir á máquina local ao dominio.</p>
+</li>
+<li>
+<p><code>realmd</code>: Permite unir á máquina local ao dominio con adcli e configura sssd.</p>
+</li>
+<li>
+<p><code>pakcagekit</code>: Ferramenta que permite administrar paquetes usada por realmd.</p>
+</li>
+</ul>
+<p>Para instalar os paquetes executamos:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo apt update &amp;&amp; sudo apt install -y sssd sssd-tools adcli libnss-sss libpam-sss realmd packagekit</code></pre></div>
+</div>
+<figcaption>
+Instalación de paquetes para unirse ao dominio
+</figcaption>
+</figure>
+<p>
+Unha vez temos instalados os paquetes podemos proceder a unir a nosa máquina ao
+dominio. Depende de como estea configurado o dominio, isto pódese facer con
+calquera usuaria ou so con contas de administradora. No meu caso fareino coa
+conta de Administador:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo realm join --user=Administrator dev.lab</code></pre></div>
+</div>
+<figcaption>
+Comando para unir ao dominio a máquina
+</figcaption>
+</figure>
+<p>
+Se todo sae ben o comando debería preguntar polo contrasinal da usuaria e non
+producir ningunha  outra saída. Podemos comprobar que estamos unidos ao dominio
+con <code>sssctl</code> ou <code>realm</code>:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo sssctl domain-list
+dev.lab
+$ sudo realm list
+dev.lab
+  type: kerberos
+  realm-name: DEV.LAB
+  domain-name: dev.lab
+  configured: kerberos-member
+  server-software: active-directory
+  client-software: sssd
+  required-package: sssd-tools
+  required-package: sssd
+  required-package: libnss-sss
+  required-package: libpam-sss
+  required-package: adcli
+  required-package: samba-common-bin
+  login-formats: %U@dev.lab
+  login-policy: allow-realm-logins</code></pre></div>
+</div>
+<figcaption>
+sssctl e realm amosando o dominio actual
+</figcaption>
+</figure>
+<p>
+Unha vez completamos a union ao dominio é hora de indicarlle a PAM que use sssd
+tamén como método de autenticación. Para iso necesitamos executar
+<code>pam-auth-update</code> e seleccionar &#34;SSS authentication&#34;. Ademais, se queremos que
+as usuarias de dominio teñan o seu propio directorio de usuaria, hai que
+seleccionar tamén &#34;Create home directory on login&#34;:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo pam-auth-update</code></pre></div>
+</div>
+<p>
+Debería quedar algo coma isto:</p>
+<figure>
+<img src="./pam-update-screenshot.png" alt="./pam-update-screenshot.png" title="./pam-update-screenshot.png" /><figcaption>
+pam-auth-update para usar sss e crear directorio de usuaria
+</figcaption>
+</figure>
+<p>
+Con isto feito deberíamos poder iniciar sesión con usuarias de dominio na
+máquina. Podemos facer a proba dende outra máquina:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ssh Administrator@dev.lab@lab-debian12
+Administrator@dev.lab@192.168.122.165&#39;s password: 
+Linux debian12-base 6.1.0-23-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.99-1 (2024-07-15) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Sun Aug 18 17:48:53 2024 from 192.168.122.137
+administrator@dev.lab@lab-debian12:~$</code></pre></div>
+</div>
+<figcaption>
+Inicio de sesión dunha usuaria de dominio con ssh
+</figcaption>
+</figure>
+<p>
+E finalmente podemos iniciar sesión cas usuarias de dominio!! Con isto estaría o
+mais básico, pero se queres seguir lendo vou configurar algunha cousiña mais que
+nos pode ser útil.</p>
+</div>
+</div>
+<div id="outline-container-autenticando-so-co-nome-de-usuaria-sen-o-dominio" class="outline-2">
+<h2 id="autenticando-so-co-nome-de-usuaria-sen-o-dominio">
+Autenticando so co nome de usuaria, sen o dominio
+</h2>
+<div id="outline-text-autenticando-so-co-nome-de-usuaria-sen-o-dominio" class="outline-text-2">
+<p>
+Unha cousa que pode facilitarnos a vida é non ter que especificar o
+dominio no login de usuarias de dominio, polo que &#34;Administrator@dev.lab&#34;
+quedaría en &#34;Administrator&#34;. No caso de ssh pasaríamos de:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ssh Administrator@dev.lab@lab-debian12</code></pre></div>
+</div>
+<p>
+a usar so o nome de usuaria:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ssh Administrator@lab-debian12</code></pre></div>
+</div>
+<p>
+Para facer iso debemos indicarlle a sssd que por defecto queremos usar o noso
+dominio como sufixo para as usuarias. Isto podemos facelo engadindo unha
+directiva <code>default_domain_suffix</code> en <code>/etc/sssd/sssd.conf</code> como a seguinte:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo head -6 /etc/sssd/sssd.conf
+
+[sssd]
+domains = dev.lab
+config_file_version = 2
+services = nss, pam
+default_domain_suffix = dev.lab</code></pre></div>
+</div>
+<figcaption>
+sssd.conf con default_domain_suffix
+</figcaption>
+</figure>
+<p>
+E logo reiniciamos <code>sssd</code>:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo systemctl restart sssd</code></pre></div>
+</div>
+<p>
+Unha vez temos iso configurado podemos facer ssh so co nome de usuaria:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ssh Administrator@lab-debian12
+Administrator@192.168.122.165&#39;s password: 
+Linux debian12-base 6.1.0-23-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.99-1 (2024-07-15) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Sun Aug 18 18:07:39 2024 from 192.168.122.137
+administrator@dev.lab@lab-debian12:~$</code></pre></div>
+</div>
+<p>
+Perfecto!! Agora xa podemos aforrarnos 2 segundos de escribir o dominio e
+gastalo no que queiramos. Non é moito, pero por algo se comeza.</p>
+</div>
+</div>
+<div id="outline-container-integrar-grupos-de-dominio-en-sudo" class="outline-2">
+<h2 id="integrar-grupos-de-dominio-en-sudo">
+Integrar grupos de dominio en sudo
+</h2>
+<div id="outline-text-integrar-grupos-de-dominio-en-sudo" class="outline-text-2">
+<p>
+Outra cousa que nos pode interesar é poder usar <strong>sudo</strong> con usuarias de
+dominio. En concreto eu vou tentar replicar o comportamento dos administradores
+de dominio nas máquinas Windows. Por defecto o grupo &#34;Domain Admins&#34; é
+privilexiado en tódalas máquinas Windows. En GNU/Linux para acadar un efecto
+semellante o que podemos facer e concederlle execución con <code>sudo</code> a dito grupo. </p>
+<p>
+Para iso podemos engadir unha regla coma a seguinte en <code>/etc/sudoers</code>:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo cat /etc/sudoers | grep domain
+&#34;%domain admins@dev.lab&#34; ALL=(ALL) ALL</code></pre></div>
+</div>
+<p>
+Unha vez engadida, deberíamos ser quen de executar <code>sudo</code> sen restriccións coa
+usuaria <code>Administrator</code>:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">administrator@dev.lab@lab-debian12:~$ sudo id
+uid=0(root) gid=0(root) groups=0(root)</code></pre></div>
+</div>
+<p>
+A outra posibilidade que temos é obter as reglas para sudo dende o Controlador
+de Dominio a maiores das que hai en <code>/etc/sudoers</code>. Para isto precisamos que
+interveña sssd, polo que instalaremos o paquete <code>libsss-sudo</code>:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo apt update &amp;&amp; sudo apt install -y libsss-sudo</code></pre></div>
+</div>
+<figcaption>
+Instalación de libsss-sudo
+</figcaption>
+</figure>
+<p>
+Despois da instalación veremos que o ficheiro <code>/etc/nsswitch.conf</code> amosa o uso
+de sss para sudoers:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /etc/nsswitch.conf | grep sudoers
+sudoers: files  sss</code></pre></div>
+</div>
+<figcaption>
+Configuración de nss para obter as reglas de sudo
+</figcaption>
+</figure>
+<p>
+Por outro lado, temos que configurar <code>sssd</code> para que use o módulo de
+sudo. Facemos isto engadindo <code>sudo</code> na clausula <code>services</code> de
+<code>/etc/sssd/sssd.conf</code>. Quedaría algo coma isto:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo cat /etc/sssd/sssd.conf | grep services
+services = nss, pam, sudo</code></pre></div>
+</div>
+<figcaption>
+sssd configurado para usar sudo
+</figcaption>
+</figure>
+<p>
+Con esta configuración <code>sssd</code> buscará as regras de sudo dentro da base de datos
+de Active Directory (mediante LDAP). Polo tanto, ditas regras deben ser
+introducidas na base de datos de de Active Directory, pero iso queda fora do
+alcance deste post, que eu estou configurando Debian, non Active Directory. Mais
+podes consultar o seguinte recurso (eu non o probei):</p>
+<ul>
+<li>
+<p><a href="https://noobient.com/2015/11/02/integrating-ubuntu-with-active-directory/#Sudo">Integrating Ubuntu with Active Directory: Sudo</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-montar-carpetas-compartidas-no-sistema" class="outline-2">
+<h2 id="montar-carpetas-compartidas-no-sistema">
+Montar carpetas compartidas no sistema
+</h2>
+<div id="outline-text-montar-carpetas-compartidas-no-sistema" class="outline-text-2">
+<p>
+Outra cousa que pode ser moi interesante e útil á hora de unir unha máquina a
+Active Directory e montar as carpetas compartidas, usando SMB, que se poden
+atopar en distintos servidores (e nalguna que outra computadora persoal).</p>
+<p>
+Imos ver varias ferramentas que nos poden axudar en diferentes situacións.</p>
+<div id="outline-container-explorando-carpetas-compartidas-con-smbclient" class="outline-3">
+<h3 id="explorando-carpetas-compartidas-con-smbclient">
+Explorando carpetas compartidas con smbclient
+</h3>
+<div id="outline-text-explorando-carpetas-compartidas-con-smbclient" class="outline-text-3">
+<p>
+Unha das nosas opcións é <code>smbclient</code>, o cliente de consola de Samba. O primeiro
+é instalalo:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo apt install smbclient</code></pre></div>
+</div>
+<figcaption>
+Instalación de smbclient
+</figcaption>
+</figure>
+<p>
+Unha vez instalado, temos que indicarlle a nosa configuración no ficheiro
+<code>/etc/samba/smb.conf</code>. Para que funcione no meu dominio, eu usei as seguintes
+opcións:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">workgroup = DEV
+client signing = yes
+realm = DEV.LAB</code></pre></div>
+</div>
+<figcaption>
+Configuración de /etc/samba/smb.conf
+</figcaption>
+</figure>
+<p>
+Para darche un pouco de contexto, isto é o que ven a significar cada opción:</p>
+<ul>
+<li>
+<p>workgroup : É o nome do dominio en formato NetBIOS, que é un protocolo usado,
+entre outras cousas, para as direccións IP das máquinas na rede local. Para
+sacar o nome de netbios podemos usar <code>ldapsearch -LLL -H ldap://dc01.dev.lab
+-b &#39;DC=dev,DC=lab&#39;  &#39;(objectClass=domain)&#39; name 2&gt;/dev/null | grep name:</code>, pero
+ten en conta que tes que polo en maiúsculas.</p>
+</li>
+<li>
+<p>realm: O nome de dominio en formato DNS.</p>
+</li>
+<li>
+<p>client signing: Para habilitar o firmado nas comunicacións.</p>
+</li>
+</ul>
+<p>
+A pesares de que smbclient pode utilizar kerberos, non
+din feito para que me detectase os tickets por defecto, xa que se o executo,
+pregúntame polo contrasinal da usuaria:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">administrator@dev.lab@lab-debian12:~$ smbclient -L dc01.dev.lab
+Password for [Administrator@DEV.LAB]:</code></pre></div>
+</div>
+<figcaption>
+smbclient pedindo o contrasinal
+</figcaption>
+</figure>
+<p>
+Non está mal porque o comando funciona, quero dicir que a autenticación está
+integrada con AD, pero o ideal sería usar os tickets de Kerberos que por defecto
+temos no ficheiro indicado por <code>$KRB5CCNAME</code>. Afortunadamente, para iso podemos
+usar o parámetro <code>--use-krb5-ccache=$KRB5CCNAME</code> a <code>sbmclient</code>. Mais andar a
+pasarlle este parámetro se o usamos moitas veces pode ser un peñazo, así que o
+que podemos facer para solucionalo é crear o seguinte alias:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">alias smbclient=&#39;smbclient --use-krb5-ccache=$KRB5CCNAME&#39;</code></pre></div>
+</div>
+<figcaption>
+Alias para que smbclient use os nosos tickets de Kerberos
+</figcaption>
+</figure>
+<p>
+Deste xeito, o comando usaría os tickets. Porén, eu nestes exemplos vouno
+usar indicándolle o parámetro explícito para que me quede mais didáctico.</p>
+<p>
+O tema é que podemos executar smbclient do seguinte xeito para obter un listado
+das carpetas compartidas do servidor que lle indiquemos (se temos permiso e
+conectividade claro):</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">administrator@dev.lab@lab-debian12:~$ smbclient --use-krb5-ccache=$KRB5CCNAME -L dc01.dev.lab
+
+	Sharename       Type      Comment
+	---------       ----      -------
+	ADMIN$          Disk      Remote Admin
+	C$              Disk      Default share
+	IPC$            IPC       Remote IPC
+	NETLOGON        Disk      Logon server share 
+	SYSVOL          Disk      Logon server share 
+SMB1 disabled -- no workgroup available</code></pre></div>
+</div>
+<figcaption>
+Listado de carpetas compartidas dun servidor
+</figcaption>
+</figure>
+<p>
+Unha vez temos listadas as carpetas compartidas, podemos exploralas tamén con <code>smbclient</code>:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">administrator@dev.lab@lab-debian12:~$ smbclient --use-krb5-ccache=$KRB5CCNAME \\\\dc01.dev.lab\\SYSVOL
+Try &#34;help&#34; to get a list of possible commands.
+smb: \&gt; ls
+  .                                   D        0  Mon Sep 25 10:23:21 2023
+  ..                                  D        0  Mon Sep 25 10:23:21 2023
+  dev.lab                            Dr        0  Mon Sep 25 10:23:21 2023
+
+		18221567 blocks of size 4096. 12979219 blocks available</code></pre></div>
+</div>
+<figcaption>
+Exploración da carpeta SYSVOL
+</figcaption>
+</figure>
+<p>
+Con isto podeste facer unha idea de cando usar <code>smbclient</code>. Mais se queres
+montar unha carpeta no equipo local temos outras alternativas. Pero antes de
+seguir gustaríame comentar un erro que tiven mentres facía probas, que é o
+seguinte:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">administrator@dev.lab@lab-debian12:~$ smbclient -L dc01.dev.lab --use-krb5-ccache=$KRB5CCNAME
+gse_get_client_auth_token: gss_init_sec_context failed with [ Miscellaneous failure (see text): FAST fast response is missing FX-FAST (cifs/dc01.dev.lab@DEV.LAB)](2529639059)
+gensec_spnego_client_negTokenInit_step: gse_krb5: creating NEG_TOKEN_INIT for cifs/dc01.dev.lab failed (next[(null)]): NT_STATUS_LOGON_FAILURE
+session setup failed: NT_STATUS_LOGON_FAILURE</code></pre></div>
+</div>
+<figcaption>
+Error de smbclient
+</figcaption>
+</figure>
+<p>
+A mensaxe de erro leva a equivocación, xa que no meu caso este erro foi
+provocado porque a miña máquina e o Controlador de Dominio (que é o que expede
+os tickets de Kerberos) non estaban sincronizados ca mesma hora. Unha vez
+axustado o reloxo todo funcionou correctamente.</p>
+</div>
+</div>
+<div id="outline-container-montar-carpeta-compartida-con-mount" class="outline-3">
+<h3 id="montar-carpeta-compartida-con-mount">
+Montar carpeta compartida con mount
+</h3>
+<div id="outline-text-montar-carpeta-compartida-con-mount" class="outline-text-3">
+<p>
+Inda que está moi ben explorar as carpetas compartidas con <code>smbclient</code>, noutras
+ocasións queremos traballar con elas coma se dunha carpeta local se
+tratase. Para estes casos é mellor montalas no noso sistema de ficheiros, para o
+que podemos usar o programa <a href="https://www.man7.org/linux/man-pages/man8/mount.8.html">mount</a>. Mais para traballar con carpetas SMB (ou
+CIFS, como era coñecido anteriormento) precisamos instalar o seguinte paquete:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo apt install cifs-utils</code></pre></div>
+</div>
+<figcaption>
+Instalación de paquete para usar SMB en mount
+</figcaption>
+</figure>
+<p>
+O paquete <code>cifs-utils</code> permíte a <code>mount</code> saber como montar sistemas de ficheiros
+SMB. Isto combinado ca opción <code>-o sec=krb5</code> que permite usar Kerberos para
+a autenticación, permítenos montar carpetas remotas con facilidade como se
+aprecia no seguinte exemplo:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">administrator@dev.lab@lab-debian12:~$ mkdir /tmp/SYSVOL
+administrator@dev.lab@lab-debian12:~$ sudo mount -t cifs -o sec=krb5 //dc01.dev.lab/SYSVOL /tmp/SYSVOL/
+administrator@dev.lab@lab-debian12:~$ ls /tmp/SYSVOL/
+dev.lab</code></pre></div>
+</div>
+<figcaption>
+Montando a carpeta SYSVOL en /tmp/SYSVOL
+</figcaption>
+</figure>
+<p>
+E xa temos a carpeta montada!! E lembra que <a href="https://www.man7.org/linux/man-pages/man8/mount.8.html">mount</a> tamén permite pasarlle opcións
+aos puntos de montaxe para facelos de so lectura, deshabilitar execución de
+binarios, etc. Podes ver consultar as opcións en <a href="https://www.man7.org/linux/man-pages/man8/mount.8.html">mount(8)</a>.</p>
+</div>
+</div>
+<div id="outline-container-montando-carpetas-compartidas-con-pam-mount" class="outline-3">
+<h3 id="montando-carpetas-compartidas-con-pam-mount">
+Montando carpetas compartidas con pam_mount
+</h3>
+<div id="outline-text-montando-carpetas-compartidas-con-pam-mount" class="outline-text-3">
+<p>
+Montar carpetas compartidas con <code>mount</code> está moi ben, pero as veces é mellor
+montar as carpetas automáticamente cando unha usuaria inicia sesión. Isto pódese
+facer co módulo <code>libpam-mount</code> de PAM, que podemos instalar co seguinte comando:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo apt install libpam-mount</code></pre></div>
+</div>
+<figcaption>
+Instalación do módulo de carpetas compartidas de PAM
+</figcaption>
+</figure>
+<p>
+E tras instalar o novo módulo temos que asegurarnos que PAM está configurado
+para habilitalo. Para iso executamos o seguinte comando:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo pam-auth-update</code></pre></div>
+</div>
+<figcaption>
+Actualizando a configuración de PAM
+</figcaption>
+</figure>
+<p>
+E comprobamos que a opción &#34;Mount volumes&#34; está seleccionada.</p>
+<p>
+Unha vez temos <code>libpam-mount</code>, podemos configurar as carpetas compartidas a montar
+no ficheiro <code>/etc/security/pam_mount.conf.xml</code> (si, xa sei que é unha merda que
+sexa XML). Para isto debemos engadir un elemento <code>volume</code> coma o seguinte:</p>
+<figure>
+<div class="src src-xml">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;volume</span> <span style="color:#a6e22e">fstype=</span><span style="color:#e6db74">&#34;cifs&#34;</span> 
+	<span style="color:#a6e22e">sgrp=</span><span style="color:#e6db74">&#34;domain users@dev.lab&#34;</span>
+	<span style="color:#a6e22e">server=</span><span style="color:#e6db74">&#34;dc01.dev.lab&#34;</span>
+	<span style="color:#a6e22e">path=</span><span style="color:#e6db74">&#34;SYSVOL&#34;</span>
+	<span style="color:#a6e22e">mountpoint=</span><span style="color:#e6db74">&#34;~/SYSVOL&#34;</span>
+	<span style="color:#a6e22e">options=</span><span style="color:#e6db74">&#34;vers=3.0,sec=krb5,cruid=%(USERUID),noexec,rw,nosuid,nodev&#34;</span>
+	<span style="color:#f92672">/&gt;</span></code></pre></div>
+</div>
+<figcaption>
+Configuración de volume para montar por libpam-mount
+</figcaption>
+</figure>
+<p>
+Aquí indicamos que os membros do grupo <code>domain users</code> do dominio <code>dev.lab</code> van
+montar o cartafol compartido <code>SYSVOL</code> no seu directorio persoal. O campo
+<code>options</code> correspóndese con opcións de <code>mount</code>. Ademais é importante engadir o
+<code>volume</code> despois do elemento <code>debug</code> por se fai falta depurar algo (como me fixo
+falta a mín).</p>
+<p>
+Unha vez o temos todo ao iniciar sesión cunha usuaria que pertence ao grupo
+indicado debería montarse a carpeta compartida:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">user@debdev:~$ ssh Administrator@lab-debian12 
+Administrator@192.168.122.165&#39;s password: 
+Linux lab-debian12 6.1.0-23-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.99-1 (2024-07-15) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Fri Aug 23 21:12:07 2024 from 192.168.122.137
+administrator@dev.lab@lab-debian12:~$ ls SYSVOL/
+dev.lab</code></pre></div>
+</div>
+<figcaption>
+Carpeta compartida montada ao iniciar sesión
+</figcaption>
+</figure>
+<p>
+E ahí temos o noso cartafol compartido montado!!</p>
+<p>
+Mais antes de terminar, vouche describir un problema que tiven coa esperanza de que
+che poida axudar. Mentres intentaba montar este cartafol compartido tiven
+problemas e costoume atopar como solucionalo, así que o deixo aquí escrito para
+aprender. Para depurar <code>pam_mount</code> podemos habilitar a opción
+<code>&lt;debug enable=&#34;1&#34;/&gt;</code> que ten que estar o mais arriba posible na configuración
+do ficheiro <code>/etc/security/pam_mount.conf.xml</code>. Unha vez habilitado, <code>pam_count</code>
+mostrará mensaxes pola saída de erro, que no caso de ssh podemos ver con:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ systemctl status sshd.service 
+● ssh.service - OpenBSD Secure Shell server
+     Loaded: loaded (/lib/systemd/system/ssh.service; enabled; preset: enabled)
+     Active: active (running) since Wed 2024-08-17 20:20:05 CEST; 16h ago
+       Docs: man:sshd(8)
+             man:sshd_config(5)
+    Process: 512 ExecStartPre=/usr/sbin/sshd -t (code=exited, status=0/SUCCESS)
+   Main PID: 518 (sshd)
+      Tasks: 1 (limit: 2315)
+     Memory: 19.4M
+        CPU: 2.608s
+     CGroup: /system.slice/ssh.service
+             └─518 &#34;sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups&#34;
+
+Aug 18 12:30:52 lab-debian12 sshd[8045]: (pam_mount.c:660): done opening session (ret=0)
+Aug 18 12:30:53 lab-debian12 sshd[8045]: pam_env(sshd:session): deprecated reading of user environment &gt;
+Aug 18 12:31:34 lab-debian12 sshd[8070]: Accepted publickey for user from 192.168.122.136 port 43494 ss&gt;
+Aug 18 12:31:34 lab-debian12 sshd[8070]: pam_unix(sshd:session): session opened for user user(uid=1000)&gt;
+Aug 18 12:31:34 lab-debian12 sshd[8070]: (pam_mount.c:568): pam_mount 2.19: entering session stage
+Aug 18 12:31:34 lab-debian12 sshd[8070]: (pam_mount.c:629): no volumes to mount
+Aug 18 12:31:34 lab-debian12 sshd[8070]: command: &#39;pmvarrun&#39; &#39;-u&#39; &#39;user&#39; &#39;-o&#39; &#39;1&#39;
+Aug 18 12:31:34 lab-debian12 sshd[8070]: (pam_mount.c:441): pmvarrun says login count is 4
+Aug 18 12:31:34 lab-debian12 sshd[8070]: (pam_mount.c:660): done opening session (ret=0)</code></pre></div>
+</div>
+<p>
+Podemos observar o erro <code>(pam_mount.c:629): no volumes to mount</code> que no meu caso
+debeuse a que na opción de <code>volume</code> estaba especificando o grupo
+<code>sgrp=&#34;domain users&#34;</code> no canto de <code>sgrp=&#34;domain users@dev.lab&#34;</code> e non me estaba
+recoñecendo á usuaria como membro do grupo. Unha vez mudei a opción
+solucionouse o problema.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-conclusion" class="outline-2">
+<h2 id="conclusion">
+Conclusión
+</h2>
+<div id="outline-text-conclusion" class="outline-text-2">
+<p>
+Neste artigo fixemos un repaso de como unir unha máquina Debian a un entorno
+Active Directory. Espero que che sexa útil.</p>
+<p>
+Veña vémonos!!</p>
+</div>
+</div>
+<div id="outline-container-referencias" class="outline-2">
+<h2 id="referencias">
+Referencias
+</h2>
+<div id="outline-text-referencias" class="outline-text-2">
+<ul>
+<li>
+<p>Pierre Blazquez. &#34;<strong>How-To: Join Debian 12 to an Active Directory Domain</strong>&#34;.
+Pierre Blazquez blog, 02 Feb, 2024, <a href="https://www.pierreblazquez.com/2024/02/04/how-to-join-debian-12-to-an-active-directory-domain/">https://www.pierreblazquez.com/2024/02/04/how-to-join-debian-12-to-an-active-directory-domain/</a></p>
+</li>
+<li>
+<p>noobient. &#34;<strong>Integrating Ubuntu with Active Directory</strong>&#34;. noobient blog, 02 Nov,
+2015, <a href="https://noobient.com/2015/11/02/integrating-ubuntu-with-active-directory/">https://noobient.com/2015/11/02/integrating-ubuntu-with-active-directory/</a></p>
+</li>
+<li>
+<p>Matei Cezar. &#34;<strong>Integrate Ubuntu to Samba4 AD DC with SSSD and Realm – Part
+15</strong>&#34;. Tecmint, 27 Nov, 2017, <a href="https://www.tecmint.com/integrate-ubuntu-to-samba4-ad-dc-with-sssd-and-realm/">https://www.tecmint.com/integrate-ubuntu-to-samba4-ad-dc-with-sssd-and-realm/</a></p>
+</li>
+</ul>
+</div>
+</div>
+
+
+        
+          <div class="blog-tags">
+            
+              <a href="https://hackliza.gal//tags/linux/">linux</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/gnu/">gnu</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/ad/">ad</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/debian/">debian</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="https://hackliza.gal/posts/cambiar_dns_linux/" data-toggle="tooltip" data-placement="top" title="Que demo pasa co meu DNS? Descubrindo e configurando demos de rede">&larr; Artigo anterior</a>
+            </li>
+          
+          
+            <li class="next">
+              <a href="https://hackliza.gal/posts/keydump/" data-toggle="tooltip" data-placement="top" title="Volcado de keyrings con Keydump: Extraendo credenciais en claro de SSSD">Artigo siguiente &rarr;</a>
+            </li>
+          
+        </ul>
+      
+
+
+      
+        
+          
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hackliza" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+          
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://github.com/hackliza" title="GitHub">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/hackliza" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2024
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="https://hackliza.gal/">Hackliza</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.74.3</a> alimentada &nbsp;&bull;&nbsp; Tema <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adaptado de <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="https://hackliza.gal/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://hackliza.gal/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

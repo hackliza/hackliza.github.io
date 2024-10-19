@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>How to join Debian to Active Directory - Hackliza</title>
+  <meta name="description" content="Hi people, in this article I&#39;m going to show how to join a GNU/Linux machine, specifically a Debian one, to an Active Directory environment.I know, I know, Active Directory (AD) is a commercial tool from the evil Microsoft, but we need to admit that is the most used tool in the market.
+ However, not because we are in a Microsoft environment we need to use Windows, even if that&#39;s what they would like."><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Hackliza",
+    
+    "url": "https:\/\/hackliza.gal\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "https:\/\/hackliza.gal\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/en\/posts\/linux-en-ad\/",
+          "name": "How to join debian to active directory"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Eloy Pérez González"
+  },
+  "headline": "How to join Debian to Active Directory",
+  "description" : "Hi people, in this article I\u0026#39;m going to show how to join a GNU\/Linux machine, specifically a Debian one, to an Active Directory environment.I know, I know, Active Directory (AD) is a commercial tool from the evil Microsoft, but we need to admit that is the most used tool in the market.\n However, not because we are in a Microsoft environment we need to use Windows, even if that\u0026#39;s what they would like.",
+  "inLanguage" : "en",
+  "wordCount":  4374 ,
+  "datePublished" : "2024-08-29T00:00:00",
+  "dateModified" : "2024-08-29T00:00:00",
+  "image" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+  "keywords" : [ "linux, gnu, ad, debian" ],
+  "mainEntityOfPage" : "https:\/\/hackliza.gal\/en\/posts\/linux-en-ad\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "https:\/\/hackliza.gal\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="How to join Debian to Active Directory" />
+<meta property="og:description" content="Hi people, in this article I&#39;m going to show how to join a GNU/Linux machine, specifically a Debian one, to an Active Directory environment.I know, I know, Active Directory (AD) is a commercial tool from the evil Microsoft, but we need to admit that is the most used tool in the market.
+ However, not because we are in a Microsoft environment we need to use Windows, even if that&#39;s what they would like.">
+<meta property="og:image" content="https://hackliza.gal/img/hackliza.png" />
+<meta property="og:url" content="https://hackliza.gal/en/posts/linux-en-ad/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hackliza" />
+
+  <meta name="twitter:title" content="How to join Debian to Active Directory" />
+  <meta name="twitter:description" content="Hi people, in this article I&#39;m going to show how to join a GNU/Linux machine, specifically a Debian one, to an Active Directory environment.I know, I know, Active Directory (AD) is a commercial …">
+  <meta name="twitter:image" content="https://hackliza.gal/img/hackliza.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@hackliza" />
+  <meta name="twitter:creator" content="@hackliza" />
+  <link href='https://hackliza.gal/img/hackliza.png' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.74.3" />
+  <link rel="alternate" href="https://hackliza.gal/en/index.xml" type="application/rss+xml" title="Hackliza"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://hackliza.gal/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="https://hackliza.gal/css/syntax.css" /><link rel="stylesheet" href="https://hackliza.gal/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><style>
+ nav {
+     background: #0099CC !important;
+ }
+
+ .navbar-brand, #main-navbar ul li a, footer {
+     color: #fff !important;
+ }
+
+ .navbar-brand:hover, #main-navbar ul li a:hover {
+     color: #ccc !important;
+ }
+
+
+ figure {
+     margin-top: 1.5em; 
+     margin-bottom: 1.5em; 
+ }
+ 
+ figcaption {
+     text-align: center;
+     font-size: 85%;
+ }
+
+ pre {
+     overflow-x: auto !important;
+ }
+
+ .posts-heading {
+     text-align: center;
+ }
+ 
+</style>
+
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://hackliza.gal/en/">Hackliza</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blog" href="/en/">Blog</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="About" href="/en/about/">About</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Talks" href="/en/talks/">Talks</a>
+            </li>
+          
+        
+
+        
+          
+            <li>
+              
+                
+              
+                
+                  <a href="/gl" lang="gl">gl</a>
+                
+              
+            </li>
+          
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Hackliza" href="https://hackliza.gal/en/">
+            <img class="avatar-img" src="https://hackliza.gal/img/hackliza.png" alt="Hackliza" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>How to join Debian to Active Directory</h1>
+              
+              
+                <hr class="small">
+              
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        
+<p>
+Hi people, in this article I&#39;m going to show how to join a GNU/Linux machine,
+specifically a Debian one, to an Active Directory environment.I know, I know,
+Active Directory (AD) is a commercial tool from the evil Microsoft, but we need
+to admit that is the most used tool in the market.</p>
+<p>
+However, not because we are in a Microsoft environment we need to use Windows,
+even if that&#39;s what they would like. So, in this post I&#39;m going to describe how
+GNU/Linux can be joined to Active Directory. Same principles should be applied
+when using other directory services, like <a href="https://www.freeipa.org/page/Main_Page">FreeIPA</a> or a pure <a href="https://gl.wikipedia.org/wiki/LDAP">LDAP</a> service.</p>
+<p>
+I would like you to note that I&#39;m going to use examples from my lab domain, so
+you will need to adapt them in order to your environment. This is my data:</p>
+<ul>
+<li>
+<p>Domain: <code>dev.lab</code></p>
+</li>
+<li>
+<p>Domain Administrator: <code>Administrator</code></p>
+</li>
+<li>
+<p>Domain Controller: <code>dc01.dev.lab</code> - <code>192.168.122.135</code></p>
+</li>
+</ul>
+<p>Once we are aware of this, let&#39;s go to the topic.</p>
+<div id="outline-container-resolving-domain-with-dns" class="outline-2">
+<h2 id="resolving-domain-with-dns">
+Resolving domain with DNS
+</h2>
+<div id="outline-text-resolving-domain-with-dns" class="outline-text-2">
+<p>
+First thing on the list is to be able to resolve our domain by using
+DNS. Therefore, our easier option is to establish as DNS server our Domain
+Controller (DC), which is the machine were the directory database is stored and
+the one that provides the services for the directory, like DNS.</p>
+<blockquote>
+<p>There can be several Domain Controllers in an Active Directory environment, but
+pick one of them as our DNS server is enough. Maybe two in case you want a
+backup DNS server.</p>
+</blockquote>
+<p>
+My DC IP is <code>192.168.122.135</code>. First, I want check that I have conectivity to
+it, with a ping command (in case we want to be extrasure, we can use <a href="https://linux.die.net/man/1/nc">netcat</a> or
+<a href="https://nmap.org/">nmap</a> to check we can reach the 53/UDP port, used by DNS):</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ping -c4 192.168.122.135
+PING 192.168.122.135 (192.168.122.135) 56(84) bytes of data.
+64 bytes from 192.168.122.135: icmp_seq=1 ttl=128 time=0.645 ms
+64 bytes from 192.168.122.135: icmp_seq=2 ttl=128 time=0.600 ms
+64 bytes from 192.168.122.135: icmp_seq=3 ttl=128 time=0.563 ms
+64 bytes from 192.168.122.135: icmp_seq=4 ttl=128 time=0.659 ms
+
+--- 192.168.122.135 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3061ms
+rtt min/avg/max/mdev = 0.563/0.616/0.659/0.037 ms</code></pre></div>
+</div>
+<figcaption>
+Ping to Domain Controller
+</figcaption>
+</figure>
+<p>
+Once we are sure we can connect, we must add the DC as DNS server. In my case
+I&#39;m going to add it to the <a href="https://linux.die.net/man/5/dhclient.conf">/etc/dhcp/dhclient.conf</a> file so <a href="https://linux.die.net/man/8/dhclient">dhclient</a> will include
+it into <a href="https://www.man7.org/linux/man-pages/man5/resolv.conf.5.html">/etc/resolv.conf</a>, which is the file used by GNU/Linux (specifically by
+the <a href="https://www.man7.org/linux/man-pages/man7/libc.7.html">libc</a>) to retrieve the DNS servers.</p>
+<blockquote>
+<p>Maybe in your case <code>dhclient</code> is not on charge of DNS configuration, so you need
+to discover which program is. The usual alternatives are NetworkManager and
+systemd-resolved. You can check our article <a href="https://hackliza.gal/en/posts/cambiar_dns_linux/">Who is messing with my DNS?</a> to
+properly configure your DNS.</p>
+</blockquote>
+<p>
+The commands to add my DC as DNS server would be the following:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ echo &#34;prepend domain-name-servers 192.168.122.135;&#34; | sudo tee -a /etc/dhcp/dhclient.conf
+prepend domain-name-servers 192.168.122.135;</code></pre></div>
+</div>
+<figcaption>
+Setting Domain Controller as DNS server
+</figcaption>
+</figure>
+<p>
+Besides in order to make easier to find domain machines, I want that when I
+specified a hostname, it is searched inside my domain. Therefore, I&#39;m going to
+add my domain as the default to search for in case I introduce a machine name
+without the domain part:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ echo &#39;prepend domain-search &#34;dev.lab&#34;;&#39; | sudo tee -a /etc/dhcp/dhclient.conf
+prepend domain-search &#34;dev.lab&#34;;</code></pre></div>
+</div>
+<figcaption>
+Setting my domain as the default for searchs
+</figcaption>
+</figure>
+<p>
+And finally we restart the service so the new configuration is applied:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo systemctl restart ifup@enp1s0.service</code></pre></div>
+</div>
+<figcaption>
+Network daemon reboot
+</figcaption>
+</figure>
+<p>
+Be aware the <code>ifup</code> service, that spawns <code>dhclient</code>, is given the network
+interface as a parameter, which is <code>enp1s0</code> in my case, but it may differ in
+your machine.</p>
+<p>
+Next, we can try to resolve our domain to be sure our DC was properly included
+as DNS server:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /etc/resolv.conf
+search dev.lab.
+nameserver 192.168.122.135
+nameserver 192.168.122.1
+$ host dev.lab
+dev.lab has address 192.168.122.135</code></pre></div>
+</div>
+<figcaption>
+DNS resolution of our domain
+</figcaption>
+</figure>
+<p>
+We also check that the domain machine names is resolved even if we don&#39;t specify
+the domain part:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ host dc01.dev.lab
+dc01.dev.lab has address 192.168.122.135
+$ host dc01
+dc01.dev.lab has address 192.168.122.135</code></pre></div>
+</div>
+<figcaption>
+Machine names DNS resolution
+</figcaption>
+</figure>
+</div>
+</div>
+<div id="outline-container-a-bit-of-theory-the-connection-components" class="outline-2">
+<h2 id="a-bit-of-theory-the-connection-components">
+A bit of theory: The connection components
+</h2>
+<div id="outline-text-a-bit-of-theory-the-connection-components" class="outline-text-2">
+<p>
+Now we got conectivity with the domain, we need to install all the libraries and
+tools that implement the different protocols that allow our machine to interact
+with the Domain Controllers.</p>
+<p>
+However, before install them, I would like to share a bit of theory, so we can
+understand the different parts that are involved in the Active Directory
+integration.</p>
+<div id="outline-container-active-directory-protocols" class="outline-3">
+<h3 id="active-directory-protocols">
+Active Directory protocols
+</h3>
+<div id="outline-text-active-directory-protocols" class="outline-text-3">
+<div id="outline-container-dns" class="outline-4">
+<h4 id="dns">
+DNS
+</h4>
+<div id="outline-text-dns" class="outline-text-4">
+<p>
+We already mess with this one. <a href="https://gl.wikipedia.org/wiki/Domain_Name_System">DNS</a> (Domain Name System) is a very important
+protocol used to get the IPs of the domain machines. For our domain, the main
+DNS authority are the Domain Controllers.</p>
+<p>
+Any tool we use will resolve the DNS names without us to worry about it, but in
+case we want to explicitly get the IP of a machine, we can use utilities like
+<a href="https://linux.die.net/man/1/host">host</a>, <a href="https://linux.die.net/man/1/nslookup">nslookup</a> or <a href="https://linux.die.net/man/1/dig">dig</a>:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ host dc01.dev.lab
+dc01.dev.lab has address 192.168.122.135</code></pre></div>
+</div>
+<figcaption>
+Domain machines name resolution
+</figcaption>
+</figure>
+</div>
+</div>
+<div id="outline-container-kerberos" class="outline-4">
+<h4 id="kerberos">
+Kerberos
+</h4>
+<div id="outline-text-kerberos" class="outline-text-4">
+<p>
+<a href="https://en.wikipedia.org/wiki/Kerberos_(protocol)">Kerberos</a> is an protocol for remote authentication. It is based in tokens called
+<strong>tickets</strong>, that the Domain Controller dispenses when an user authenticates with
+her username and password. Afterwards, tickets can be presented to other domain
+machines in order to authenticate the user.</p>
+<p>
+There are two <strong>tickets</strong> types:</p>
+<ul>
+<li>
+<p><strong>TGT</strong> (Ticket Granting Ticket): Is the ticket returned to an user when she
+authenticates with her username and password against the Domain Controller. It
+can be used to ask for tickets for the services, known as ST, without typing
+the password again.</p>
+</li>
+</ul>
+<figure>
+<pre class="example">
+                                                .---.
+    _____                                      /   /|
+   |     |   &gt;----Username and password---&gt;   .---. |
+   |_____|                                    |   | &#39;
+   /:::::/   &lt;--------------TGT-----------&lt;   |   |/ 
+  client                                     &#39;---&#39;  
+                                                DC
+</pre>
+<figcaption>
+TGT retrieval
+</figcaption>
+</figure>
+<ul>
+<li>
+<p><strong>ST</strong> (Service Ticket): Is a ticket for an specific service, like SMB (also
+known as CIFS) or LDAP. The ST is retrieved from the Domain Controller when a
+TGT is presented.</p>
+</li>
+</ul>
+<figure>
+<pre class="example">
+                                          .---.
+    _____                                /   /|
+   |     |   &gt;----------TGT---------&gt;   .---. |
+   |_____|                              |   | &#39;
+   /:::::/   &lt;------ST for CIFS-----&lt;   |   |/ 
+  client                               &#39;---&#39;  
+    ^  v                                 DC
+    |  |
+    |  |                          .---. 
+    |  &#39;-----ST for CIFS------&gt;  /   /|                                          
+    |                           .---. | 
+    &#39;-------shared folder-----&lt; |   | &#39;                                          
+                                |   |/  
+                                &#39;---&#39;   
+                            SMB/CIFS server
+</pre>
+<figcaption>
+ST retrieval and use
+</figcaption>
+</figure>
+<p>
+Tickets are used to avoid users being constantly asked by their passwords, which
+can be annoying, every time a new connection to a machine is made. Besides,
+tickets can include security information for the upper protocols like as if they
+must <strong>sign or encrypt</strong> the messages. Lastly, tickets can also include
+information about the users, such as the <strong>user groups</strong>, in a struct known as PAC
+(Privilege Attribute Certificate).</p>
+<p>
+Kerberos is protocol that is well integrated with other protocolos as SMB or
+LDAP, so is not usual to directly interact with it. However, the Debian
+<code>krb5-user</code> package includes several tools to request and list our current
+tickets, as in the following example:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ klist
+Ticket cache: FILE:/tmp/krb5cc_1190600500_fwQbdO
+Default principal: Administrator@DEV.LAB
+
+Valid starting       Expires              Service principal
+08/22/2024 20:32:19  08/23/2024 06:32:19  krbtgt/DEV.LAB@DEV.LAB
+	renew until 08/23/2024 20:32:19
+08/22/2024 20:32:20  08/23/2024 06:32:19  cifs/dc01.dev.lab@
+	renew until 08/23/2024 20:32:19
+	Ticket server: cifs/dc01.dev.lab@DEV.LAB</code></pre></div>
+</div>
+<figcaption>
+klist listing current session Kerberos tickets
+</figcaption>
+</figure>
+<p>
+In this case we can observe two tickets, the one for <code>krbtgt/DEV.LAB@DEV.LAB</code>
+which allow us to know that is a TGT, and the one for <code>cifs/dc01.dev.lab</code> that
+we know is for the SMB/CIFS service which allows an user to access shared
+folders in the remote system. Knowing the tickets in our current session can
+useful for troubleshooting.</p>
+</div>
+</div>
+<div id="outline-container-ldap" class="outline-4">
+<h4 id="ldap">
+LDAP
+</h4>
+<div id="outline-text-ldap" class="outline-text-4">
+<p>
+<a href="https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol">LDAP</a> is a commonly used protocol in directory services. It allows to query the
+directory database so you can retrieve and modify the entities, like users or
+computers. You may think of LDAP as the SQL of directory services.</p>
+<p>
+In the specific case of Active Directory, LDAP uses Kerberos under the hood to
+authenticate users when a new connection with the Domain Controller is
+established.</p>
+<p>
+The open source implementation of LDAP is OpenLDAP, which is included in the
+<code>libldap-&lt;version&gt;</code> package, which is a dependency for many other packages
+related with the protocol. In addition, if we want to query the directory
+database, we can use tools like <code>ldapsearch</code> from the <code>ldap-utils</code> package.</p>
+<p>
+Here is an example of domain computers enumeration:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ldapsearch -H ldap://dc01.dev.lab -b &#39;DC=dev,DC=lab&#39;  &#39;(objectClass=computer)&#39; name 2&gt;/dev/null | grep name:
+name: DC01
+name: DEBIAN12</code></pre></div>
+</div>
+<figcaption>
+Listing domain computers with ldapsearch
+</figcaption>
+</figure>
+</div>
+</div>
+<div id="outline-container-samba-smb" class="outline-4">
+<h4 id="samba-smb">
+Samba/SMB
+</h4>
+<div id="outline-text-samba-smb" class="outline-text-4">
+<p>
+<a href="https://linux.die.net/man/7/samba">Samba</a> is the free implementation of <a href="https://en.wikipedia.org/wiki/Server_Message_Block">SMB</a>, which is a common protocol to share
+folders in Windows environments, including Active Directory.</p>
+<blockquote>
+<p>Apart from SMB, it is common to use the name CIFS to refer to the same protocol,
+even if CIFS was a previous protocol of SMB (same situation as SSL and
+TLS). Actually, the SMB service of Active Directory is called CIFS.</p>
+</blockquote>
+<p>
+As I mentioned previously, SMB uses Kerberos under the hood as authentication
+protocol, and in the same way as LDAP, it sends a ticket when a new connection
+is established with the target server.</p>
+<p>
+In the case of Debian, the <code>samba-tools</code> package contains the required tools and
+libraries to communicate with SMB as a client. For instance, we can use
+<code>smbclient</code> to list shared folders in servers of a domain:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ smbclient --use-krb5-ccache=$KRB5CCNAME -L dc01.dev.lab
+
+	Sharename       Type      Comment
+	---------       ----      -------
+	ADMIN$          Disk      Remote Admin
+	C$              Disk      Default share
+	IPC$            IPC       Remote IPC
+	NETLOGON        Disk      Logon server share 
+	SYSVOL          Disk      Logon server share 
+SMB1 disabled -- no workgroup available</code></pre></div>
+</div>
+<figcaption>
+Listing SMB shared folders from a remote server with smbclient
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-tools-for-gnulinux-integration-in-active-directory" class="outline-3">
+<h3 id="tools-for-gnulinux-integration-in-active-directory">
+Tools for GNU/Linux integration in Active Directory
+</h3>
+<div id="outline-text-tools-for-gnulinux-integration-in-active-directory" class="outline-text-3">
+<p>
+Once we have seen the protocols, lets review some key tools and components for
+integrating GNU/Linux in Active Directory.</p>
+<div id="outline-container-pam" class="outline-4">
+<h4 id="pam">
+PAM
+</h4>
+<div id="outline-text-pam" class="outline-text-4">
+<p>
+<a href="https://www.man7.org/linux/man-pages/man8/pam.8.html">PAM</a> (Pluggable Authentication Modules) is a set of GNU/Linux libraries that
+allows to integrate several authentication mechanisms. Programs that require
+authenticate system users, like SSH or <a href="https://www.man7.org/linux/man-pages/man1/login.1.html">login</a>, can use PAM to benefit from all
+these authentication mechanisms, like passwords, pins, certificates, etc, with
+little effort.</p>
+<blockquote>
+<p>Curiosity: SSH keys are not part of PAM, but an authentication mechanism of SSH
+itself.</p>
+</blockquote>
+<p>
+PAM allows both local authentication, like checking passwords in <a href="https://www.man7.org/linux/man-pages/man5/shadow.5.html">/etc/shadow</a>,
+and remote authentication, by using protocols like Kerberos (through sssd as we
+will see later).</p>
+<p>
+Besides, PAM also allow other actions like changing user passwords, setting the
+environment variables or mounting user directory when a user logs in.</p>
+<p>
+We can check the files in the <code>/etc/pam.d</code> folder to see what PAM modules are
+being used.</p>
+</div>
+</div>
+<div id="outline-container-nss" class="outline-4">
+<h4 id="nss">
+NSS
+</h4>
+<div id="outline-text-nss" class="outline-text-4">
+<p>
+<a href="https://www.man7.org/linux/man-pages/man5/nss.5.html">NSS</a> (Name Service Switch) is a mechanism used in GNU/Linux to know where to find
+the information related to different system items, like users or domain
+names. In this regard the configuration file <a href="https://www.man7.org/linux/man-pages/man5/nsswitch.conf.5.html">/etc/nsswitch.conf</a> is used as
+reference.</p>
+<p>
+For example, when an application wants to get information about an user,
+nsswitch is read to know what are the data sources, like the <a href="https://linux.die.net/man/5/passwd">/etc/passwd</a> local
+file or the sssd service.</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /etc/nsswitch.conf | grep passwd
+passwd:         files systemd sss</code></pre></div>
+</div>
+<figcaption>
+Usernames sources configuration
+</figcaption>
+</figure>
+<p>
+Another common case are the domain names, where nsswitch indicates that
+information must be retrieved first from <a href="https://www.man7.org/linux/man-pages/man5/hosts.5.html">/etc/hosts</a>, and if it is missed in the
+file, from a DNS requests.</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /etc/nsswitch.conf | grep hosts
+hosts:          files dns</code></pre></div>
+</div>
+<figcaption>
+Domain names resolution configuration
+</figcaption>
+</figure>
+</div>
+</div>
+<div id="outline-container-sssd" class="outline-4">
+<h4 id="sssd">
+sssd
+</h4>
+<div id="outline-text-sssd" class="outline-text-4">
+<p>
+<a href="https://linux.die.net/man/8/sssd">sssd</a> (System Security Services Daemon) is like the glue that joins all the
+previously discussed protocols and programs, since it is a tool that uses many
+libraries to interact with directory services like Active Directory or FreeIPA,
+allowing their integration with <a href="https://www.man7.org/linux/man-pages/man8/pam.8.html">PAM</a> and <a href="https://www.man7.org/linux/man-pages/man5/nss.5.html">NSS</a>.</p>
+<p>
+The integration would be something like this:</p>
+<figure>
+<pre class="example">
+                                             +-----------+
+ +---------------+                      .--&gt; | Samba/SMB |
+ | PAM - pam_sss | ----.                |    +-----------+
+ +---------------+     |                |        v
+                       |                |        &#39;------------.
+                       |                |                     v
+                       |    +------+    |                +----------+
+                       |--&gt; | sssd | ---|--------------&gt; | Kerberos |
+                       |    +------+    |                +----------+
+                       |                |                     ^ 
+                       |                |       .-------------&#39; 
+ +------------------+  |                |       ^ 
+ | NSS - libnss_sss | -&#39;                |    +------+
+ +------------------+                   &#39;--&gt; | LDAP |
+                                             +------+
+</pre>
+<figcaption>
+sssd integration with the rest of components
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-joining-the-machine-to-the-domain" class="outline-2">
+<h2 id="joining-the-machine-to-the-domain">
+Joining the machine to the domain
+</h2>
+<div id="outline-text-joining-the-machine-to-the-domain" class="outline-text-2">
+<p>
+In order to join the machine to the domain we can use the <a href="https://manpages.org/realm/8">realm</a> program, which
+configures sssd so we can use it to authenticate domain users.</p>
+<p>
+Here is a summary of the packages we are going to install, so we can understand
+the purpose of each one:</p>
+<ul>
+<li>
+<p><code>sssd</code>: Installs the sssd daemon and the required modules to communicate with
+directory services.</p>
+</li>
+<li>
+<p><code>sssd-tools</code>: Installs the tools to control sssd, like <a href="https://man.archlinux.org/man/sssctl.8.en">sssctl</a>.</p>
+</li>
+<li>
+<p><code>libnss-sss</code>: Installs the NSS library that allows the communication with sssd.</p>
+</li>
+<li>
+<p><code>libpam-sss</code>: Installs the PAM library that allows the communication with sssd.</p>
+</li>
+<li>
+<p><code>adcli</code>: Allows to join the machine to the domain.</p>
+</li>
+<li>
+<p><code>realmd</code>: Allows to join the machine to the domain by using adcli and sets the
+sssd configuration.</p>
+</li>
+<li>
+<p><code>pakcagekit</code>: Tool used by realmd to manage packages.</p>
+</li>
+</ul>
+<p>In order to install the packages we execute the following:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo apt update &amp;&amp; sudo apt install -y sssd sssd-tools adcli libnss-sss libpam-sss realmd packagekit</code></pre></div>
+</div>
+<figcaption>
+Installing required packages to join the domain
+</figcaption>
+</figure>
+<p>
+Once the packages are installed, we can continue and join our machine to the
+domain. We can do this with any domain user or just with administrator accounts
+depending on the domain configuration. In my case I will do it with my
+Administrator account:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo realm join --user=Administrator dev.lab</code></pre></div>
+</div>
+<figcaption>
+Command to join a machine to the domain
+</figcaption>
+</figure>
+<p>
+If everything goes well the command should only ask for the user password and no
+more output should be produced. Afterwards, we can verify we have joined the
+domain with <code>sssctl</code> or <code>realm</code>:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo sssctl domain-list
+dev.lab
+$ sudo realm list
+dev.lab
+  type: kerberos
+  realm-name: DEV.LAB
+  domain-name: dev.lab
+  configured: kerberos-member
+  server-software: active-directory
+  client-software: sssd
+  required-package: sssd-tools
+  required-package: sssd
+  required-package: libnss-sss
+  required-package: libpam-sss
+  required-package: adcli
+  required-package: samba-common-bin
+  login-formats: %U@dev.lab
+  login-policy: allow-realm-logins</code></pre></div>
+</div>
+<figcaption>
+sssctl and realm showing the current domain
+</figcaption>
+</figure>
+<p>
+Then we need to configure PAM to use sssd as a mechanism to authenticate
+users. We need to execute <code>pam-auth-update</code> and select &#34;SSS
+authentication&#34;. Besides, if we want to create a home directory for domain
+users, we also need to select &#34;Create home directory on login&#34;:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo pam-auth-update</code></pre></div>
+</div>
+<p>
+Our configuration should be something like this:</p>
+<figure>
+<img src="./pam-update-screenshot.png" alt="./pam-update-screenshot.png" title="./pam-update-screenshot.png" /><figcaption>
+pam-auth-update to use sss and creating home directory
+</figcaption>
+</figure>
+<p>
+When this is done we should be able to login with domain users in our
+machine. We can test this with SSH:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ssh Administrator@dev.lab@lab-debian12
+Administrator@dev.lab@192.168.122.165&#39;s password: 
+Linux debian12-base 6.1.0-23-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.99-1 (2024-07-15) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Sun Aug 18 17:48:53 2024 from 192.168.122.137
+administrator@dev.lab@lab-debian12:~$</code></pre></div>
+</div>
+<figcaption>
+Domain user login with ssh
+</figcaption>
+</figure>
+<p>
+And we finally can login with domain users!! This should be enough for the most
+basic environments, but you can keep reading since I&#39;m going to configure a few
+more things.</p>
+</div>
+</div>
+<div id="outline-container-authentication-with-the-domain-username-without-the-domain" class="outline-2">
+<h2 id="authentication-with-the-domain-username-without-the-domain">
+Authentication with the domain username, without the domain
+</h2>
+<div id="outline-text-authentication-with-the-domain-username-without-the-domain" class="outline-text-2">
+<p>
+A very comfortable thing we can do is to configure sssd so we don&#39;t need to
+specify the domain when we login with a domain user. So instead of writing
+&#34;Administrator@dev.lab&#34; we can just type &#34;Administrator&#34;. In case of using SSH,
+instead of using the following form:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ssh Administrator@dev.lab@lab-debian12</code></pre></div>
+</div>
+<p>
+We could use just the username:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ssh Administrator@lab-debian12</code></pre></div>
+</div>
+<p>
+In order to do this we must configure sssd to use the domain as suffix for the
+users. We can do this adding a <code>default_domain_suffix</code> statement in
+<code>/etc/sssd/sssd.conf</code> like the next:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo head -6 /etc/sssd/sssd.conf
+
+[sssd]
+domains = dev.lab
+config_file_version = 2
+services = nss, pam
+default_domain_suffix = dev.lab</code></pre></div>
+</div>
+<figcaption>
+sssd.conf with default_domain_suffix
+</figcaption>
+</figure>
+<p>
+Then we restart <code>sssd</code>:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo systemctl restart sssd</code></pre></div>
+</div>
+<p>
+And now we should be able to login by only specifying the username:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ssh Administrator@lab-debian12
+Administrator@192.168.122.165&#39;s password: 
+Linux debian12-base 6.1.0-23-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.99-1 (2024-07-15) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Sun Aug 18 18:07:39 2024 from 192.168.122.137
+administrator@dev.lab@lab-debian12:~$</code></pre></div>
+</div>
+<p>
+Perfect!! Now we can afford 2 seconds of typing and use as we wish. Not much,
+but it&#39;s a start.</p>
+</div>
+</div>
+<div id="outline-container-integrating-domain-groups-with-sudo" class="outline-2">
+<h2 id="integrating-domain-groups-with-sudo">
+Integrating domain groups with sudo
+</h2>
+<div id="outline-text-integrating-domain-groups-with-sudo" class="outline-text-2">
+<p>
+Another interesting thing is to use <strong>sudo</strong> with domain users. I would like to
+replicate the &#34;Domain Admins&#34; group behavior in Windows machine, where those are
+included as local administrators. In GNU/Linux to achieve a similar effect we
+can grant sudo to the &#34;Domain Admins&#34; group.</p>
+<p>
+In order to do this we can add a rule like the following in <code>/etc/sudoers</code>:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo cat /etc/sudoers | grep domain
+&#34;%domain admins@dev.lab&#34; ALL=(ALL) ALL</code></pre></div>
+</div>
+<p>
+Once this rule is added, we should be able to execute <code>sudo</code> with the
+<code>Administrator</code> user:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">administrator@dev.lab@lab-debian12:~$ sudo id
+uid=0(root) gid=0(root) groups=0(root)</code></pre></div>
+</div>
+<p>
+Another way to get the sudo rules, in addition to read <code>/etc/sudoers</code>, is to
+retrieve them from the Domain Controller. This process is carried by sssd so we
+need to install the <code>libsss-sudo</code> package:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo apt update &amp;&amp; sudo apt install -y libsss-sudo</code></pre></div>
+</div>
+<figcaption>
+libsss-sudo installation
+</figcaption>
+</figure>
+<p>
+After the installation we can see that <code>/etc/nsswitch.conf</code> file shows sss as a
+provider for sudoers:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /etc/nsswitch.conf | grep sudoers
+sudoers: files  sss</code></pre></div>
+</div>
+<figcaption>
+nss configuration for sudo rules
+</figcaption>
+</figure>
+<p>
+On the other hand, we have to configure <code>sssd</code> so it uses the sudo module. We
+can do this by adding <code>sudo</code> into the <code>services</code> statement of
+<code>/etc/sssd/sssd.conf</code>. </p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo cat /etc/sssd/sssd.conf | grep services
+services = nss, pam, sudo</code></pre></div>
+</div>
+<figcaption>
+sssd configured to use sudo
+</figcaption>
+</figure>
+<p>
+By using this configuration <code>sssd</code> will look for sudo rules in Active Directory
+database (with LDAP). Therefore, the rules you want to introduce into sudo must
+be written into Active Directory database, but how to do that is out of this
+article scope. However you can check the following post to do it (I didn&#39;t
+tested it):</p>
+<ul>
+<li>
+<p><a href="https://noobient.com/2015/11/02/integrating-ubuntu-with-active-directory/#Sudo">Integrating Ubuntu with Active Directory: Sudo</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-mounting-shared-folders-into-the-system" class="outline-2">
+<h2 id="mounting-shared-folders-into-the-system">
+Mounting shared folders into the system
+</h2>
+<div id="outline-text-mounting-shared-folders-into-the-system" class="outline-text-2">
+<p>
+Other thing that can be useful when joining a machine to a domain is being able
+to mount shared folders, by using SMB, that can be found in domain servers (and
+in some personal computers).</p>
+<p>
+Let&#39;s review some tools that can be useful in different situations.</p>
+<div id="outline-container-exploring-shared-folders-with-smbclient" class="outline-3">
+<h3 id="exploring-shared-folders-with-smbclient">
+Exploring shared folders with smbclient
+</h3>
+<div id="outline-text-exploring-shared-folders-with-smbclient" class="outline-text-3">
+<p>
+One of our options it to use <code>smbclient</code>, the console client of Samba. First
+thing to do is installing it:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo apt install smbclient</code></pre></div>
+</div>
+<figcaption>
+smbclient installation
+</figcaption>
+</figure>
+<p>
+Once it&#39;s installed, we need to indicate our domain into the
+<code>/etc/samba/smb.conf</code> file. In order to make it work into my domain, I have used
+the following options:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">workgroup = DEV
+client signing = yes
+realm = DEV.LAB</code></pre></div>
+</div>
+<figcaption>
+/etc/samba/smb.conf configuration
+</figcaption>
+</figure>
+<p>
+In order to give you some context, this is the meaning of each option:</p>
+<ul>
+<li>
+<p>workgroup: It is the domain name in NetBIOS format, which is a protocolo used,
+among other things, to resolve machine IP addresses in the local network. In
+order to get the netbios name of our domain we can use
+<code>ldapsearch -LLL -H ldap://dc01.dev.lab -b &#39;DC=dev,DC=lab&#39;
+&#39;(objectClass=domain)&#39; name 2&gt;/dev/null | grep name:</code>, but remember that you
+need to specify the domain name in uppercase in the Samba configuration.</p>
+</li>
+<li>
+<p>realm: The domain name in DNS format.</p>
+</li>
+<li>
+<p>client signing: To enable packets signatures.</p>
+</li>
+</ul>
+<p>Even if smbclient can use Kerberos, I wasn&#39;t able to make it to use my tickets
+by default. When I execute it, asks me for the user password:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">administrator@dev.lab@lab-debian12:~$ smbclient -L dc01.dev.lab
+Password for [Administrator@DEV.LAB]:</code></pre></div>
+</div>
+<figcaption>
+smbclient asking for password
+</figcaption>
+</figure>
+<p>
+I needed to specify the <code>--use-krb5-ccache=$KRB5CCNAME</code> to make it use my
+Kerberos tickets (the <code>$KRB5CCNAME</code> contains the path to the file containing the
+Kerberos tickets). So, in order to make easier to use <code>smbclient</code> with Kerberos
+tickets we can create the following alias: </p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">alias smbclient=&#39;smbclient --use-krb5-ccache=$KRB5CCNAME&#39;</code></pre></div>
+</div>
+<figcaption>
+smbclient alias to use Kerberos tickets
+</figcaption>
+</figure>
+<p>
+This way smbclient will use Kerberos tickets by default, but I not going to use
+the alias in the following examples in order to make them more didactic.</p>
+<p>
+The point is that we can execute <code>smbclient</code> in the following way to list the
+shares in a remote server:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">administrator@dev.lab@lab-debian12:~$ smbclient --use-krb5-ccache=$KRB5CCNAME -L dc01.dev.lab
+
+	Sharename       Type      Comment
+	---------       ----      -------
+	ADMIN$          Disk      Remote Admin
+	C$              Disk      Default share
+	IPC$            IPC       Remote IPC
+	NETLOGON        Disk      Logon server share 
+	SYSVOL          Disk      Logon server share 
+SMB1 disabled -- no workgroup available</code></pre></div>
+</div>
+<figcaption>
+remote server shared folders listing
+</figcaption>
+</figure>
+<p>
+Once we know the remote shared folders, we can can also explore them with
+<code>smbclient</code>:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">administrator@dev.lab@lab-debian12:~$ smbclient --use-krb5-ccache=$KRB5CCNAME \\\\dc01.dev.lab\\SYSVOL
+Try &#34;help&#34; to get a list of possible commands.
+smb: \&gt; ls
+  .                                   D        0  Mon Sep 25 10:23:21 2023
+  ..                                  D        0  Mon Sep 25 10:23:21 2023
+  dev.lab                            Dr        0  Mon Sep 25 10:23:21 2023
+
+		18221567 blocks of size 4096. 12979219 blocks available</code></pre></div>
+</div>
+<figcaption>
+SYSVOL folder exploration
+</figcaption>
+</figure>
+<p>
+This should give you an idea of when to use smbclient, but you may prefer other
+options such as mounting the remote folder in the local filesystem. We will
+explore some alternatives, but before I would like to share an error that I
+encountered in my tests:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">administrator@dev.lab@lab-debian12:~$ smbclient -L dc01.dev.lab --use-krb5-ccache=$KRB5CCNAME
+gse_get_client_auth_token: gss_init_sec_context failed with [ Miscellaneous failure (see text): FAST fast response is missing FX-FAST (cifs/dc01.dev.lab@DEV.LAB)](2529639059)
+gensec_spnego_client_negTokenInit_step: gse_krb5: creating NEG_TOKEN_INIT for cifs/dc01.dev.lab failed (next[(null)]): NT_STATUS_LOGON_FAILURE
+session setup failed: NT_STATUS_LOGON_FAILURE</code></pre></div>
+</div>
+<figcaption>
+smbclient error
+</figcaption>
+</figure>
+<p>
+The error message is misleading, since in my case it wasn&#39;t an error related
+to FAST, but an error in clock synchronization between my machine and the
+Domain Controller (which dispenses the Kerberos tickets). Once the clock was
+adjust, everything works perfectly.</p>
+</div>
+</div>
+<div id="outline-container-mounting-shared-folder-with-mount" class="outline-3">
+<h3 id="mounting-shared-folder-with-mount">
+Mounting shared folders with mount
+</h3>
+<div id="outline-text-mounting-shared-folder-with-mount" class="outline-text-3">
+<p>
+Even if it&#39;s nice to explore shared folders with <code>smbclient</code>, usually we want to
+work with them as if they were local folders. In this case we need to mount them
+in our filesystem by using <a href="https://www.man7.org/linux/man-pages/man8/mount.8.html">mount</a>. However, we need to install the following
+package in order to make it work with SMB (also known as CIFS):</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo apt install cifs-utils</code></pre></div>
+</div>
+<figcaption>
+Installing a package to use SMB in mount
+</figcaption>
+</figure>
+<p>
+The <code>cifs-utils</code> package allows <code>mount</code> to know how to mount SMB shared
+folders. If we combine this with the <code>-o sec=krb5</code> option that allows to use
+Kerberos, we can mount remote shared folders as easy as in the following
+example:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">administrator@dev.lab@lab-debian12:~$ mkdir /tmp/SYSVOL
+administrator@dev.lab@lab-debian12:~$ sudo mount -t cifs -o sec=krb5 //dc01.dev.lab/SYSVOL /tmp/SYSVOL/
+administrator@dev.lab@lab-debian12:~$ ls /tmp/SYSVOL/
+dev.lab</code></pre></div>
+</div>
+<figcaption>
+Mounting the SYSVOL shared folder in /tmp/SYSVOL
+</figcaption>
+</figure>
+<p>
+And there it is, our shared folder mounted!! And remember that <a href="https://www.man7.org/linux/man-pages/man8/mount.8.html">mount</a> allows to
+specify options for the mount points that allows to make them read only,
+disabling binary execution, etc. You can check the options in <a href="https://www.man7.org/linux/man-pages/man8/mount.8.html">mount(8)</a>.</p>
+</div>
+</div>
+<div id="outline-container-mounting-shared-folders-with-pam_mount" class="outline-3">
+<h3 id="mounting-shared-folders-with-pam_mount">
+Mounting shared folders with pam_mount
+</h3>
+<div id="outline-text-mounting-shared-folders-with-pam_mount" class="outline-text-3">
+<p>
+Mounting shared folders with <code>mount</code> is nice, but sometimes it is better to
+mount them when an user logs in. For this purpose, we can use the PAM
+<code>libpam-mount</code> module, which can be installed with the following command:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo apt install libpam-mount</code></pre></div>
+</div>
+<figcaption>
+Instalación do módulo de carpetas compartidas de PAM
+</figcaption>
+</figure>
+<p>
+After installing the module we need to make sure that PAM is using it. We can
+execute the following command to check that:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo pam-auth-update</code></pre></div>
+</div>
+<figcaption>
+Updating PAM configuration
+</figcaption>
+</figure>
+<p>
+We must check that the &#34;Mount volumes&#34; option is selected.</p>
+<p>
+Once we got <code>libpam-mount</code>, we can add shared folders to mount in the
+<code>/etc/security/pam_mount.conf.xml</code> file. To do this we must add a <code>volume</code>
+element like the following:</p>
+<figure>
+<div class="src src-xml">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;volume</span> <span style="color:#a6e22e">fstype=</span><span style="color:#e6db74">&#34;cifs&#34;</span> 
+	<span style="color:#a6e22e">sgrp=</span><span style="color:#e6db74">&#34;domain users@dev.lab&#34;</span>
+	<span style="color:#a6e22e">server=</span><span style="color:#e6db74">&#34;dc01.dev.lab&#34;</span>
+	<span style="color:#a6e22e">path=</span><span style="color:#e6db74">&#34;SYSVOL&#34;</span>
+	<span style="color:#a6e22e">mountpoint=</span><span style="color:#e6db74">&#34;~/SYSVOL&#34;</span>
+	<span style="color:#a6e22e">options=</span><span style="color:#e6db74">&#34;vers=3.0,sec=krb5,cruid=%(USERUID),noexec,rw,nosuid,nodev&#34;</span>
+	<span style="color:#f92672">/&gt;</span></code></pre></div>
+</div>
+<figcaption>
+Volume configuration for libpam-mount
+</figcaption>
+</figure>
+<p>
+Here we indicate that members of <code>domain users</code> group of <code>dev.lab</code> domain are
+going to mount the <code>SYSVOL</code> shared folder in their home directory. Moreover, the
+<code>options</code> field indicates the <code>mount</code> options. And it is important to remark
+that <code>volume</code> elements should be after the <code>debug</code> element, which is helpful if
+you have to debug something (as it was my case).</p>
+<p>
+And now we can login with an user belonging to the specified group and the
+shared folder should be mounted automatically:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">user@debdev:~$ ssh Administrator@lab-debian12 
+Administrator@192.168.122.165&#39;s password: 
+Linux lab-debian12 6.1.0-23-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.99-1 (2024-07-15) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Fri Aug 23 21:12:07 2024 from 192.168.122.137
+administrator@dev.lab@lab-debian12:~$ ls SYSVOL/
+dev.lab</code></pre></div>
+</div>
+<figcaption>
+Mounting shared folder when user logs in
+</figcaption>
+</figure>
+<p>
+And there it is our shared folder mounted!!</p>
+<p>
+However, before we finish, I&#39;m going to share an issue I had with the hope of
+this knowledge being helpful. I wasn&#39;t able to mount the shared folder at first,
+so I enable the debug option with <code>&lt;debug enable=&#34;1&#34;/&gt;</code>, which should be at the
+top of the configuration. Once the debug is enabled, <code>pam_mount</code> will show debug
+messages that we can see in the service output:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ systemctl status sshd.service 
+● ssh.service - OpenBSD Secure Shell server
+     Loaded: loaded (/lib/systemd/system/ssh.service; enabled; preset: enabled)
+     Active: active (running) since Wed 2024-08-17 20:20:05 CEST; 16h ago
+       Docs: man:sshd(8)
+             man:sshd_config(5)
+    Process: 512 ExecStartPre=/usr/sbin/sshd -t (code=exited, status=0/SUCCESS)
+   Main PID: 518 (sshd)
+      Tasks: 1 (limit: 2315)
+     Memory: 19.4M
+        CPU: 2.608s
+     CGroup: /system.slice/ssh.service
+             └─518 &#34;sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups&#34;
+
+Aug 18 12:30:52 lab-debian12 sshd[8045]: (pam_mount.c:660): done opening session (ret=0)
+Aug 18 12:30:53 lab-debian12 sshd[8045]: pam_env(sshd:session): deprecated reading of user environment &gt;
+Aug 18 12:31:34 lab-debian12 sshd[8070]: Accepted publickey for user from 192.168.122.136 port 43494 ss&gt;
+Aug 18 12:31:34 lab-debian12 sshd[8070]: pam_unix(sshd:session): session opened for user user(uid=1000)&gt;
+Aug 18 12:31:34 lab-debian12 sshd[8070]: (pam_mount.c:568): pam_mount 2.19: entering session stage
+Aug 18 12:31:34 lab-debian12 sshd[8070]: (pam_mount.c:629): no volumes to mount
+Aug 18 12:31:34 lab-debian12 sshd[8070]: command: &#39;pmvarrun&#39; &#39;-u&#39; &#39;user&#39; &#39;-o&#39; &#39;1&#39;
+Aug 18 12:31:34 lab-debian12 sshd[8070]: (pam_mount.c:441): pmvarrun says login count is 4
+Aug 18 12:31:34 lab-debian12 sshd[8070]: (pam_mount.c:660): done opening session (ret=0)</code></pre></div>
+</div>
+<p>
+We can appreciate the <code>(pam_mount.c:629): no volumes to mount</code> error that in my
+case was given cause in my volume options I had specified <code>sgrp=&#34;domain users&#34;</code>
+instead of <code>sgrp=&#34;domain users@dev.lab&#34;</code>. This error made the group not being
+recognized. Once the option was modified for the correct one everything worked
+fine.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-conclusion" class="outline-2">
+<h2 id="conclusion">
+Conclusion
+</h2>
+<div id="outline-text-conclusion" class="outline-text-2">
+<p>
+In this article we have seen how to connect a Debian machine to an Active
+Directory environment. I hope you found it useful.</p>
+<p>
+See you!!</p>
+</div>
+</div>
+<div id="outline-container-references" class="outline-2">
+<h2 id="references">
+References
+</h2>
+<div id="outline-text-references" class="outline-text-2">
+<ul>
+<li>
+<p>Pierre Blazquez. &#34;<strong>How-To: Join Debian 12 to an Active Directory Domain</strong>&#34;.
+Pierre Blazquez blog, 02 Feb, 2024, <a href="https://www.pierreblazquez.com/2024/02/04/how-to-join-debian-12-to-an-active-directory-domain/">https://www.pierreblazquez.com/2024/02/04/how-to-join-debian-12-to-an-active-directory-domain/</a></p>
+</li>
+<li>
+<p>noobient. &#34;<strong>Integrating Ubuntu with Active Directory</strong>&#34;. noobient blog, 02 Nov,
+2015, <a href="https://noobient.com/2015/11/02/integrating-ubuntu-with-active-directory/">https://noobient.com/2015/11/02/integrating-ubuntu-with-active-directory/</a></p>
+</li>
+<li>
+<p>Matei Cezar. &#34;<strong>Integrate Ubuntu to Samba4 AD DC with SSSD and Realm – Part
+15</strong>&#34;. Tecmint, 27 Nov, 2017, <a href="https://www.tecmint.com/integrate-ubuntu-to-samba4-ad-dc-with-sssd-and-realm/">https://www.tecmint.com/integrate-ubuntu-to-samba4-ad-dc-with-sssd-and-realm/</a></p>
+</li>
+</ul>
+</div>
+</div>
+
+
+        
+          <div class="blog-tags">
+            
+              <a href="https://hackliza.gal/en/tags/linux/">linux</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/gnu/">gnu</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/ad/">ad</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/debian/">debian</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="https://hackliza.gal/en/posts/cambiar_dns_linux/" data-toggle="tooltip" data-placement="top" title="Who is messing with my DNS server? Discovering and managing network daemons">&larr; Previous Post</a>
+            </li>
+          
+          
+            <li class="next">
+              <a href="https://hackliza.gal/en/posts/keydump/" data-toggle="tooltip" data-placement="top" title="Keyrings dump with keydump: Extracting SSSD cleartext credentials">Next Post &rarr;</a>
+            </li>
+          
+        </ul>
+      
+
+
+      
+        
+          
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hackliza" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+          
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://github.com/hackliza" title="GitHub">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/hackliza" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2024
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="https://hackliza.gal/en/">Hackliza</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.74.3</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="https://hackliza.gal/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://hackliza.gal/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

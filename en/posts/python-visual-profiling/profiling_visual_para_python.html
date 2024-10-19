@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-06-26 Dom 19:43 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Profiling visual para Python</title>
+<meta name="author" content="Sergio Martínez Portela" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Profiling visual para Python</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org99db18d">1. Gráficos de lapas (Flame Graphs)</a></li>
+<li><a href="#org6d69e56">2. Obtendo os datos</a></li>
+<li><a href="#org1d8e56a">3. Preparando o entorno</a></li>
+<li><a href="#org3fb3894">4. Tomando medidas e analizando</a></li>
+<li><a href="#orgb61289d">5. Pechando</a></li>
+</ul>
+</div>
+</div>
+<p>
+Boas, xente.
+</p>
+
+<p>
+Hoxe veño cun exemplo práctico de como podemos analizar os nosos programas de Python para atopar facilmente pescozos de botella.
+</p>
+
+<p>
+Falase moito de como as optimizacións non se deben facer a cegas, senón que hai que medir que partes dun programa son as problemáticas para conseguir mellorar a execución do código de xeito eficiente, hoxe veremos como facelo de forma cómoda e práctica.
+</p>
+
+<div id="outline-container-org99db18d" class="outline-2">
+<h2 id="org99db18d"><span class="section-number-2">1.</span> Gráficos de lapas (Flame Graphs)</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Hai moitos xeitos de medir e visualizar o comportamento dunha aplicación, pero persoalmente o que máis cómodo me parece é a técnica dos <a href="https://www.brendangregg.com/flamegraphs.html">Gráficos de lapas (Flame Graphs) descrito por Brendan Gregg</a>. Consiste en medir canto tempo se adica a execución dunha pila de funcións e debuxalo apilando as funcións que chaman unhas a outras de xeito que canto máis espazo horizontal ocupe unha función, máis tempo lle adica o código a executala.
+</p>
+
+<p>
+<img src="https://www.brendangregg.com/FlameGraphs/cpu-mysql-updated.svg" alt="cpu-mysql-updated.svg" class="org-svg" />
+<a href="https://www.brendangregg.com/FlameGraphs/cpu-mysql-updated.svg">[Preme aquí para ver a imaxe de xeito interactivo]​</a>
+</p>
+
+<p>
+E moi interesante como forma de explorar a execución do programa, xa que permite facer "zoom" de forma interactiva na mesma imaxe. Proba a abrir a imaxe anterior seguindo a ligazón e preme en <code>mysqld`mysql_parse</code> e verás que expande esa función pra ocupar todo o espazo horizontal, de xeito que se pode apreciar mellor os tempos que toma cada función a que chama esta.
+</p>
+
+<p>
+Ou, pasando o cursor por enriba dunha función, coma <code>mysqld`mysql_exec</code> podemos ver a porcentaxe do tempo de execución do programa que se emprega dentro de esta chamada, neste caso <code>83.77</code>
+</p>
+
+
+<div id="org6cbf507" class="figure">
+<p><img src="./zoom_sample_image.png" alt="zoom_sample_image.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6d69e56" class="outline-2">
+<h2 id="org6d69e56"><span class="section-number-2">2.</span> Obtendo os datos</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Ben, agora que entendemos como utilizar os <i>Flame Graphs</i> vexamos como xerar o noso propio. Para poder facer medidas vamos necesitar algún programa que medir, así que podemos usar este, pero o proceso e o mesmo pra todos.
+</p>
+
+<p>
+O máis importante a ter en conta e que esta técnica (e outras moitas de profiling) dividen o tempo de execución por función, así que se as funcións son moi longas pode ser interesante dividilas en funcións mais cortas para ter unha idea máis clara de que parte do código e o que require máis tempo.
+</p>
+
+<p>
+Entón, como ilustración usaremos este programa
+</p>
+<div class="org-src-container">
+<pre class="src src-python"># Programa de exemplo, estudarémolo e veremos como vai evolucionando o
+# seu rendemento
+def fibonacci(n):
+    """Simplemente unha función de exemplo."""
+    if n == 0:
+        return 0
+    elif n &lt; 2:
+        return 1
+    else:
+        return fibonacci(n - 1) + fibonacci(n - 2)
+
+
+def factorial(n):
+    """Outra función de exemplo."""
+    if n &lt; 2:
+        return 1
+    else:
+        return n * factorial(n - 1)
+
+def fibonacci_plus_factorial(n):
+    """Función que chama as dúas."""
+    fib = fibonacci(n)
+    fact = factorial(n)
+    return fib + fact
+
+if __name__ == '__main__':
+    N = 35
+    print("[Test] Fibonacci(5): {:3d} = 5 ?".format(fibonacci(5)))
+    print("[Test] Factorial(5): {:3d} = 120 ?".format(factorial(5)))
+    print("Resultado:", fibonacci_plus_factorial(N))
+</pre>
+</div>
+
+<p>
+Se executamos este código veremos que é bastante lento:
+</p>
+<div class="org-src-container">
+<pre class="src src-text">$ time python sample.py
+[Test] Fibonacci(5):   5 = 5 ?
+[Test] Factorial(5): 120 = 120 ?
+Resultado:  10333147966386144929666651337523209227465
+
+real	0m3,905s
+user	0m3,896s
+sys	0m0,004s
+</pre>
+</div>
+
+<p>
+Vexamos entón que e o que está tomando máis tempo utilizando <i>Flame Graphs</i>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1d8e56a" class="outline-2">
+<h2 id="org1d8e56a"><span class="section-number-2">3.</span> Preparando o entorno</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Pra obter o gráfico podemos utilizar o paquete <a href="https://github.com/evanhempel/python-flamegraph/">python-flamegraph</a>. Normalmente recomendaría obtelo do repositorio fonte, pero este está desactualizado e non funciona cunha versión recente de Python.
+</p>
+
+<p>
+Por sorte hai <a href="https://github.com/evanhempel/python-flamegraph/network">varias persoas que manteñen forks máis actualizados</a>. O seu é escoller un cos cambios necesarios e funcionalidades que nos interesen e revisar os commits intermedios pra asegurarnos que non se introduciron cambios maliciosos antes de instalalo. A verdade e que normalmente neste punto non me quero complicar moito a vida e non vou utilizar o profiler de forma activa en código exposto a internet, asi que buscando un cos cambios mínimos imprescindibles <a href="https://github.com/evanhempel/python-flamegraph/compare/master...nickodell:master">podemos atopar o fork de nickodell</a>. (Se buscades algo mais <b>serio</b> botádelle un ollo <a href="https://github.com/IceTDrinker/python-flamegraph/commit/74312897641a3b86f569b40627e3ad0e4f9edd69">a esta nota</a>).
+</p>
+
+<p>
+Para instalar esta versión do paquete directamente a partir do GitHub podemos facer:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">pip install git+https://github.com/nickodell/python-flamegraph.git
+</pre>
+</div>
+
+<p>
+O seguinte necesario será clonar este repositorio: <a href="https://github.com/brendangregg/FlameGraph">https://github.com/brendangregg/FlameGraph</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3fb3894" class="outline-2">
+<h2 id="org3fb3894"><span class="section-number-2">4.</span> Tomando medidas e analizando</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+Unha vez temos todo preparado podemos usalo para medir o noso programa con comando coma:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">python -m flamegraph -o medida.log sample.py
+</pre>
+</div>
+
+<p>
+Esto producirá un ficheiro <code>medida.log</code> cos datos necesarios, pra convertelo nunha imaxe de <i>Flame Graph</i> podemos executar isto (adaptando a ruta inicial a onde se haia clonado o repo <a href="https://github.com/brendangregg/FlameGraph">brendangregg/FlameGraph</a>:
+</p>
+<div class="org-src-container">
+<pre class="src src-shell">~/repos/FlameGraph/flamegraph.pl medida.log &gt; medida.svg
+</pre>
+</div>
+
+<p>
+Isto producirá un ficheiro <code>medida.svg</code> que poderemos abrir cun navegador:
+</p>
+
+<p>
+<img src="./medida1.svg" alt="medida1.svg" class="org-svg" />
+<a href="./medida1.svg">(Preme aquí pra abrilo en modo interactivo)</a>
+</p>
+
+<p>
+Podemos observar que, de forma desproporcionada, a maior parte da execución se adica a función <code>fibonacci</code>, así que optimicémola. Como facer isto depende de cada función, neste caso podemos pasala de forma recursiva a iterativa:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">def fibonacci(n):
+    """Simplemente unha función de exemplo, agora optimizada."""
+    seq = [0, 1]
+    while n &gt;= len(seq):
+        seq.append(seq[-1] + seq[-2])
+
+    return seq[n]
+</pre>
+</div>
+
+<p>
+Se executamos este código veremos que gran parte da carga de execución xa se resolveu:
+</p>
+<div class="org-src-container">
+<pre class="src src-text">$ time python sample.py
+[Test] Fibonacci(5):   5 = 5 ?
+[Test] Factorial(5): 120 = 120 ?
+Resultado:  10333147966386144929666651337523209227465
+
+real	0m0,029s
+user	0m0,017s
+sys	0m0,012s
+</pre>
+</div>
+
+<p>
+Sorprendentemente, podemos ver que non e necesario optimizar a función <code>factorial()</code> inda que tamén sexa recursiva, e polo tanto podería parecer que é necesario optimizala. E realmente no caso efectivo a sua execución é bastante eficiente.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb61289d" class="outline-2">
+<h2 id="orgb61289d"><span class="section-number-2">5.</span> Pechando</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+Vemos así que utilizando estes diagramas podemos buscar en que parte do programa nos podemos centrar pra optimizalo de forma rápida.
+</p>
+
+<p>
+Normalmente non é posible optimizar un programa só facendoo cunha soa función, senón que é un proceso iterativo:
+</p>
+<ul class="org-ul">
+<li>Medir os tempos</li>
+<li>Optimizar función que toma máis tempo</li>
+<li>Repetir ata que esteamos contentos co tempo de execución</li>
+</ul>
+
+<p>
+E o obxectivo deste exemplo era aplicar a optimización sobre as dúas funcións, amosando este ciclo iterativo. Pero ironicamente a miña suposición de que a función <code>factorial()</code> sería lenta resultou ser falsa, co que teredes que crerme cando vos digo que non soe funcionar nun paso 😉. Isto nos demostra a lección máis importante que se pode aprender sobre optimización:
+</p>
+
+<p>
+<b>Antes de cambiar nada, mide o teu programa!</b>
+</p>
+
+<p>
+E pouco máis vos podo contar, espero que vos resulte útil. Leémonos!
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2022-06-26</p>
+<p class="author">Author: Sergio Martínez Portela</p>
+<p class="date">Created: 2022-06-26 Dom 19:43</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

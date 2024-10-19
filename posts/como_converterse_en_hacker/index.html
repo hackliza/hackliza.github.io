@@ -1,0 +1,1799 @@
+<!DOCTYPE html>
+<html lang="gl" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Como Converterse En Hacker - Hackliza</title>
+  <meta name="description" content="Eric Steven Raymond"><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Hackliza",
+    
+    "url": "https:\/\/hackliza.gal\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "https:\/\/hackliza.gal\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/posts\/como_converterse_en_hacker\/",
+          "name": "Como converterse en hacker"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Hackliza"
+  },
+  "headline": "Como Converterse En Hacker",
+  "description" : "Boas xente.\n Este post é unha tradución do How To Become A Hacker de Eric Steven Raymond, publicado orixinariamente no 2001 (a última actualización a día de hoxe fíxose no 2020).\n Eric Raymond, autor de grandes pezas como The Cathedral \u0026amp; the Bazaar ou The Art of Unix Programming , amósanos neste icónico texto o que é un hacker, cal é a súa filosofía e os valores que defende, así como a actitude e coñecementos que se precisan para ser un deles.",
+  "inLanguage" : "gl",
+  "wordCount":  9399 ,
+  "datePublished" : "2021-04-19T00:00:00",
+  "dateModified" : "2021-04-19T00:00:00",
+  "image" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+  "keywords" : [ "tradución" ],
+  "mainEntityOfPage" : "https:\/\/hackliza.gal\/posts\/como_converterse_en_hacker\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "https:\/\/hackliza.gal\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="Como Converterse En Hacker" />
+<meta property="og:description" content="Eric Steven Raymond">
+<meta property="og:image" content="https://hackliza.gal/img/hackliza.png" />
+<meta property="og:url" content="https://hackliza.gal/posts/como_converterse_en_hacker/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hackliza" />
+
+  <meta name="twitter:title" content="Como Converterse En Hacker" />
+  <meta name="twitter:description" content="Eric Steven Raymond">
+  <meta name="twitter:image" content="https://hackliza.gal/img/hackliza.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@hackliza" />
+  <meta name="twitter:creator" content="@hackliza" />
+  <link href='https://hackliza.gal/img/hackliza.png' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.74.3" />
+  <link rel="alternate" href="https://hackliza.gal/index.xml" type="application/rss+xml" title="Hackliza"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://hackliza.gal/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="https://hackliza.gal/css/syntax.css" /><link rel="stylesheet" href="https://hackliza.gal/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><style>
+ nav {
+     background: #0099CC !important;
+ }
+
+ .navbar-brand, #main-navbar ul li a, footer {
+     color: #fff !important;
+ }
+
+ .navbar-brand:hover, #main-navbar ul li a:hover {
+     color: #ccc !important;
+ }
+
+
+ figure {
+     margin-top: 1.5em; 
+     margin-bottom: 1.5em; 
+ }
+ 
+ figcaption {
+     text-align: center;
+     font-size: 85%;
+ }
+
+ pre {
+     overflow-x: auto !important;
+ }
+
+ .posts-heading {
+     text-align: center;
+ }
+ 
+</style>
+
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Conmuta navegación</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://hackliza.gal/">Hackliza</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blogue" href="/">Blogue</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Sobre nós" href="/about/">Sobre nós</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Charlas" href="/talks/">Charlas</a>
+            </li>
+          
+        
+
+        
+          
+            <li>
+              
+                
+                  <a href="/en" lang="en">en</a>
+                
+              
+                
+              
+            </li>
+          
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Hackliza" href="https://hackliza.gal/">
+            <img class="avatar-img" src="https://hackliza.gal/img/hackliza.png" alt="Hackliza" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>Como Converterse En Hacker</h1>
+              
+              
+                <hr class="small">
+              
+              
+                
+                  <h2 class="posts-subheading">Eric Steven Raymond</h2>
+                
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        
+<p>
+Boas xente.</p>
+<p>
+Este post é unha tradución do <a href="http://www.catb.org/~esr/faqs/hacker-howto.html">How To Become A Hacker</a> de <a href="http://www.catb.org/esr/">Eric Steven Raymond</a>,
+publicado orixinariamente no 2001 (a última actualización a día de hoxe fíxose
+no 2020).</p>
+<p>
+Eric Raymond, autor de grandes pezas como <a href="https://www.oreilly.com/library/view/the-cathedral/0596001088/">The Cathedral &amp; the Bazaar</a>
+ou <a href="http://www.catb.org/esr/writings/taoup/">The Art of Unix Programming</a> , amósanos neste icónico texto o que é un hacker,
+cal é a súa filosofía e os valores que defende, así como a actitude e
+coñecementos que se precisan para ser un deles. Definitivamente unha peza
+atemporal da cultura hacker que merece ser homenaxeada. </p>
+<p>
+Agardamos que vos guste.</p>
+<p>
+<strong>Táboa de contidos</strong></p>
+<ul>
+<li>
+<p><a href="#headline-1">Por que este documento?</a></p>
+</li>
+<li>
+<p><a href="#headline-2">Que é un hacker?</a></p>
+</li>
+<li>
+<p><a href="#headline-3">A actitude hacker</a></p>
+<ol>
+<li>
+<p><a href="#headline-4">O mundo está cheo de problemas fascinantes esperando a ser resoltos.</a></p>
+</li>
+<li>
+<p><a href="#headline-5">Ningún problema debería ser resolto dúas veces.</a></p>
+</li>
+<li>
+<p><a href="#headline-6">O aburrimento e o traballo monótono son o mal.</a></p>
+</li>
+<li>
+<p><a href="#headline-7">A liberdade é boa.</a></p>
+</li>
+<li>
+<p><a href="#headline-8">Actitude non é substituto de competencia.</a></p>
+</li>
+</ol>
+</li>
+<li>
+<p><a href="#headline-9">Habilidades básicas para un hacker</a></p>
+<ol>
+<li>
+<p><a href="#headline-10">Aprende a programar.</a></p>
+</li>
+<li>
+<p><a href="#headline-11">Consigue un Unix de código aberto e aprende a usalo.</a></p>
+</li>
+<li>
+<p><a href="#headline-12">Aprende a usar a World Wide Web e escribir HTML.</a></p>
+</li>
+<li>
+<p><a href="#headline-13">Se non sabes Inglés funcional, apréndeo.</a></p>
+</li>
+</ol>
+</li>
+<li>
+<p><a href="#headline-14">O status na cultura hacker</a></p>
+<ol>
+<li>
+<p><a href="#headline-15">Escribe software de código aberto</a></p>
+</li>
+<li>
+<p><a href="#headline-16">Axuda a probar e depurar software de código aberto</a></p>
+</li>
+<li>
+<p><a href="#headline-17">Publica información útil</a></p>
+</li>
+<li>
+<p><a href="#headline-18">Axuda a manter as infraestruturas funcionando</a></p>
+</li>
+<li>
+<p><a href="#headline-19">Serve á propia cultura hacker</a></p>
+</li>
+</ol>
+</li>
+<li>
+<p><a href="#headline-20">A conexión hacker/nerd</a></p>
+</li>
+<li>
+<p><a href="#headline-21">Puntos polo estilo</a></p>
+</li>
+<li>
+<p><a href="#headline-22">Nota histórica: hacking, código aberto e software libre</a></p>
+</li>
+<li>
+<p><a href="#headline-23">Outros recursos</a></p>
+</li>
+<li>
+<p><a href="#headline-24">Preguntas frecuentes</a></p>
+</li>
+</ul>
+<div class="center-block" style="text-align: center; margin-left: auto; margin-right: auto;">
+<p><img src="./glider.png" alt="./glider.png" title="./glider.png" /></p>
+</div>
+<div id="outline-container-headline-1" class="outline-2">
+<h2 id="headline-1">
+Por que este documento?
+</h2>
+<div id="outline-text-headline-1" class="outline-text-2">
+<p>
+Como editor do <a href="http://www.catb.org/jargon">Jargon File</a> e autor doutros poucos coñecidos documentos de
+natureza similar, a miúdo recibo emails de novatos entusiastas da rede
+preguntando (en efecto) &#34;como podo aprender a ser un hacker maxistral?&#34;. En 1996
+decateime de que non parecía haber outros FAQs ou documentos web que resolvesen
+esta cuestión vital, polo que fixen este. Moitos hackers considérano agora
+definitivo, e imaxino que iso significa que o é. Inda así, non pretendo ser a
+autoridade exclusiva neste tema; polo que si non che gusta o que lees aquí,
+escribe o teu.</p>
+<p>
+Se estás lendo unha copia deste documento offline, a versión actual atópase en
+<a href="https://hackliza.gal/posts/como_converterse_en_hacker/.">https://hackliza.gal/posts/como_converterse_en_hacker/.</a></p>
+<p>
+Nota: Hai unha lista de <a href="#headline-24">preguntas frecuentes</a> ao final deste documento. Por
+favor, leas –dúas veces– antes de escribirme calquera pregunta sobre este
+documento.</p>
+<p>
+Hai moitas traducións deste documento dispoñibles:
+<a href="http://www.abdulibrahim.com/%D9%83%D9%8A%D9%81-%D8%AA%D8%B5%D8%A8%D8%AD-%D9%87%D8%A7%D9%83%D8%B1/">árabe</a>,
+<a href="https://www.moneyaisle.com/worldwide/how-to-become-a-hacker-be">bielorruso</a>,
+<a href="http://weknowyourdreams.com/">búlgaro</a>,
+<a href="http://www.0x08.org/docs/hacker-howto.html#hacker-howto">chinés</a>,
+<a href="http://scientificachievements.com/jak-se-stat-hackerem/">checo</a>,
+<a href="http://www.olemichaelsen.dk/hacker-howto.html">danés</a>,
+<a href="https://nobullshitseeds.com/translate/hacken-leren/">holandés</a>,
+<a href="https://www.kakupesa.net/hacker/">estonio</a>,
+<a href="https://thomasgil.com/hacker.html">francés</a>,
+<a href="http://www.linuxtaskforce.de/hacker-howto-ger.html">alemán</a>,
+<a href="https://sophron.latthi.com/hacker-howto-gr.html">grego</a>,
+<a href="http://www.forallworld.com/hogyan-valhat-egy-hacker/">húngaro</a>,
+<a href="https://arlandi.design/documents/hacker.html">italiano</a>,
+<a href="https://he.wikisource.org/wiki/%D7%90%D7%99%D7%9A_%D7%9C%D7%94%D7%99%D7%95%D7%AA_%D7%94%D7%90%D7%A7%D7%A8">hebreo</a>,
+<a href="https://cruel.org/freeware/hacker.html">xaponés</a>,
+<a href="https://rtfb.lt/hacker-howto-lt.html">lituano</a>,
+<a href="http://stian.atlantiscrew.net/doc/hacker-howto.html">noruegués</a>,
+<a href="http://ashiyane.org/forums/showthread.php?t=20570">persa</a>,
+<a href="https://michalp.net/blog/posts/hacker-howto">polaco</a>,
+<a href="http://jvdm.sdf.org/pt/raquer-howto/">portugués (brasileiro)</a>,
+<a href="garaj.xhost.ro/hacker-howto/hacker-howto.ro.htm">romanés</a>,
+<a href="https://sindominio.net/biblioweb/telematica/hacker-como.html">español</a>,
+<a href="http://www.belgeler.org/howto/hacker-howto/hacker-howto.html">turco</a>
+e <a href="www1.tripnet.se/~mly/open/faqs/hacker-howto.se.html">sueco</a>.
+Ten en conta que dado que este documento cambia ocasionalmente, pode que estean
+desactualizados en diferentes graos.</p>
+<p>
+O diagrama de cinco puntos en nove cadrados que decora este documento chámase
+<em>glider</em>. É un patrón sinxelo con algunhas propiedades sorprendentes nunha
+simulación matemática chamada <a href="http://www.dmoz.org/Computers/Artificial_Life/Cellular_Automata/">Life</a>
+que fascinou aos hackers durante moitos anos. Creo que é un bo emblema visual de
+como son os hackers — abstracto, ao principio un pouco misterioso, pero unha
+porta de entrada a un mundo enteiro cunha intrincada lóxica propia. Le máis
+información sobre o emblema do glider <a href="http://catb.org/~esr/hacker-emblem/">aquí</a>.</p>
+<p>
+Se consideras que este documento é valioso, podes apoiar ao seu creador (Eric
+Steven Raymond) en <a href="https://www.patreon.com/esr">Patreon</a> ou <a href="https://www.subscribestar.com/esr">SubscribeStar</a>.
+E considera tamén apoiar a outros hackers que produciron código que utilizas e
+valoras a través de <a href="http://www.catb.org/esr/loadsharers/">Loadsharers</a>.
+Moitas doazóns pequenas pero continuas súmanse rapidamente e poden liberar ás
+persoas que che deron agasallos do seu traballo para crear cousas de máis valor.</p>
+</div>
+</div>
+<div id="outline-container-headline-2" class="outline-2">
+<h2 id="headline-2">
+Que é un hacker?
+</h2>
+<div id="outline-text-headline-2" class="outline-text-2">
+<p>
+O <a href="http://www.catb.org/jargon">Jargon File</a> contén un montón de definicións do termo &#39;hacker&#39;, a maioría teñen
+que ver con habilidade técnica e desfrutar resolvendo problemas e superando
+límites. Sen embargo, se queres saber como converterte en hacker, só dous son
+relevantes.</p>
+<p>
+Existe unha comunidade, unha cultura compartida, de programadores expertos e
+magos das redes que remonta a súa historia ata os primeiros miniordenadores de
+tempo-compartido e experimentos de ARPAnet. Os membros desta cultura crearon o
+termo &#39;hacker&#39;. Os hackers crearon Internet. Os hackers fixeron do sistema
+operativo Unix o que é hoxe en día. Os hackers fixeron o traballo da World Wide
+Web. Se es parte desta cultura, se contribuiches a ela e outra xente sabe quen
+es e chámate hacker, es un hacker.</p>
+<p>
+A mentalidade hacker non está limitada a esta cultura do hacker de software. Hai
+xente que aplica a actitude hacker a outras cousas, como á electrónica ou música
+— de feito, podes atopalos nas categorías máis elevadas da ciencia e a arte. Os
+hackers do software recoñecen a estes espíritos afíns noutras partes e pódenlles
+chamar hackers tamén — e algúns afirman que a natureza hacker é independente do
+ámbito particular no que traballe un hacker. Pero no resto deste documento
+centrarémonos nas habilidades e actitudes dos hackers de software, e as
+tradicións da cultura compartida que orixinaron o termo &#39;hacker&#39;.</p>
+<p>
+Existe outro grupo de xente que ruidosamente se chaman hackers a si mesmos, pero
+non o son. Esta é xente (maioritariamente homes adolescentes) que se divirte
+colándose en ordenadores e aproveitándose do sistema telefónico. Os verdadeiros
+hackers chaman a esta xente &#39;crackers&#39; e non teñen nada que ver con eles. Os
+verdadeiros hackers pensan que os crackers son preguiceiros, irresponsábels, e non
+moi brillantes e alegan que ser capaz de romper a seguridade non che fai un
+hacker máis do que ser capaz de pontear coches che fai ser un enxeñeiro
+automobilístico. Desafortunadamente, moitos xornalistas e escritores foron
+enganados para usar a palabra &#39;hacker&#39; para describir ós crackers; isto irrita
+infinitamente aos hackers.</p>
+<p>
+A diferencia fundamental é esta: os hackers crean cousas, os crackers rómpenas.</p>
+<p>
+Se queres ser un hacker, segue lendo. Se queres ser un cracker, vai ler o grupo
+de novas <a href="news:alt.2600">alt.2600</a> e prepárate para facer de cinco a dez anos no cárcere despois
+de descubrir que non es tan listo como ti crías E iso é todo o que vou dicir
+sobre os crackers.</p>
+<div class="center-block" style="text-align: center; margin-left: auto; margin-right: auto;">
+<p><img src="./glider.png" alt="./glider.png" title="./glider.png" /></p>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-3" class="outline-2">
+<h2 id="headline-3">
+A actitude hacker
+</h2>
+<div id="outline-text-headline-3" class="outline-text-2">
+<ol>
+<li>
+<p><a href="#headline-4">O mundo está cheo de problemas fascinantes esperando a ser resoltos.</a></p>
+</li>
+<li>
+<p><a href="#headline-5">Ningún problema debería ser resolto dúas veces.</a></p>
+</li>
+<li>
+<p><a href="#headline-6">O aburrimento e o traballo monótono son o mal.</a></p>
+</li>
+<li>
+<p><a href="#headline-7">A liberdade é boa.</a></p>
+</li>
+<li>
+<p><a href="#headline-8">Actitude non é substituto de competencia.</a></p>
+</li>
+</ol>
+<p>Os hackers resolven problemas e constrúen cousas, e creen na liberdade e na
+axuda mutua voluntaria. Para ser aceptado como hacker, teste que comportar como
+se ti mesmo tiveses este tipo de actitude. E para comportarte como se tiveses a
+actitude, tes que crer realmente na actitude.</p>
+<p>
+Pero se pensas que promover as actitudes hacker é so unha forma de gañar
+aprobación na cultura, non entenderás o asunto. Volverte o tipo de persoa que cree
+estas cousas é importante para ti — para axudarche a aprender e manterte
+motivado. Como en tódalas artes creativas, o xeito máis efectivo de volverse
+un mestre é imitar a mentalidade dos mestres — non so intelectualmente, senón
+tamén emocionalmente.</p>
+<p>
+Ou como di o seguinte poema Zen moderno:</p>
+<pre class="example">
+  Para seguir o camiño:
+  mira ó mestre,
+  sigue ó mestre,
+  camiña co mestre,
+  mira a través do mestre,
+  convértete no mestre.
+</pre>
+<p>
+Polo que, se queres ser un hacker, repite as seguintes cousas ata que as creas:</p>
+<div id="outline-container-headline-4" class="outline-3">
+<h3 id="headline-4">
+1. O mundo está cheo de problemas fascinantes esperando a ser resoltos.
+</h3>
+<div id="outline-text-headline-4" class="outline-text-3">
+<p>
+Ser un hacker é moi divertido, pero é unha clase de diversión que require
+esforzo. O esforzo require motivación. Os atletas de éxito sacan a súa
+motivación dunha especie de pracer físico ao facer que os seus corpos funcionen
+ben, animándose así mesmos a ir máis alá dos seus límites físicos. De mesmo
+xeito, para ser un hacker tes que emocionarte ao resolver problemas, pulir as
+túas habilidades, e exercitar a túa intelixencia.</p>
+<p>
+Se non es o tipo de persoa que se sinte deste xeito de forma natural, precisas
+converterte nunha para ser un hacker. Doutro modo descubrirás que a túa enerxía para
+hackear gastase en distraccións como sexo, diñeiro ou aprobación social.</p>
+<p>
+(Tamén deberás desenvolver un tipo de fe nas túas capacidades para aprender — a
+crenza de que inda se non sabes todo o que precisas para resolver un problema,
+se abordas so unha parte e aprendes diso, aprenderás o suficiente para resolver
+a seguinte parte — e así sucesivamente, ata que estea feito.)</p>
+</div>
+</div>
+<div id="outline-container-headline-5" class="outline-3">
+<h3 id="headline-5">
+2. Ningún problema debería ser resolto dúas veces.
+</h3>
+<div id="outline-text-headline-5" class="outline-text-3">
+<p>
+Os cerebros creativos son un valioso e limitado recurso. No deberían malgastarse
+reinventando a roda cando existen tantos novos e fascinantes problemas agardando
+aí fora.</p>
+<p>
+Para comportarte coma un hacker, tes que pensar que o tempo para pensar doutros
+hackers é valioso — tanto que é case o teu deber moral compartir información,
+resolver problemas e logo dar as solucións de xeito que outros hackers poidan
+resolver novos problemas no canto de estar continuamente abordando os vellos.</p>
+<p>
+Tes que entender, sen embargo, que &#34;Ningún problema debería resolverse dúas
+veces&#34; non implica considerar as solucións existentes como sagradas, ou que
+soamente hai unha única solución válida para un problema. A miúdo, aprendemos
+moito dun problema que non coñeciamos antes estudando a primeira aproximación da
+solución. Está ben, e moitas veces é preciso, decidir que o podemos facer
+mellor. O que non está ben son as barreiras artificiais técnicas, legais ou
+institucionais (como o código pechado) que evita que se reuse unha boa solución
+e forza á xente a reinventar rodas.</p>
+<p>
+(Non tes que crer que estás obrigado a compartir totalmente os teus enxeñosos
+produtos, inda que os hackers que o fan son os máis respectados por outros
+hackers. É consistente con valores hacker vender o suficiente para pagar a
+comida, o aluger e os ordenadores. Está ben usar as túas habilidades hackers para
+manter á túa familia ou incluso volverse rico, sempre e cando non esquezas ser
+fiel ó teu arte e ós teus compañeiros hackers mentres o fas.)</p>
+</div>
+</div>
+<div id="outline-container-headline-6" class="outline-3">
+<h3 id="headline-6">
+3. O aburrimento e o traballo monótono son o mal.
+</h3>
+<div id="outline-text-headline-6" class="outline-text-3">
+<p>
+Os hackers (e a xente creativa en xeral) nunca deberían estar aburridos ou
+traballar arreo nun traballo repetitivo e estúpido, porque cando iso acontece
+significa que non están facendo o que soamente eles poden facer — resolver novos
+problemas. Este desaproveitamento dana a todos. Polo tanto o aburrimento e a
+monotonía non son so desagradables senón tamén malévolos.</p>
+<p>
+Para comportarte coma un hacker, tes que crer que isto o suficiente para querer
+automatizar as cousas aburridas tanto como sexa posible, non so por ti senón por
+todos (especialmente outros hackers).</p>
+<p>
+(Existe unha excepción a isto. As veces os hackers fan cousas que parecen
+repetitivas e aburridas para un observador para despexar a mente, ou para
+adquirir unha habilidade ou unha experiencia en particular que non se pode
+conseguir doutro xeito. Pero isto é por elección propia — ninguén que poida
+pensar debería ser forzado a unha situación que o aburra.)</p>
+</div>
+</div>
+<div id="outline-container-headline-7" class="outline-3">
+<h3 id="headline-7">
+4. A liberdade é boa.
+</h3>
+<div id="outline-text-headline-7" class="outline-text-3">
+<p>Os hackers son anti-autoritarios por natureza. Calquera que che poida dar ordes
+pode deterte de resolver calquera problema que che fascine — e, tendo en conta
+como funcionan as mentes autoritarias, polo xeral atopará algún motivo estúpido
+para facelo. Polo que a actitude autoritaria debe ser combatida onde sexa
+que a atopes, para non che asfixie a ti nin a outros hackers.</p>
+<p>
+(Isto non significa que haxa que combater toda autoridade. Os nenos precisan ser
+guiados e os criminais retidos. Un hacker pode aceptar algúns tipos de
+autoridade para obter algo que quere máis que o tempo que gasta seguindo
+ordes. Pero esa é unha negociación consciente e limitada; o tipo de entrega
+persoal que os autoritarios queren non está en venta.)</p>
+<p>
+Os autoritarios prosperan ca censura e o segredo. E non confían na cooperación
+voluntaria nin no intercambio de información — so lles gusta a &#39;cooperación&#39; que
+eles controlan. Polo que para comportarte coma un hacker, tes que desenvolver
+unha hostilidade instintiva cara a censura, o segredo, e o uso da forza e o
+engano para controlar a adultos responsabels. E tes que estar disposto a actuar
+seguindo esa crenza.</p>
+</div>
+</div>
+<div id="outline-container-headline-8" class="outline-3">
+<h3 id="headline-8">
+5. Actitude non é substituto de competencia.
+</h3>
+<div id="outline-text-headline-8" class="outline-text-3">
+<p>
+Para ser un hacker, tes que desenvolver algunhas de estas actitudes. Pero ter
+unha actitude solo non che vai facer hacker máis do que che faría ser un atleta
+campión ou unha estrela do rock. Converterse en hacker precisará intelixencia,
+práctica, dedicación e traballo duro.</p>
+<p>
+Polo tanto, tes que aprender a desconfiar das actitudes e respectar as
+competencias de todo tipo. Os hackers non deixan que os posers lle fagan perder
+o tempo, senón que adoran a competencia — especialmente competencia en hacking,
+pero calquera competencia pode ser valorada. A competencia en habilidades
+demandadas é especialmente boa, e a competencia en habilidades demandadas que
+involucran agudeza mental, destreza, e concentración é a mellor.</p>
+<p>
+Se veneras a competencia, desfrutarás desenvolvendoa en ti mesmo — o traballo
+duro e a dedicación converteranse nun xogo intenso en vez dunha pesadez. Esa
+actitude é vital para converterse en hacker.</p>
+<div class="center-block" style="text-align: center; margin-left: auto; margin-right: auto;">
+<p><img src="./glider.png" alt="./glider.png" title="./glider.png" /></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-9" class="outline-2">
+<h2 id="headline-9">
+Habilidades básicas para un hacker
+</h2>
+<div id="outline-text-headline-9" class="outline-text-2">
+<ol>
+<li>
+<p><a href="#headline-10">Aprende a programar.</a></p>
+</li>
+<li>
+<p><a href="#headline-11">Consigue un Unix de código aberto e aprende a usalo.</a></p>
+</li>
+<li>
+<p><a href="#headline-12">Aprende a usar a World Wide Web e escribir HTML.</a></p>
+</li>
+<li>
+<p><a href="#headline-13">Se non sabes Inglés funcional, apréndeo.</a></p>
+</li>
+</ol>
+<p>A actitude hacker é vital, pero as habilidades son aínda máis vitais. A
+actitude non é substituto de competencia, e hai certas habilidades básicas que
+precisas ter antes de que a ningún hacker se lle pase sequera pola cabeza
+considerarte como tal.</p>
+<p>
+Estas habilidades cambian amodo ó longo do tempo cando a tecnoloxía require
+novas capacidades e deixa obsoleta ás vellas. Por exemplo, adoitábase incluír
+programar en código máquina, e non foi ata ben que pouco que se precisa HTML.
+Pero agora está claro que se inclúen as seguintes:</p>
+<div id="outline-container-headline-10" class="outline-3">
+<h3 id="headline-10">
+1. Aprende a programar.
+</h3>
+<div id="outline-text-headline-10" class="outline-text-3">
+<p>
+Esta, por suposto, é a habilidade básica de hacking. Se non coñeces ningunha
+linguaxe de programación, recoméndoche comezar con Python. Ten un deseño limpo,
+está ben documentado, e é relativamente amigable para os principiantes. Amais de
+ser unha boa primeira linguaxe, non é so un xoguete, é moi potente e flexible e
+adecuado para proxectos longos. Escribín unha <a href="http://www.linuxjournal.com/article.php?sid=3882">revisión de Python</a> máis
+detallada. Existen bos <a href="https://www.python.org/about/gettingstarted/">tutoriais</a> no <a href="https://docs.python.org/3/tutorial/">sitio web de Python</a>; e hai un excelente
+escrito por terceiros en <a href="http://cscircles.cemc.uwaterloo.ca/">Computer Science Circles</a>.</p>
+<p>
+Eu adoitaba recomendar Java como unha boa linguaxe para aprender das primeiras,
+mais <a href="http://www.crosstalkonline.org/storage/issue-archives/2008/200801/200801-Dewar.pdf">esta crítica</a> fíxome cambiar de opinión (busca por &#34;The Pitfalls of Java as
+a First Programming Language&#34; nela). Un hacker non pode, como eles cruamente
+din, &#34;atacar a resolución de problemas coma un fontaneiro nunha ferretería&#34;; ti
+tes que saber que fan os compoñentes. Agora penso que probablemente sexa mellor
+aprender C e Lisp primeiro, e logo Java.</p>
+<p>
+Tal vez se poida sacar unha idea máis xeral daquí. Se unha linguaxe fai
+demasiado por ti, será ao mesmo tempo boa para producir e mala para
+aprender. Este problema non soamente o teñen as linguaxes, os frameworks de
+aplicacións web como RubyOnRails, CakePHP, Django fan todo demasiado fácil como
+para obter un entendemento mínimo que che deixa sen recursos cando tes que
+afrontar un problema complicado, ou simplemente depurar a solución dun sinxelo.</p>
+<p>
+Unha mellor alternativa a Java é aprender <a href="https://golang.org/">Go</a>. A esta nova linguaxe é fácil
+pasarse vindo de Python, e aprendela porache na boa dirección para o seguinte
+paso, que é aprender C. Ademais, unha das incertezas sobre os vindeiros anos é
+canto desprazara Go a C como linguaxe de programación de sistemas. Existe un
+posible futuro no que abarque a maioría da gama tradicional de C.</p>
+<p>
+Se te pos a programar en serio, eventualmente terás que aprender C, o linguaxe
+base de Unix. C++ está moi relacionado con C; se sabes un, aprender o outro non
+che será difícil. Sen embargo, ningunha destas é adecuada para aprender como
+primeira linguaxe. E, de feito, canto máis evites programar en C, máis
+produtivo serás.</p>
+<p>
+C é moi eficiente, e usa os mínimos recursos da máquina. Desafortunadamente,
+para ter esa eficiencia, C require que fagas a man moita xestión de recursos de
+baixo nivel (como a memoria). Todo ese código de baixo nivel é complexo e
+propenso a erros, e requerirache estar moito tempo depurando. Co potentes que son
+hoxe as máquinas, isto polo xeral non compensa — é máis intelixente usar unha
+linguaxe que use o tempo da maquina menos eficientemente, pero o teu tempo
+<em>máis</em> eficientemente. Isto é, Python.</p>
+<p>
+Outras linguaxes particularmente importantes para hackers son <a href="https://www.perl.com/">Perl</a> e <a href="https://www.lisp.org/">LISP</a>. Perl
+merece a pena aprendelo por razóns prácticas, é amplamente usado en páxinas
+web e administración de sistemas, polo que inda que nunca escribas Perl, deberías
+aprender a lelo. Moita xente usa Perl do modo que che digo que deberías usar
+Python, para evitar programar en C en traballos que non requiren a eficiencia
+de C. Precisarás entender o seu código.</p>
+<p>
+LISP merece a pena aprendelo por razóns diferentes — a profunda revelación que
+terás cando o entendas. Esa experiencia farache mellor programador o resto dos
+teus días, incluso se non usas moito o propio LISP. (Podes ter facilmente unha
+experiencia inicial con LISP escribindo e editando modos do editor Emacs, ou
+extensións Script-Fu para GIMP.)</p>
+<p>
+O mellor é, de feito, aprender os cinco, Python, C/C++, Perl e LISP. Ademais de
+ser as linguaxes máis importantes de hacking, representan diferentes
+aproximacións á programación, e cada un educarache de xeito significativo. Go
+inda non chegou ó punto de ser incluído entre as linguaxes de hacking máis
+importantes, pero parece dirixirse a tal estatus.</p>
+<p>
+Mais se consciente que non alcanzarás o nivel de habilidade dun hacker ou
+incluso dun programador soamente acumulando linguaxes — necesitas aprender a
+pensar sobre os problemas de programación de maneira xeral, independentemente de
+calquera linguaxe. Para ser un hacker, necesitas chegar ao punto no que podes
+aprender unha nova linguaxe usando o que está no manual do que xa sabes. Isto
+quere dicir que deberías aprender varias linguaxes diferentes.</p>
+<p>
+Non podo darche aquí instrucións completas sobre como aprender a programar — é
+unha habilidade complexa. Pero podo dicirche que os cursos e libros non o farán
+— moitos, tal vez a maioría dos mellores hackers son autodidactas. Podes
+aprender as características — cachiños de coñecemento — dos libros, pero a
+mentalidade que transforma ese coñecemento nunha habilidade viva so pode ser
+aprendida a través da práctica e aprendizaxe. O que o fará será (a) <em>ler código</em>
+e (b) <em>escribir código</em>.</p>
+<p>
+Peter Norvig, un dos mellores hackers de Google e coautor do libro de IA más
+amplamente usado, escribiu en ensaio excelente chamado
+<a href="http://norvig.com/21-days.html">Teach Yourself Programming in Ten Years</a>.
+A súa &#34;receita para programar con éxito&#34; merece especial atención.</p>
+<p>
+Aprender a programar é como aprender a escribir. O mellor xeito de facelo e ler
+algo escrito polos mestres da materia, escribir algo ti mesmo, ler un montón
+máis, escribir un pouco máis, ler un montón máis, escribir algo máis… e
+repetir ata que o que escribes empezan a ter o tipo de forza e economía que ves
+nos teus modelos.</p>
+<p>
+Teño máis que dicir sobre este proceso de aprendizaxe en <a href="http://www.catb.org/~esr/faqs/hacking-howto.html">How To Learn Hacking.</a>
+Son un conxunto de instrucións sinxelas, pero non fáciles.</p>
+<p>
+Atopar bo código para ler soía ser difícil, porque había poucos códigos fonte de
+programas longos para que os hackers novatos leran e xogasen con eles. Isto
+cambiou drásticamente; software open-source, ferramentas de programación, e
+sistemas operativos (todos escritos por hackers) son agora facilmente
+accesibles. O que me leva ó noso seguinte tema…</p>
+</div>
+</div>
+<div id="outline-container-headline-11" class="outline-3">
+<h3 id="headline-11">
+2. Consigue un Unix de código aberto e aprende a usalo.
+</h3>
+<div id="outline-text-headline-11" class="outline-text-3">
+<p>
+Vou asumir que tes un ordenador persoal ou podes ter acceso a un. (Tómate un
+momento para apreciar canto significa iso. A cultura hacker orixinouse cando os
+ordenadores eran tan caros que os particulares no podían telos.) O paso máis
+importante que calquera novato pode facer de cara a adquirir as habilidades dun
+hacker e conseguir unha copia de Linux ou dun dos Unix BSDs, instalalo nunha
+máquina persoal, e arrincalo.</p>
+<p>
+Sí, existen outros sistemas operativos no mundo ademais de Unix. Pero son
+distribuidos en binario — non podes ler o código, e non podes modificalo.
+Intentar aprender a hackear nunha máquina Windows de Microsoft ou sobre calquera
+outro sistema de código cerrado é como aprender a bailar con armadura.</p>
+<p>
+Sobre Mac OS X é posible, pero solo parte do sistema é código aberto — é
+probable que te atopes con moitas barreiras, e tes que ser coidadoso para non
+desenvolver o mal hábito de depender do código propietario de Apple. Se te podes
+concentrar no Unix que hai por debaixo podes aprender algunhas cousas útiles.</p>
+<p>
+Unix é o sistema operativo de Internet. Inda que podes aprender a usar Internet
+sen coñecer Unix, non podes ser un hacker de Internet sen entender Unix. Por
+isto, a cultura hacker de hoxe en día está moi centrada en Unix. (Isto non foi
+sempre así, e algúns antigos hackers non están contentos con iso, pero a
+simbiose entre Unix e Internet volveuse tan forte que incluso o músculo de
+Microsoft non pode facer mella nela.)</p>
+<p>
+Así que consegue un Unix — a min gústame Linux pero existen outros (e sí, podes
+executar Linux e Microsoft Windows na mesma máquina). Apréndeo. Execútao. Xoga
+con el. Fala con Internet con el. Lee o código. Modifica o código. Terás
+mellores ferramentas de programación (incluíndo C, LISP, Python, e Perl) das que
+calquera sistema operativo de Microsoft podería soñar, vaste divertir, e
+absorberás máis coñecemento do que pensas que estás a aprender ata que mires
+cara atrás coma un mestre hacker.</p>
+<p>
+Para aprender máis sobre Unix, consulta <a href="http://catb.org/~esr/faqs/loginataka.html">The Loginataka</a>. Igual tamén
+che gustaría botarlle unha ollada a <a href="http://catb.org/~esr/writings/taoup/">The Art Of Unix Programming</a>.</p>
+<p>
+O blogue <a href="https://letsgolarval.wordpress.com/">Let&#39;s Go Larval!</a> é unha xanela
+sobre o proceso de aprendizaxe dun novo usuario de Linux que creo que é
+inusualmente lúcido e útil. A publicación <a href="https://letsgolarval.wordpress.com/2015/06/23/how-i-learned-linux/">How I Learned Linux</a>
+é un bo punto de partida.</p>
+<p>
+Para obter un Linux, mira a páxina <a href="https://www.linux.org/">Linux Online!</a>;
+podes descargalo dende aí ou (mellor aínda) encontrar un grupo local de usuarios
+de Linux que che axuden coa instalación.</p>
+<p>
+Durante os primeiros dez anos de vida deste HOWTO, informei que dende o punto de
+vista dun novo usuario, todas as distribucións de Linux son case equivalentes.
+Pero no 2006-2007 xurdiu a mellor opción: <a href="https://ubuntu.com/">Ubuntu</a>.
+Mentres outras distros teñen as súas propias áreas de forza, Ubuntu é de lonxe o
+máis accesible para os novatos en Linux. Ten coidado, con todo, coa horrible e
+case inutilizable interface de escritorio &#34;Unity&#34; que Ubuntu introduciu por
+defecto uns anos despois; as variantes de Xubuntu ou Kubuntu son mellores. </p>
+<p>
+Podes atopar axuda e recursos de BSD Unix en <a href="https://www.bsd.org/"><a href="https://www.bsd.org/">https://www.bsd.org/</a></a>.</p>
+<p>
+Un bo xeito de mergullar os pés na auga é arrincar o que os fans de Linux chaman
+<a href="https://livecdnews.com/">live CD</a>, unha distribución que funciona
+completamente dende o CD ou memoria USB sen ter que modificar o disco duro. Isto
+pode ser lento, porque os CD son lentos, pero é un xeito de ver as posibilidades
+sen ter que facer nada drástico.</p>
+<p>
+Escribín un manual sobre os <a href="https://tldp.org/HOWTO/Unix-and-Internet-Fundamentals-HOWTO/index.html">conceptos básicos de Unix e Internet</a>.</p>
+<p>
+Antes recomendaba non instalar Linux ou BSD como proxecto en solitario se es un
+novato. Hoxe en día os instaladores son o suficientemente bos como para facelo
+completamente só, incluso para un novato. Non obstante, aínda recomendo
+contactar co grupo de usuarios de Linux local e pedir axuda. Non doe e pode
+suavizar o proceso. </p>
+</div>
+</div>
+<div id="outline-container-headline-12" class="outline-3">
+<h3 id="headline-12">
+3. Aprende a usar a World Wide Web e escribir HTML.
+</h3>
+<div id="outline-text-headline-12" class="outline-text-3">
+<p>
+A maioría das cousas que construíu a cultura hacker fan o seu traballo sen
+chamar a atención, axudando a dirixir fábricas, oficinas e universidades sen
+ningún impacto evidente sobre como viven os non hackers. A web é a gran
+excepción, o enorme e relucente xoguete dos hacker que incluso os <em>políticos</em>
+admiten que cambiou o mundo. Só por este motivo (e moitos outros bos) cómpre
+aprender a traballar na web.</p>
+<p>
+Isto non significa só aprender a manexar un navegador (calquera pode facelo),
+senón aprender a escribir HTML, a linguaxe da web. Se non sabes programar,
+escribir HTML ensinarache algúns hábitos mentais que che axudarán a aprender.
+Así que constrúe unha páxina persoal.</p>
+<p>
+Pero só ter unha páxina persoal non é o suficientemente bo como para
+converterse nun hacker. A web está chea de páxinas persoais. A maioría delas
+son lama sen sentido e con cero contido — lama con moi bo aspecto, iso si, lama
+de todos modos (para ver máis disto mira <a href="http://catb.org/~esr/html-hell.html">The HTML Hell Page</a>).</p>
+<p>
+Para valer a pena, a túa páxina debe ter <em>contido</em> — debe ser interesante e/ou
+útil para outros hackers. E iso lévanos ao seguinte tema…</p>
+</div>
+</div>
+<div id="outline-container-headline-13" class="outline-3">
+<h3 id="headline-13">
+4. Se non sabes Inglés funcional, apréndeo.
+</h3>
+<div id="outline-text-headline-13" class="outline-text-3">
+<p>
+Eu mesmo, coma estadounidense e falador inglés nativo, tiven relutancia en
+suxerir isto, para que non se tome como unha especie de imperialismo cultural.
+Pero varios falantes nativos doutras linguas instáronme a sinalar que o inglés é
+a lingua de traballo da cultura hacker e de Internet e que necesitarás coñecelo
+para funcionar na comunidade hacker.</p>
+<p>
+Ó redor de 1991 souben que moitos hackers que teñen o inglés como segunda
+lingua ou úsana en discusións técnicas incluso cando comparten unha lingua de
+nacemento; Informáronme no seu momento de que o inglés ten un vocabulario técnico
+máis rico que calquera outro idioma e, polo tanto, é simplemente unha mellor
+ferramenta para o traballo. Por razóns similares, as traducións de libros
+técnicos escritos en inglés a miúdo non son satisfactorias (se é que se fan).</p>
+<p>
+Linus Torvalds, finlandés, comenta o seu código en inglés (ao parecer nunca se
+lle ocorreu facelo noutra lingua). A súa fluidez en inglés foi un factor
+importante na súa capacidade para captar unha comunidade mundial de
+desenvolvedores para Linux. É un exemplo que paga a pena seguir.</p>
+<p>
+Ser falante nativo de inglés non garante que teñas coñecementos lingüísticos o
+suficientemente bos como para funcionar como hacker. Se os teus escritos son
+semi-alfabetos, pouco gramaticais e están cheos de faltas de ortografía, moitos
+hackers (incluído eu) tenderemos a ignorarte. Aínda que a escritura desleixada
+non significa invariablemente un pensamento desleixado, xeralmente atopamos que
+a correlación é forte, e non temos utilidade para os pensadores desleixados. Se
+aínda non podes escribir con competencia, aprende a facelo.</p>
+<div class="center-block" style="text-align: center; margin-left: auto; margin-right: auto;">
+<p><img src="./glider.png" alt="./glider.png" title="./glider.png" /></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-14" class="outline-2">
+<h2 id="headline-14">
+O status na cultura hacker
+</h2>
+<div id="outline-text-headline-14" class="outline-text-2">
+<ol>
+<li>
+<p><a href="#headline-15">Escribe software de código aberto</a></p>
+</li>
+<li>
+<p><a href="#headline-16">Axuda a probar e depurar software de código aberto</a></p>
+</li>
+<li>
+<p><a href="#headline-17">Publica información útil</a></p>
+</li>
+<li>
+<p><a href="#headline-18">Axuda a manter as infraestruturas funcionando</a></p>
+</li>
+<li>
+<p><a href="#headline-19">Serve á propia cultura hacker</a></p>
+</li>
+</ol>
+<p>Coma na maioría de culturas sen unha economía monetaria, a cultura hacker
+basease na reputación. Ti estás intentando resolver problemas, pero como de
+interesantes son, e se as túas solucións son realmente boas, é algo que só os
+seus compañeiros técnicos ou superiores normalmente están preparados para
+xulgar.</p>
+<p>
+Polo tanto, cando participas no xogo dos hackers, ti aprendes a manter a
+puntuación polo que pensan outros hackers da túa habilidade (esta é a razón
+pola que non es un hacker ata que outros hackers te o chaman de forma
+constante). Este feito está sepultado pola imaxe de que hackear é un traballo
+solitario; tamén está considerado un tabú dentro da cultura hacker (decaendo
+gradualmente dende finais dos 90 pero aínda sendo potente) admitir que o ego ou
+a validación externa están implicados na motivación propia.</p>
+<p>
+En concreto, a cultura hacker é o que os antropoloxistas chaman a <em>cultura do
+agasallo</em>. Ti gañas status e reputación nel non por dominar a outras persoas,
+nin por ser guapo, nin por ter cousas que outras persoas desexarían, senón por
+regalar cousas. Especificamente, por regalar o teu tempo, a túa creatividade e
+os resultados da túa habilidade.</p>
+<p>
+Hai basicamente cinco tipos de cousas que podes facer para ser respectado polos
+hackers:</p>
+<div id="outline-container-headline-15" class="outline-3">
+<h3 id="headline-15">
+1. Escribe software de código aberto
+</h3>
+<div id="outline-text-headline-15" class="outline-text-3">
+<p>Primeiro (o máis central e máis tradicional) hai que escribir programas que
+outros hackers pensen que son divertidos ou útiles, e dar o código para que
+toda a cultura hacker o utilice.</p>
+<p>
+(Nós tendíamos a chamar a estes traballos &#34;software libre&#34;, pero isto é
+confundido por moita xente que non está segura de que significa exactamente a
+palabra &#34;libre&#34;. A maior parte de nós agora prefire utilizar o termo software
+de &#34;<a href="https://opensource.org/">código aberto</a>&#34;).</p>
+<p>
+Os semideuses máis venerados da cultura hacker son persoas que escribiron
+grandes programas que cubrían unha necesidade xeneralizada e os regalaban, de
+xeito que agora todo o mundo os utiliza.</p>
+<p>
+Pero aquí hai un bo punto histórico. Mentres que os hackers sempre miraron aos
+desenvolvedores de código aberto entre eles como o núcleo máis duro da nosa
+comunidade, antes de mediados dos anos 90 a maioría dos hackers traballaban a
+maior parte do tempo en código pechado. Isto inda era verdadeiro cando eu
+escribín a primeira versión deste HOWTO en 1996; foi necesario incorporar o
+software de código aberto despois de 1997 para cambiar as cousas. Hoxe, a
+&#34;comunidade hacker&#34; e os &#34;desenvolvedores de código aberto&#34; son dúas
+descricións para esencialmente a mesma cultura e poboación – pero merece a
+pena recordar que isto non foi sempre así. (Para máis detalles sobre isto, mira
+<a href="Nota história: Hacking, Código Aberto e Software Libre">a sección chamada &#34;Nota histórica: Hacking, Código Aberto e Software Libre&#34;</a>)</p>
+</div>
+</div>
+<div id="outline-container-headline-16" class="outline-3">
+<h3 id="headline-16">
+2. Axuda a probar e depurar software de código aberto
+</h3>
+<div id="outline-text-headline-16" class="outline-text-3">
+<p>Tamén serven quenes soportan e depuran o software de código aberto. Neste mundo
+imperfecto, inevitablemente gastaremos a maior parte do noso tempo de
+desenvolvemento de software na fase de depuración. Este é o motivo polo que
+calquera autor de código aberto que estea a pensar che dirá que os bos
+beta-testers (os que saben describir os síntomas claramente, localizar ben os
+problemas, que toleren erros e estean dispostos a aplicar algunhas rutinas de
+diagnóstico sinxelas) valen o seu peso en ouro. Incluso un destes pode marcar
+a diferenza entre unha fase de depuración que é un pesadelo prolongado e
+esgotador e outra que só é unha molestia saudable.</p>
+<p>
+Se es un novato, intenta atopar un programa en desenvolvemento no que
+esteas interesado e ser un bo beta-tester. Existe unha progresión natural dende
+axudar a probar programas ata axudar a depuralos e axudar a modificalos. Ti
+aprenderás moito seguindo este camiño, e xerarás bo karma con xente que nun
+futuro che axudará.</p>
+</div>
+</div>
+<div id="outline-container-headline-17" class="outline-3">
+<h3 id="headline-17">
+3. Publica información útil
+</h3>
+<div id="outline-text-headline-17" class="outline-text-3">
+<p>Outra cousa boa é recoller e filtrar a información interesante e publicala en
+páxinas web ou documentos coma Preguntas Máis Frecuentes (FAQ), e facelas
+dispoñibles para todo o mundo.</p>
+<p>
+Os mantedores das principais preguntas máis frecuentes técnicas obteñen case
+tanto respecto como os autores de código aberto.</p>
+</div>
+</div>
+<div id="outline-container-headline-18" class="outline-3">
+<h3 id="headline-18">
+4. Axuda a manter as infraestruturas funcionando
+</h3>
+<div id="outline-text-headline-18" class="outline-text-3">
+<p>A cultura hacker (e o desenvolvemento de enxeñaría de Internet, para o caso)
+funciona con voluntarios. Hai unha gran cantidade de traballo necesario pero
+pouco glamouroso que se necesita realizar para que que as cousas sigan
+funcionando – administrar as listas de correo, moderar os grupos de noticias,
+manter grandes sitios de arquivos de software, desenvolver o RFC e outros
+estándares técnicos.</p>
+<p>
+As persoas que fan este tipo de cousas obteñen unha gran cantidade de respecto,
+porque todo o mundo sabe que eses traballos consumen moito tempo e non son tan
+divertidos coma xogar co código. Facelas demostra dedicación.</p>
+</div>
+</div>
+<div id="outline-container-headline-19" class="outline-3">
+<h3 id="headline-19">
+5. Serve á propia cultura hacker
+</h3>
+<div id="outline-text-headline-19" class="outline-text-3">
+<p>Finalmente, ti podes servir e propagar á propia cultura (como, por exemplo,
+escribindo un manual preciso sobre como converterse nun hacker :-)). Isto non é
+algo que ti estarás en condicións de facer ata que esteas por un tempo e serás
+coñecido por unha das catro primeiras cousas.</p>
+<p>
+A cultura hacker non ten líderes, pero ten heroes, anciáns tribais,
+historiadores e voceiros. Cando andes polas trincheiras durante moito tempo,
+volveraste algún destes. Coidado: os hackers desconfían do ego descarado nos
+seus anciáns tribais, polo que alcanzar este tipo de fama é perigoso. En vez de
+esforzarse por iso, tes que situarte para que che veña sen forzalo e logo ser
+modesto e gracioso co teu estado.</p>
+<div class="center-block" style="text-align: center; margin-left: auto; margin-right: auto;">
+<p><img src="./glider.png" alt="./glider.png" title="./glider.png" /></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-20" class="outline-2">
+<h2 id="headline-20">
+A conexión hacker/nerd
+</h2>
+<div id="outline-text-headline-20" class="outline-text-2">
+<p>
+Contrariamente aos mitos populares, ti non tes que ser un nerd para ser un
+hacker. Sen embargo, axuda, e moitos hackers son de feito nerds. Estar algo
+marxinado socialmente axuda a estar concentrado nas cousas realmente
+importantes, coma pensar e hackear.</p>
+<p>
+Por esta razón, moitos hackers adoptaron a etiqueta &#39;geek&#39; coma unha insignia de
+orgullo —é unha forma de declarar a súa independencia das expectativas sociais
+normais (así como a afección por outras cousas como a ciencia ficción e os xogos
+de estratexia que adoitan acompañar a ser un hacker). O termo &#39;nerd&#39; era
+utilizado nos anos 90, cando &#39;nerd&#39; era un leve pexorativo e &#39;geek&#39; un pouco
+máis duro; nalgún momento despois do 2000 cambiaron de lugar, polo menos na
+cultura popular dos Estados Unidos, e agora hai incluso unha cultura do orgullo
+&#39;geek&#39; entre as persoas que non son técnicas.</p>
+<p>
+Se consegues concentrarte o suficiente no hacking para ser bo niso e seguir
+tendo vida, está ben. Isto é moito máis fácil agora que cando eu era novo nos
+anos 70; a cultura tradicional agora é moito máis amigable cos tecno-nerds.
+Incluso hai un número crecente de persoas que se dan conta de que os hackers
+adoitan ser material de alta calidade para amantes e cónxuxes.</p>
+<p>
+Se che atrae o hacking porque non tes vida, tamén está ben —polo menos non terás
+problemas para concentrarte. Quizais teñas unha vida máis tarde.</p>
+<div class="center-block" style="text-align: center; margin-left: auto; margin-right: auto;">
+<p><img src="./glider.png" alt="./glider.png" title="./glider.png" /></p>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-21" class="outline-2">
+<h2 id="headline-21">
+Puntos polo estilo
+</h2>
+<div id="outline-text-headline-21" class="outline-text-2">
+<p>
+Outra vez, para ser un hacker, tes que entrar na mentalidade hacker. Hai varias
+cousas que podes facer cando non estás no ordenador que parecen axudar. Non hai
+substitutos do hacking (nada o é) pero moitos hackers fano, e senten que
+conectan dalgún xeito básico coa esencia do hacking.</p>
+<ul>
+<li>
+<p>Aprende a escribir a túa linguaxe materna ben. Aínda que é un estereotipo
+común que os programadores non saben escribir, un sorprendente número de
+hackers (incluíndo aos máis habilidosos que coñezo) son escritores moi
+capaces. </p>
+</li>
+<li>
+<p>Le ciencia ficción. Vai a convencións de ciencia ficción (esta é unha boa
+forma de coñecer a hackers e proto-hackers). </p>
+</li>
+<li>
+<p>Únete a un hackerspace e crea cousas (outra boa forma de coñecer a hackers e
+proto-hackers). </p>
+</li>
+<li>
+<p>Entrena en artes marciais. O tipo de disciplina mental necesaria para as artes
+marciais parece ser similar de xeito importante ao que fan os hackers. As
+formas máis populares entre os hackers son definitivamente as artes asiáticas
+sen armas, coma o Tae Kwon Do, varias formas de Karate, Kung Fu, Aikido, ou Ju
+Jitsu. A esgrima occidental e as artes da espada asiáticas tamén teñen
+seguidores visibles. Nos lugares onde é legal, o disparo con pistola foi
+aumentando en popularidade dende finais dos anos noventa. As artes marciais
+máis hacker son as que enfatizan a disciplina mental, a conciencia relaxada e
+o control preciso, en lugar da forza bruta, o atletismo ou a dureza física. </p>
+</li>
+<li>
+<p>Estuda unha disciplina de meditación real. O eterno favorito entre os hackers
+é o Zen (o máis importante, é que é posible beneficiarse do Zen sen adquirir
+unha relixión ou sen descartar a que xa tes). Tamén poden funcionar outros
+estilos, pero ten coidado de escoller unha que non esixa crer cousas tolas. </p>
+</li>
+<li>
+<p>Desenvolve un oído analítico para a música. Aprende a apreciar tipos de música
+peculiares. Aprende a tocar ben algún instrumento musical ou a cantar. </p>
+</li>
+<li>
+<p>Desenvolve o teu aprecio polos xogos de palabras.</p>
+</li>
+</ul>
+<p>Canto máis destas cousas fagas, máis probable é que sexas un hacker natural. Por
+que estas cousas en particular non están completamente claras, pero están
+relacionadas cunha mestura de habilidades do cerebro esquerdo e dereito que
+parece ser importante; os hackers teñen que ser capaces de razoar loxicamente e
+de saír da aparente lóxica dun problema ao momento.</p>
+<p>
+Traballa tan intensamente como xogas e xoga tan intensamente como traballas.
+Para os hackers verdadeiros, os límites entre &#34;xogar&#34;, &#34;traballar&#34;, &#34;ciencia&#34; e
+&#34;arte&#34; tenden a desaparecer, ou a mesturarse nunha lúdica creatividade de alto
+nivel. Ademais, non te conformes cun estreito abano de habilidades. Inda que a
+maioría dos hackers autodescríbense como programadores, é moi probable que sexan
+máis que competentes en varias habilidades relacionadas –administración de
+sistemas, deseño web, e a resolución de problemas de hardware do PC son comúns.
+Un hacker que sexa administrador de sistemas, por outra banda, é probable que
+sexa bastante habilidoso na programación de scripts e deseño web. Os hackers non
+fan as cousas á medias; se invisten nunha habilidade, adoitan ser moi bos nela.</p>
+<p>
+Finalmente, algunhas cousas que non hai que facer.</p>
+<ul>
+<li>
+<p>Non empregues un ID de usuario grandioso ou tonto.</p>
+</li>
+<li>
+<p>Non entres en discusións áridas na Usenet (nin en ningún outro lugar).</p>
+</li>
+<li>
+<p>Non te chames a ti mesmo &#39;ciberpunk&#39; e non perdas o tempo con alguén que o
+faga.</p>
+</li>
+<li>
+<p>Non fagas publicacións nin escribas correos electrónicos cheos de erros
+ortográficos e gramática incorrecta.</p>
+</li>
+</ul>
+<p>A única reputación que terás facendo estas cousas será a dun imbécil. Os hackers
+teñen unha gran memoria – poderían pasar moitos anos ata que che acepten de novo
+despois destes erros.</p>
+<p>
+O problema cos nomes grandiosos merece unha explicación. Ocultar a túa
+identidade detrás deste tipo de ID é un comportamento xuvenil e parvo
+característico dos crackers, warez d00dz e outras formas de vida inferiores. Os
+hackers non fan isto; están orgullosos do que fan e queren que se asocie cos
+seus nomes reais. Entón, se empregas un nome grandioso, déixao. Na cultura dos
+hackers só te marcará coma un perdedor.</p>
+<div class="center-block" style="text-align: center; margin-left: auto; margin-right: auto;">
+<p><img src="./glider.png" alt="./glider.png" title="./glider.png" /></p>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-22" class="outline-2">
+<h2 id="headline-22">
+Nota Histórica: Hacking, Código Aberto e Software Libre
+</h2>
+<div id="outline-text-headline-22" class="outline-text-2">
+<p>
+Cado escribín este HOWTO a finais de 1996, algunhas cousas eran moi diferentes
+de como son hoxe en día. Unhas poucas palabras sobre destes cambios poden
+axudar a aclarar as cousas para as persoas que están confundidas sobre a
+relación do código aberto, o software libre e Linux coa comunidade hacker. Se
+non tes curiosidade por isto, podes saltar directamente ás preguntas frecuentes
+e á bibliografía dende aquí.</p>
+<p>
+O espírito e a comunidade hacker tal e como os describín aquí son moi
+anteriores á aparición de Linux despois de 1990; introducinme por primeira vez
+nela arredor de 1976 e as súas raíces son facilmente rastrexables ata principios
+dos anos sesenta. Pero antes de Linux, a maioría do hacking facíase en sistemas
+operativos propietarios ou nun puñado de sistemas caseiros experimentais como o
+ITS do MIT que nunca se despregaron fóra dos seus nichos académicos orixinais.
+Aínda que houbo algúns intentos anteriores (pre-Linux) de cambiar esta
+situación, o seu impacto foi no mellor dos casos moi marxinal e confinado a
+comunidades de verdadeiros crentes dedicados que eran pequenas minorías incluso
+dentro da comunidade hacker, e moito menos respecto ao mundo máis grande do
+software en xeral.</p>
+<p>
+O que agora se chama &#34;código aberto&#34; remóntase tanto coma a propia comunidade
+hacker, pero ata 1985 era unha práctica popular sen nome máis que un movemento
+consciente con teorías e manifestos. Esta prehistoria rematou cando, en 1985, o
+hacker Richard Stallman (&#34;RMS&#34;) intentou darlle un nome: &#34;software libre&#34;. Pero
+o seu acto de nomear tamén foi un acto de reivindicación; engadiu bagaxe
+ideolóxica á etiqueta de &#34;software libre&#34; que gran parte da comunidade de
+hackers existente nunca aceptou. Como resultado, a etiqueta de &#34;software libre&#34;
+foi rexeitada en voz alta por unha substancial minoría da comunidade hacker
+(especialmente entre os asociados a BSD Unix), e usada con reservas serias pero
+silenciosas pola maioría do resto (incluído eu).</p>
+<p>
+A pesar destas reservas, a pretensión de RMS de definir e dirixir á comunidade
+hacker baixo a bandeira do &#34;software libre&#34; mantívose en xeral ata mediados dos
+anos noventa. Isto só foi desafiado seriamente polo auxe de Linux. Linux deu ao
+desenvolvemento de código aberto un fogar natural. Moitos proxectos emitidos
+baixo termos que agora chamaríamos de código aberto migraron de Unix
+propietarios a Linux. A comunidade arredor de Linux medrou de forma explosiva,
+volvéndose moito máis grande e heteroxénea que a cultura hacker anterior a
+Linux. RMS intentou decididamente cooptar toda esta actividade no seu movemento
+de &#34;software libre&#34;, pero foi frustrado tanto pola explosiva diversidade da
+comunidade Linux como polo escepticismo público do seu fundador, Linus
+Torvalds. Torvalds continuou empregando o termo &#34;software libre&#34; por falta de
+alternativa, pero rexeitou públicamente a bagaxe ideolóxica de RMS. Moitos
+hackers máis novos seguiron o exemplo.</p>
+<p>
+En 1996, cando publiquei por primeira vez este HOWTO, a comunidade hacker
+reorganizouse rápidamente en torno a Linux e un puñado de outros sistemas
+operativos de código aberto (en particular, os descendentes de BSD Unix). A
+memoria comunitaria do feito de que a maioría de nós levaramos décadas
+desenvolvendo software de código pechado en sistemas operativos de código
+pechado aínda non comezara a esvaecerse, pero ese feito xa comezaba a parecer
+parte dun pasado morto; Os hackers definíanse cada vez máis como hackers polos
+seus anexos a proxectos de código aberto como Linux ou Apache.</p>
+<p>
+Non obstante, o termo &#34;código aberto&#34; aínda non aparecera; non o faría ata
+principios de 1998. Cando se fixo, a maioría da comunidade de hackers adoptouno
+nos seis meses seguintes; as excepcións eran unha minoría ideoloxicamente unida
+ao termo &#34;software libre&#34;. Desde 1998, e sobre todo despois de 2003, a
+identificación do &#34;hacking&#34; co desenvolvemento de &#34;código aberto (e software
+libre)&#34; fíxose moi próxima. Hoxe non ten moito sentido intentar distinguir entre
+estas categorías e parece improbable que cambie no futuro.</p>
+<p>
+Non obstante, convén lembrar que non sempre foi así.</p>
+<div class="center-block" style="text-align: center; margin-left: auto; margin-right: auto;">
+<p><img src="./glider.png" alt="./glider.png" title="./glider.png" /></p>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-23" class="outline-2">
+<h2 id="headline-23">
+Outros recursos
+</h2>
+<div id="outline-text-headline-23" class="outline-text-2">
+<p>
+Paul Graham escribiu un ensaio chamado <a href="http://www.paulgraham.com/gh.html">Great Hackers</a>
+e outro sobre <a href="http://www.paulgraham.com/college.html">Undergraduation</a>, no que fala con moita sabedoría.</p>
+<p>
+Os hackers máis novos poden considerar interesante e útil o seguinte texto
+<a href="http://www.catb.org/~esr/faqs/things-every-hacker-once-knew/">Things Every Hacker Once Knew</a>.</p>
+<p>
+Tamén escribín <a href="http://catb.org/~esr/writings/hacker-history/hacker-history.html">A Brief History Of Hackerdom</a>.</p>
+<p>
+Escribín o traballo, <a href="http://catb.org/~esr/writings/cathedral-bazaar/index.html">The Cathedral and the Bazaar</a>,
+que explica moito sobre como funcionan as culturas de código aberto e Linux.
+Abordei este tema aínda máis directamente na súa continuación
+<a href="http://catb.org/~esr/writings/homesteading/">Homesteading the Noosphere</a>.</p>
+<p>
+Rick Moen escribiu un excelente documento sobre <a href="http://linuxmafia.com/faq/Linux_PR/newlug.html">how to run a Linux user group</a>.</p>
+<p>
+Rick Moen e eu colaboramos noutro documento sobre <a href="http://catb.org/~esr/faqs/smart-questions.html">How To Ask Smart Questions</a>.
+Isto axudarache a buscar axuda de xeito que teñas máis probabilidades de
+conseguila.</p>
+<p>
+Se precisas instrucións sobre o funcionamento dos ordenadores persoais, Unix e
+Internet, consulta <a href="https://tldp.org/HOWTO//Unix-and-Internet-Fundamentals-HOWTO/">The Unix and Internet Fundamentals HOWTO</a>.</p>
+<p>
+Cando publiques software ou escribas parches para software, intenta seguir as
+pautas do <a href="https://tldp.org/HOWTO/Software-Release-Practice-HOWTO/index.html">Software Release Practice HOWTO</a>.</p>
+<p>
+Se che gustou o poema Zen, tamén che pode gustar
+<a href="http://www.catb.org/~esr/writings/unix-koans/">Rootless Root: The Unix Koans of Master Foo</a>.</p>
+<div class="center-block" style="text-align: center; margin-left: auto; margin-right: auto;">
+<p><img src="./glider.png" alt="./glider.png" title="./glider.png" /></p>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-24" class="outline-2">
+<h2 id="headline-24">
+Preguntas frecuentes
+</h2>
+<div id="outline-text-headline-24" class="outline-text-2">
+<p>
+<strong>Pregunta</strong>: Como podo saber se xa son un hacker?</p>
+<p>
+<strong>Resposta</strong>: Pregúntate a ti mesmo estas tres cousas:</p>
+<ul>
+<li>
+<p>Falas código, con fluencia?</p>
+</li>
+<li>
+<p>Identifícaste cos obxectivos e valores da comunidade hacker?</p>
+</li>
+<li>
+<p>Nalgún momento chamoute hacker un membro establecido da comunidade hacker?</p>
+</li>
+</ul>
+<p>Se podes respostar &#34;Si&#34; as tres preguntas, xa es un hacker. Non e suficiente
+  con dúas.</p>
+<p>
+  A primeira é sobre as habilidades. Ti probablemente pases se tes as
+  capacidades técnicas mínimas descritas antes neste documento. Tamén pasas de
+  sobra se tes unha cantidade substancial de código aceptado nun proxecto de
+  desenvolvemento open-source.</p>
+<p>
+  A segunda pregunta é sobre a actitude. Se os cinco principios da mentalidade
+  hacker parecen obvios para ti, máis unha descrición do teu estilo de vida que
+  algo novo, xa levas máis da metade do camiño recorrido. Esa é a metade interna
+  de cada un; a outra, externa é o grao no que te identificas cos proxectos a
+  longo prazo da comunidade hacker.</p>
+<p>
+  Esta é unha lista incompleta pero indicativa de algúns deses proxectos:
+  Impórtate que Linux mellore e se espalle? Tes paixón pola liberdade do
+  software? Hostil os monopolios? Actúas coa crenza de que os computadores poden
+  ser instrumentos de empoderamento que fagan o mundo un lugar mais rico e
+  humano?</p>
+<p>
+  Pero unha nota de precaución é necesaria aquí. A comunidade hacker ten algúns
+  intereses políticos específicos principalmente defensivos – dous de eles son
+  defender os dereitos de libre expresión e repeler a obtención de poder da
+  &#34;propiedade intelectual&#34; que faría o open-source ilegal. Algúns deses
+  proxectos a longo prazo son organizacións de liberdades civís coma a
+  Electronic Frontier Foundation e a actitude externa inclúe apoialos. Pero
+  mais aló diso, a maioría dos hacker ven os intentos de sistematizar a actitude
+  hacker nun programa político explícito con desconfianza; xa aprendemos, polo
+  camiño duro, que eses intentos dividen e distraen. Se alguén intenta
+  recrutarte para marchar no teu capitolio no nome da actitude hacker, non
+  entenderon a idea. A resposta correcta probablemente sexa &#34;Cala e amósalles o
+  código.&#34;</p>
+<p>
+  A terceira proba ten un complicado elemento de recursividade nel. Observei na
+  sección &#34;<a href="#headline-2">Que é un hacker?</a>&#34; que ser un hacker é en parte cuestión de pertencer
+  a unha subcultura particular ou rede social cunha historia compartida, un
+  interior e un exterior. No pasado lonxano, os hackers eran un grupo moito
+  menos cohesivo e auto-consciente do que son hoxe. Pero a importancia do
+  aspecto da rede social incrementou nos últimos trinta anos ao mesmo tempo que
+  o Internet fixo as conexións co núcleo da subcultura hacker mais fáciles de
+  desenrolar e manter. Un indicador sinxelo do cambio é que, neste século, temos
+  as nosas propias camisetas.</p>
+<p>
+  Os sociólogos, que estudan redes coma as da cultura hacker baixo a rúbrica de
+  &#34;colexios invisibles&#34;, atoparon que unha característica destas redes é que
+  teñen gardiáns – membros centrais coa autoridade social para avalar a entrada
+  de novos membros na rede. Porque o &#34;colexio invisible&#34; que é a cultura hacker
+  é un frouxo e informal, o papel do gardián é tamén informal. Pero unha cousa
+  que todos os hackers entenden é que non todos os hackers son gardiáns. Os
+  gardiáns teñen que obter un certo grado de antigüidade e logros antes de que
+  poidan outorgar o título. Canto é difícil de cuantificar pero todo hacker o
+  sabe cando o ve.</p>
+<p>
+<strong>P</strong>: Ensinarasme como hackear?</p>
+<p>
+<strong>R</strong>: Dende que publiquei esta páxina por primeira vez, varias persoas me
+preguntan cada semana (a miúdo cada día) se lles &#34;ensinaría todo sobre o
+hacking&#34;. Desafortunadamente non teño o tempo ou enerxía pra facer isto; os meus
+propios proxectos de hacking, e traballar como un partidario do software
+open-source, toman o 110% do meu tempo.</p>
+<p>
+  Aínda no caso de que o fixera, o hacking é unha actitude e unha habilidade
+  que, básicamente tes que ensinarte a ti mesmo. Atoparás que mentres que os
+  verdadeiros hackers queren axudarte, non te respectarán se andas a rogar que
+  che ensinen todo o que saben en sinxelos pasos.</p>
+<p>
+  Aprende unhas poucas cousas ao principio. Amosa que o estas intentando, que es
+  capaz de aprender pola túa conta. Entón vai aos hacker que atopes con
+  preguntas específicas.</p>
+<p>
+  Se mandas un correo a un hacker pedindo consello, aquí hai dúas cousas que
+  debes saber. Primeiro, atopamos que a xente que é preguiceira ou descoidada
+  coa súa escritura soen ser demasiado preguiceiros e descoidados co seu
+  pensamento pra ser bos hackers – así que se coidadoso con como escribes e usa
+  boa gramática e puntuación, senón probablemente sexas ignorado. En segundo
+  lugar, non te atrevas a pedir unha resposta a unha conta dun ISP que é
+  distinta da conta dende a que escribes; atopamos que a xente que o fai
+  normalmente son ladróns usando contas roubadas, e non temos interese en
+  recompensar o roubo.</p>
+<p>
+<strong>P</strong>: Entón, como podo empezar?</p>
+<p>
+<strong>R</strong>: A mellor forma de empezar probablemente sexa acudir á reunión de un LUG
+(Linux user group). Podes atopar estes grupos na &#34;LDP General Linux Information
+Page&#34;; probablemente haxa un preto de ti, probablemente asociado cun instituto
+ou universidade. Os membros do LUG probablemente che den un Linux se llo pides, e
+seguro que che axudan a instalalo e dar os primeiros pasos nel. </p>
+<p>
+  O teu seguinte paso (e o primeiro se non atopas un LUG cerca) debe ser atopar
+  un proxecto open-source que che interese. Comeza por ler o código e revisar os
+  bugs. Aprende a contribuír e traballa para que che recoñezan.</p>
+<p>
+  O único xeito de que che recoñezan é traballar en mellorar as túas
+  habilidades. Se me pides un consello persoal en como empezar, direiche
+  exactamente estas mesmas cousas, por que non teño ningún atallo máxico para ti.
+  Tamén te descartaría mentalmente como un potencial perdedor – por que se
+  careces do aguante pra ler esta FAQ e da intelixencia pra entender que o único
+  xeito é traballar en mellorar as túas habilidades, non tes remedio.</p>
+<p>
+  Outra posibilidade interesante é visitar un hackerspace. Hai un movemento
+  florecente de xente que crea lugares físicos – clubs de makers – onde poden
+  quedar con xente pra traballar en proxectos de hardware e software de forma
+  conxunta, ou independente nunha atmosfera amigable. Os hackerspaces a miúdo
+  conseguen ferramentas e equipo especializado que sería demasiado caro ou
+  loxísticamente inconveniente pra persoas individuais. Os hackerspaces son
+  fáciles de atopar no Internet; é posible que haxa un preto de ti.</p>
+<p>
+<strong>P</strong>: Cando hai que comezar? É demasiado tarde pra min pra aprender?</p>
+<p>
+<strong>R</strong>: Calquera idade na que te sintas motivado pra comezar e unha boa idade.
+Parece que a maioría da xente se interesa entre os 15 e os 20 anos, pero coñezo
+excepcións nas dúas direccións.</p>
+<p>
+<strong>P</strong>: Canto tempo tardarei en aprender a hackear?</p>
+<p>
+<strong>R</strong>: Iso depende en canto talento teñas e como de duro traballes. A maioría da
+xente que intenta adquirir unha habilidade respectable tarda entre dezaoito
+meses e dous anos, se se concentran. Pero non penses que acaba aí; no hacking
+(como noutros moitos campos) tardase uns dez anos en chegar a mestría, e se es
+un verdadeiro hacker, adicaras o resto da tua vida aprendendo e perfeccionando o
+teu oficio.</p>
+<p>
+<strong>P</strong>: É Visual Basic unha boa linguaxe pra empezar?</p>
+<p>
+<strong>R</strong>: Se estas facendo esta pregunta, case seguro que pensas intentar hackear no
+Microsoft Windows. Iso é unha mala idea de por si. Cando comparei intentar
+aprender a hackear en Windows con tratar de aprender a bailar cunha armadura,
+non estaba de broma. Non o intentes. É desagradable e nunca deixa de ser
+desagradable.</p>
+<p>
+  Hai un problema especifico co Visual Basic; principalmente que non é portable.
+  Aínda que hai prototipos de implementacións open-source de Visual Basic, os
+  estándares ECMA aplicables non cobren mais dunha pequena porción das súas
+  interfaces de programación. En Windows a maioría da sua librería é propietaria
+  e dun só provedor (Microsoft); se non es extremadamente coidadoso coas
+  funcionalidades que utilizas – máis coidadoso do que un novato é capaz de ser
+  – acabaras atrapado nunha desas plataformas que Microsoft escolla soportar.
+  Se estas comezando con Unix, hai linguaxes moito mellores con mellores
+  librarías. Python, por exemplo.</p>
+<p>
+  Ademais coma outros Basics, Visual Basic e unha linguaxe cun mal deseño que
+  che ensinara malos hábitos de programación. Non, non me pidas que os describa
+  en detalle; esa explicación podería encher un libro. Aprende unha linguaxe
+  mellor deseñada no seu lugar.</p>
+<p>
+  Un deses malos hábitos é volverse dependente das librarías, widgets e
+  ferramentas de desenvolvemento dun só provedor. En xeral, calquera linguaxe
+  que non estea completamente soportada por polo menos Linux ou un dos BSDs,
+  e/ou polo menos tres sistemas operativos de distintos provedores, e una mala
+  elección pra aprender a hackear.</p>
+<p>
+<strong>P</strong>: Axudarasme a crackear un sistema, ou ensinarasme como crackear?</p>
+<p>
+<strong>R</strong>: Non. Calquera que siga preguntando este tipo de preguntas despois de ler
+este FAQ é demasiado estúpido para que sexa educable aínda que eu tivese tempo
+para tutorealo. Calquera pregunta deste tipo que me chegue por email ignorareina
+ou contestareina con moita grosería.</p>
+<p>
+<strong>P</strong>: Como podo obter o contrasinal da conta doutra persoa?</p>
+<p>
+<strong>R</strong>: Iso é cracking. Vaite, idiota.</p>
+<p>
+<strong>P</strong>: Como podo entrar/ler/monitorizar o email de alguén?</p>
+<p>
+<strong>R</strong>: Iso é cracking. Pérdete, parvo.</p>
+<p>
+<strong>P</strong>: Como podo roubar privilexios nas canles do IRC?</p>
+<p>
+<strong>R</strong>: Iso é cracking. Fora de aquí, cretino.</p>
+<p>
+<strong>P</strong>: Crackearonme. Axúdasme a defenderme de novos ataques?</p>
+<p>
+<strong>R</strong>: Non. Cada vez que me fixeron esta pregunta ata agora, provén dalgún pobriño
+que está a utilizar Microsoft Windows. Non é posible protexer eficazmente os
+sistemas Windows contra ataques; o código e a arquitectura simplemente teñen
+demasiados defectos, o que fai que protexer Windows é tentar rescatar un barco
+cunha peneira. A única prevención fiable comeza co cambio a Linux ou algún outro
+sistema operativo deseñado para ser, polo menos, seguro.</p>
+<p>
+<strong>P</strong>: Estou tendo problemas co meu Windows. Pódesme axudar?</p>
+<p>
+<strong>R</strong>: Si. Entrar nunha terminal e escribe &#34;format c:&#34;. Calquera problema que
+experimentes cesará nun poucos minutos.</p>
+<p>
+<strong>P</strong>: Onde podo atopar algúns hackers cos que falar?</p>
+<p>
+<strong>R</strong>: A mellor forma é atopar un grupo de usuarios Unix ou Linux local e ir ás
+súas reunións (podes atopar ligazóns a varias listas de grupos de usuarios no
+sitio <a href="https://tldp.org/">LDP</a> en ibiblio).</p>
+<p>
+  (Dicía aquí que non atoparías hackers no IRC, pero enténdenme que isto está
+  cambiando. Ao parecer, algunhas comunidades de hackers, ligadas a cousas como
+  GIMP e Perl, agora teñen canles IRC).</p>
+<p>
+<strong>P</strong>: Podes recomendar libros útiles sobre temas relacionados co hacking?</p>
+<p>
+<strong>R</strong>: Manteño o HOWTO de <a href="https://tldp.org/HOWTO/Reading-List-HOWTO/index.html">Linux Reading List</a> que pode resultar útil. A <a href="http://catb.org/~esr/faqs/loginataka.html">Loginataka</a>
+tamén pode ser interesante.</p>
+<p>
+  Para unha introdución a Python, consulta o <a href="https://docs.python.org/3/tutorial/index.html">tutorial</a> no sitio de Python.</p>
+<p>
+<strong>P</strong>: Teño que ser bo nas matemáticas para converterme nun hacker?</p>
+<p>
+<strong>R</strong>: Non. No hacking utilizase moi poucas matemáticas formais ou aritmética. En
+particular, normalmente non necesitarás trigonometría, cálculo ou análise (hai
+excepcións a isto nun puñado de áreas de aplicación específicas como gráficos
+por ordenador en 3-D). Coñecer algo de lóxica formal e álxebra de Boole é bo.
+Algunhas bases na matemática finita (incluída a teoría de conxuntos finitos, a
+combinatoria e a teoría de grafos) poden ser útiles.</p>
+<p>
+  Moito máis importante: cómpre ser capaz de pensar lóxicamente e seguir cadeas
+  de razoamento exacto, como fan os matemáticos. Aínda que o contido da maioría
+  das matemáticas non che axudará, necesitarás a disciplina e a intelixencia
+  para manexar as matemáticas. Se careces de intelixencia, hai poucas esperanzas
+  para ti coma hacker; se che falta a disciplina, é mellor que a cultives.</p>
+<p>
+  Creo que un bo xeito de saber se o tes é coller unha copia do libro de Raymond
+  Smullyan <em>What Is The Name Of This Book?</em>. Os lúdicos enigmas de Smullyan están
+  moi no espírito hacker. Poder resolvelos é un bo sinal; gozar ó resolvelos é
+  aínda mellor.</p>
+<p>
+<strong>P</strong>: Que linguaxe debo aprender de primeiro?</p>
+<p>
+<strong>R</strong>: HTML se aínda non o sabes. Hai moitos libros sobre HTML malos e con moita
+publicidade, e lamentablemente poucos bos. O que máis me gusta é <a href="www.oreilly.com/catalog/html5/">HTML: The
+Definitive Guide</a>.</p>
+<p>
+  Pero HTML non é unha linguaxe de programación completa. Cando esteas listo
+  para comezar a programar, recomendaría comezar con <a href="https://www.python.org/">Python</a>. Escoitarás a moita
+  xente recomendando Perl, pero é máis difícil de aprender e (na miña opinión)
+  está peor deseñado.</p>
+<p>
+  C é realmente importante, pero tamén é moito máis difícil que Python ou Perl.
+  Non intentes aprendelo primeiro.</p>
+<p>
+  Usuarios de Windows, non vos conformedes con Visual Basic. Ensinarache malos
+  hábitos e non é portable fora de Windows. Evítao.</p>
+<p>
+<strong>P</strong>: Que tipo de hardware necesito?</p>
+<p>
+<strong>R</strong>: Adoitaba ser que os ordenadores persoais tiñan pouca potencia e eran pobres
+en memoria, o suficiente para poñer límites artificiais ao proceso de
+aprendizaxe dun hacker. Isto deixou de ser certo a mediados dos anos noventa;
+calquera máquina dun procesador Intel 486DX50 é o suficientemente potente para o
+traballo de desenvolvemento, comunicacións e Internet, e os discos máis pequenos
+que podes mercar a día de hoxe son o suficientemente grandes.</p>
+<p>
+  O importante para escoller unha máquina na que aprender é se o seu hardware é
+  compatible con Linux (ou compatible con BSD, se elixes seguir esa ruta). De
+  novo, isto será certo para case todas as máquinas modernas. As únicas áreas
+  realmente pegañentas son os módems e as tarxetas sen fíos; algunhas máquinas
+  teñen hardware específico de Windows que non funcionará con Linux.</p>
+<p>
+  Hai un FAQ sobre compatibilidade de hardware; a última versión está <a href="https://tldp.org/HOWTO/Hardware-HOWTO/index.html">aquí</a>.</p>
+<p>
+<strong>P</strong>: Quero contribuír. Podes axudarme a escoller un problema para traballar?</p>
+<p>
+<strong>R</strong>: Non, porque non coñezo os teus talentos nin os teus intereses. Tes que
+estar motivado por ti mesmo ou non te manterás, e é por iso que que outras
+persoas elixan a túa dirección case nunca funciona.</p>
+<p>
+<strong>P</strong>: Teño que odiar e golpear a Microsoft? </p>
+<p>
+<strong>R</strong>: Non. Non é que Microsoft non sexa repugnante, pero houbo unha cultura
+hacker moito antes de Microsoft e aínda haberá unha longa despois de que
+Microsoft sexa historia. Calquera enerxía que gastes odiando a Microsoft
+gastaríase mellor en amar o teu oficio. Escribe un bo código – iso golpeará a
+Microsoft de xeito suficiente sen contaminar o teu karma.</p>
+<p>
+<strong>P</strong>: Pero o software de código aberto non deixará aos programadores incapaces de
+gañarse a vida?</p>
+<p>
+<strong>R</strong>: Parece improbable –ata o de agora, a industria do software de código
+aberto parece estar creando emprego en vez de destruílo. Se ter un programa
+escrito supón un beneficio económico neto por non telo escrito, un programador
+cobrará se o programa será ou non de código aberto unha vez rematado. E, por
+moito que se escriba o software &#34;de balde&#34;, sempre parece haber máis demanda de
+aplicacións novas e personalizadas. Escribín máis sobre isto en <a href="https://opensource.org/">Open Source</a>.</p>
+<p>
+<strong>P</strong>: Onde podo obter un Unix gratuíto?</p>
+<p>
+<strong>R</strong>: Se aínda non tes un Unix instalado na túa máquina, noutros lugares desta
+páxina inclúo indicacións para obter o Unix gratuíto máis usado. Para ser un
+hacker necesitas motivación e iniciativa e a capacidade de educarte. Empeza
+agora…</p>
+<div class="center-block" style="text-align: center; margin-left: auto; margin-right: auto;">
+<p><img src="./glider.png" alt="./glider.png" title="./glider.png" /></p>
+</div>
+</div>
+</div>
+
+
+        
+          <div class="blog-tags">
+            
+              <a href="https://hackliza.gal//tags/traduci%C3%B3n/">tradución</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="https://hackliza.gal/posts/console_usability/" data-toggle="tooltip" data-placement="top" title="Truquiños para mellorar a usabilidade de programas de consola">&larr; Artigo anterior</a>
+            </li>
+          
+          
+            <li class="next">
+              <a href="https://hackliza.gal/posts/libfuzzer_autotools/" data-toggle="tooltip" data-placement="top" title="Usando libfuzzer en proxectos compilados con autotools">Artigo siguiente &rarr;</a>
+            </li>
+          
+        </ul>
+      
+
+
+      
+        
+          
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hackliza" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+          
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://github.com/hackliza" title="GitHub">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/hackliza" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2024
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="https://hackliza.gal/">Hackliza</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.74.3</a> alimentada &nbsp;&bull;&nbsp; Tema <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adaptado de <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="https://hackliza.gal/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://hackliza.gal/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

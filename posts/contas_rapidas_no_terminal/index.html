@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="gl" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Contas rápidas no terminal - Hackliza</title>
+  <meta name="description" content="Boas, xente.
+ A semana pasada pasei por un comentario en HN do 2019. O usuario estaba experimentando cuns script pra facer algunhas contas directamente no terminal bash.
+ TLDR: Clica aquí pra saltar a historia e ir directamente ao código.
+ O que o usuario propoñía era usar algo coma isto, baseado no comando dc (os comentarios son meus).
+$ . calc.sh # Cargar funcións $ * 4 5 # Multiplica 4 e 5 20 $ / 21 3 # Divide 21 por 3 7   Isto soaba interesante."><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Hackliza",
+    
+    "url": "https:\/\/hackliza.gal\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "https:\/\/hackliza.gal\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/posts\/contas_rapidas_no_terminal\/",
+          "name": "Contas rápidas no terminal"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Sergio Martínez Portela"
+  },
+  "headline": "Contas rápidas no terminal",
+  "description" : "Boas, xente.\n A semana pasada pasei por un comentario en HN do 2019. O usuario estaba experimentando cuns script pra facer algunhas contas directamente no terminal bash.\n TLDR: Clica aquí pra saltar a historia e ir directamente ao código.\n O que o usuario propoñía era usar algo coma isto, baseado no comando dc (os comentarios son meus).\n$ . calc.sh # Cargar funcións $ * 4 5 # Multiplica 4 e 5 20 $ \/ 21 3 # Divide 21 por 3 7   Isto soaba interesante.",
+  "inLanguage" : "gl",
+  "wordCount":  557 ,
+  "datePublished" : "2021-11-01T00:00:00",
+  "dateModified" : "2021-11-01T00:00:00",
+  "image" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+  "keywords" : [ "terminal, exploracións" ],
+  "mainEntityOfPage" : "https:\/\/hackliza.gal\/posts\/contas_rapidas_no_terminal\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "https:\/\/hackliza.gal\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="Contas rápidas no terminal" />
+<meta property="og:description" content="Boas, xente.
+ A semana pasada pasei por un comentario en HN do 2019. O usuario estaba experimentando cuns script pra facer algunhas contas directamente no terminal bash.
+ TLDR: Clica aquí pra saltar a historia e ir directamente ao código.
+ O que o usuario propoñía era usar algo coma isto, baseado no comando dc (os comentarios son meus).
+$ . calc.sh # Cargar funcións $ * 4 5 # Multiplica 4 e 5 20 $ / 21 3 # Divide 21 por 3 7   Isto soaba interesante.">
+<meta property="og:image" content="https://hackliza.gal/img/hackliza.png" />
+<meta property="og:url" content="https://hackliza.gal/posts/contas_rapidas_no_terminal/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hackliza" />
+
+  <meta name="twitter:title" content="Contas rápidas no terminal" />
+  <meta name="twitter:description" content="Boas, xente.
+ A semana pasada pasei por un comentario en HN do 2019. O usuario estaba experimentando cuns script pra facer algunhas contas directamente no terminal bash.
+ TLDR: Clica aquí pra saltar a …">
+  <meta name="twitter:image" content="https://hackliza.gal/img/hackliza.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@hackliza" />
+  <meta name="twitter:creator" content="@hackliza" />
+  <link href='https://hackliza.gal/img/hackliza.png' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.74.3" />
+  <link rel="alternate" href="https://hackliza.gal/index.xml" type="application/rss+xml" title="Hackliza"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://hackliza.gal/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="https://hackliza.gal/css/syntax.css" /><link rel="stylesheet" href="https://hackliza.gal/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><style>
+ nav {
+     background: #0099CC !important;
+ }
+
+ .navbar-brand, #main-navbar ul li a, footer {
+     color: #fff !important;
+ }
+
+ .navbar-brand:hover, #main-navbar ul li a:hover {
+     color: #ccc !important;
+ }
+
+
+ figure {
+     margin-top: 1.5em; 
+     margin-bottom: 1.5em; 
+ }
+ 
+ figcaption {
+     text-align: center;
+     font-size: 85%;
+ }
+
+ pre {
+     overflow-x: auto !important;
+ }
+
+ .posts-heading {
+     text-align: center;
+ }
+ 
+</style>
+
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Conmuta navegación</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://hackliza.gal/">Hackliza</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blogue" href="/">Blogue</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Sobre nós" href="/about/">Sobre nós</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Charlas" href="/talks/">Charlas</a>
+            </li>
+          
+        
+
+        
+          
+            <li>
+              
+                
+                  <a href="/en" lang="en">en</a>
+                
+              
+                
+              
+            </li>
+          
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Hackliza" href="https://hackliza.gal/">
+            <img class="avatar-img" src="https://hackliza.gal/img/hackliza.png" alt="Hackliza" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>Contas rápidas no terminal</h1>
+              
+              
+                <hr class="small">
+              
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        
+<p>
+Boas, xente.</p>
+<p>
+A semana pasada pasei por <a href="https://news.ycombinator.com/item?id=20407438">un comentario en HN do 2019</a>. O usuario estaba
+experimentando cuns script pra facer algunhas contas directamente no terminal
+bash.</p>
+<p>
+<a href="#headline-1">TLDR: Clica aquí pra saltar a historia e ir directamente ao código.</a></p>
+<p>
+O que o usuario propoñía era usar algo coma isto, baseado no <a href="https://www.computerhope.com/unix/udc.htm">comando dc</a> (os comentarios son meus).</p>
+<div class="src src-shell">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ . calc.sh  <span style="color:#75715e"># Cargar funcións</span>
+$ * <span style="color:#ae81ff">4</span> <span style="color:#ae81ff">5</span>      <span style="color:#75715e"># Multiplica 4 e 5</span>
+<span style="color:#ae81ff">20</span>
+$ / <span style="color:#ae81ff">21</span> <span style="color:#ae81ff">3</span>     <span style="color:#75715e"># Divide 21 por 3</span>
+<span style="color:#ae81ff">7</span></code></pre></div>
+</div>
+<p>
+Isto soaba interesante. Persoalmente, cando teño que facer algunhas contas abro
+un terminal e invoco ao Python, e facelo directamente sen ter que lanzar Python parecía útil.</p>
+<p>
+Pero, se tivera que facer un cambio pequeno… a algunha xente lle resulta intuitiva a <a href="https://en.wikipedia.org/wiki/Polish_notation">notación Polaca</a>
+, pero pra isto preferiría ter unha notación mais habitual. Algo coma:</p>
+<div class="src src-shell">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ C <span style="color:#ae81ff">4</span> * <span style="color:#ae81ff">5</span>
+<span style="color:#ae81ff">20</span>
+$ C <span style="color:#ae81ff">21</span> / <span style="color:#ae81ff">3</span>
+<span style="color:#ae81ff">7</span></code></pre></div>
+</div>
+<p>
+Esa e a idea, o comando se chamaría <code>C</code> e os argumentos deben ser o mais naturais posible.</p>
+<p>
+O xeito máis sinxelo de facelo é escreber unha función bash que invoque o interprete de Python de transparentemente, algo coma…</p>
+<div class="src src-shell">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">C <span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+  python -c <span style="color:#e6db74">&#34;print(</span>$*<span style="color:#e6db74">)&#34;</span>
+<span style="color:#f92672">}</span></code></pre></div>
+</div>
+<p>
+Pero hai un problema! Con isto podemos facer algunhas contas, pero os produtos (<code>*</code>) serían <a href="https://en.wikipedia.org/wiki/Glob_(programming)">expandidos</a> a nomes de ficheiros:</p>
+<div class="src src-shell">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># Simulemos un directorio con algúns ficheiros</span>
+$ mkdir test
+$ cd test
+$ touch fname1
+$ touch fname2
+<span style="color:#75715e"># Se invocamos a función, o &#39;*&#39; será reemplazado por nomes de ficheiro</span>
+$ C <span style="color:#ae81ff">4</span> * <span style="color:#ae81ff">5</span>
+  File <span style="color:#e6db74">&#34;&lt;string&gt;&#34;</span>, line <span style="color:#ae81ff">1</span>
+    print<span style="color:#f92672">(</span><span style="color:#ae81ff">4</span> fname1 fname2 5<span style="color:#f92672">)</span>
+            ^
+SyntaxError: invalid syntax</code></pre></div>
+</div>
+<p>
+Podemos pensar en <a href="https://stackoverflow.com/a/11456496">desactivar a expansión</a> dentro da nosa función. Pero a
+expansión ocorre antes de que o comando se execute, así que non podemos solucionalo dentro da función.</p>
+<p>
+Algo que <em>semella</em> unha función, e que pode facer cousas antes de expandir os argumentos e un <a href="https://tldp.org/LDP/abs/html/aliases.html">alias</a>.</p>
+<div class="src src-shell">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">__calc <span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+  python -c <span style="color:#e6db74">&#34;print(</span>$*<span style="color:#e6db74">)&#34;</span>
+  set +f  <span style="color:#75715e"># Re-activar a expansión de ficheiros</span>
+<span style="color:#f92672">}</span>
+
+alias C<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;set -f; __calc &#39;</span></code></pre></div>
+</div>
+<p>
+De este xeito, o alias executa <code>set -f</code>, e con isto desactiva a expansión,
+<strong>antes</strong> de que se evalúen os argumentos de función <code>__calc</code>.</p>
+<div class="src src-shell">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ C <span style="color:#ae81ff">4</span> * <span style="color:#ae81ff">5</span>
+<span style="color:#ae81ff">20</span>
+$ echo *
+fname1 fname2</code></pre></div>
+</div>
+<p>
+Vale, agora imos probar a importar a <a href="https://docs.python.org/3/library/math.html">libraría matemática de Python</a>…</p>
+<div class="src src-shell">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">__calc <span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+  python -c <span style="color:#e6db74">&#34;from math import *; print(</span>$*<span style="color:#e6db74">)&#34;</span>
+  set +f  <span style="color:#75715e"># Re-activar a expansión de ficheiros</span>
+<span style="color:#f92672">}</span>
+
+alias C<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;set -f; __calc &#39;</span></code></pre></div>
+</div>
+<p>
+E usémola pra facer algúns cálculos:</p>
+<div class="src src-shell">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ C sqrt<span style="color:#f92672">(</span> <span style="color:#ae81ff">999</span> <span style="color:#f92672">)</span>
+bash: syntax error near unexpected token <span style="color:#e6db74">`</span><span style="color:#f92672">(</span><span style="color:#960050;background-color:#1e0010">&#39;</span></code></pre></div>
+</div>
+<p>
+Vaia, iso non pinta ben. Veredes, en bash o carácter <code>(</code> é interpretado coma o
+comezo dunha <a href="https://tldp.org/LDP/abs/html/subshells.html">subshell</a>, e isto (ao contrario da expansión dos nomes de ficheiro)
+non pode ser deshabilitado.</p>
+<p>
+Pra ser honesto, non atopei unha solución pra isto, pero podo ofrecervos dúas opcións:</p>
+<p>
+Primeira, simplemente usemos comiñas:</p>
+<div class="src src-shell">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ C <span style="color:#e6db74">&#34;sqrt( 999 )&#34;</span>
+31.606961258558215</code></pre></div>
+</div>
+<p>
+A outra e aceptar os parámetros con outros caracteres, que reemplazaremos por parénteses <code>[]</code> → <code>()</code>:</p>
+<div id="outline-container-headline-1" class="outline-3">
+<h3 id="headline-1">
+Resultado
+</h3>
+<div id="outline-text-headline-1" class="outline-text-3">
+<div class="src src-shell">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">__calc <span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+  local __calc_CMD<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>echo <span style="color:#e6db74">&#34;</span>$*<span style="color:#e6db74">&#34;</span>|tr <span style="color:#e6db74">&#34;[]&#34;</span> <span style="color:#e6db74">&#34;()&#34;</span><span style="color:#66d9ef">)</span>
+  python -c <span style="color:#e6db74">&#34;from math import *; print(</span>$__calc_CMD<span style="color:#e6db74">)&#34;</span>
+  set +f  <span style="color:#75715e"># Re-activar a expansión de ficheiros</span>
+<span style="color:#f92672">}</span>
+
+alias C<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;set -f; __calc &#39;</span></code></pre></div>
+</div>
+<p>
+E con isto xa podemos facer os cálculos directamente no terminal:</p>
+<div class="src src-shell">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ C sqrt <span style="color:#f92672">[</span> <span style="color:#ae81ff">3</span> + <span style="color:#f92672">[</span> <span style="color:#ae81ff">3</span> * <span style="color:#ae81ff">4</span> <span style="color:#f92672">]</span> / <span style="color:#ae81ff">2</span> <span style="color:#f92672">]</span>
+3.0</code></pre></div>
+</div>
+<p>
+Iso é todo, ahí queda a idea. Leémonos!</p>
+</div>
+</div>
+
+
+        
+          <div class="blog-tags">
+            
+              <a href="https://hackliza.gal//tags/terminal/">terminal</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/exploraci%C3%B3ns/">exploracións</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="https://hackliza.gal/posts/libfuzzer_autotools/" data-toggle="tooltip" data-placement="top" title="Usando libfuzzer en proxectos compilados con autotools">&larr; Artigo anterior</a>
+            </li>
+          
+          
+            <li class="next">
+              <a href="https://hackliza.gal/posts/reversing_con_carraxe/" data-toggle="tooltip" data-placement="top" title="Reversing con carraxe">Artigo siguiente &rarr;</a>
+            </li>
+          
+        </ul>
+      
+
+
+      
+        
+          
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hackliza" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+          
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://github.com/hackliza" title="GitHub">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/hackliza" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2024
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="https://hackliza.gal/">Hackliza</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.74.3</a> alimentada &nbsp;&bull;&nbsp; Tema <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adaptado de <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="https://hackliza.gal/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://hackliza.gal/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

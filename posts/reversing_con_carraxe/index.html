@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="gl" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Reversing con carraxe - Hackliza</title>
+  <meta name="description" content="Sacando contrasinais con angr"><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Hackliza",
+    
+    "url": "https:\/\/hackliza.gal\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "https:\/\/hackliza.gal\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/posts\/reversing_con_carraxe\/",
+          "name": "Reversing con carraxe"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Eloy Pérez González"
+  },
+  "headline": "Reversing con carraxe",
+  "description" : "Boas xente,\n Estes dias andei cacharreando con angr e aprendendo un pouco sobre execución simbólica.\nQue diaños é angr? E a execución simbólica?   angr é unha ferramenta para análise dinámico de programas. Concretamente é un emulador que executa o programa aplicando execución simbólica. Deste xeito podemos só executar a parte do programa que nos interesa e non todo o programa.\n A execución simbólica ven sendo executar o programa ou unha parte del para coñecer que valor precisamos nun símbolo (algo parecido a unha variábel) para podermos chegar dunha parte ou estado do programa a outro.",
+  "inLanguage" : "gl",
+  "wordCount":  1561 ,
+  "datePublished" : "2022-02-12T00:00:00",
+  "dateModified" : "2022-02-12T00:00:00",
+  "image" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+  "keywords" : [ "angr, radare2, ghidra, reversing" ],
+  "mainEntityOfPage" : "https:\/\/hackliza.gal\/posts\/reversing_con_carraxe\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "https:\/\/hackliza.gal\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="Reversing con carraxe" />
+<meta property="og:description" content="Sacando contrasinais con angr">
+<meta property="og:image" content="https://hackliza.gal/img/hackliza.png" />
+<meta property="og:url" content="https://hackliza.gal/posts/reversing_con_carraxe/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hackliza" />
+
+  <meta name="twitter:title" content="Reversing con carraxe" />
+  <meta name="twitter:description" content="Sacando contrasinais con angr">
+  <meta name="twitter:image" content="https://hackliza.gal/img/hackliza.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@hackliza" />
+  <meta name="twitter:creator" content="@hackliza" />
+  <link href='https://hackliza.gal/img/hackliza.png' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.74.3" />
+  <link rel="alternate" href="https://hackliza.gal/index.xml" type="application/rss+xml" title="Hackliza"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://hackliza.gal/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="https://hackliza.gal/css/syntax.css" /><link rel="stylesheet" href="https://hackliza.gal/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><style>
+ nav {
+     background: #0099CC !important;
+ }
+
+ .navbar-brand, #main-navbar ul li a, footer {
+     color: #fff !important;
+ }
+
+ .navbar-brand:hover, #main-navbar ul li a:hover {
+     color: #ccc !important;
+ }
+
+
+ figure {
+     margin-top: 1.5em; 
+     margin-bottom: 1.5em; 
+ }
+ 
+ figcaption {
+     text-align: center;
+     font-size: 85%;
+ }
+
+ pre {
+     overflow-x: auto !important;
+ }
+
+ .posts-heading {
+     text-align: center;
+ }
+ 
+</style>
+
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Conmuta navegación</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://hackliza.gal/">Hackliza</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blogue" href="/">Blogue</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Sobre nós" href="/about/">Sobre nós</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Charlas" href="/talks/">Charlas</a>
+            </li>
+          
+        
+
+        
+          
+            <li>
+              
+                
+                  <a href="/en" lang="en">en</a>
+                
+              
+                
+              
+            </li>
+          
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Hackliza" href="https://hackliza.gal/">
+            <img class="avatar-img" src="https://hackliza.gal/img/hackliza.png" alt="Hackliza" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>Reversing con carraxe</h1>
+              
+              
+                <hr class="small">
+              
+              
+                
+                  <h2 class="posts-subheading">Sacando contrasinais con angr</h2>
+                
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        
+<p>
+Boas xente,</p>
+<p>
+Estes dias andei cacharreando con <a href="https://angr.io/">angr</a> e aprendendo un pouco sobre
+execución simbólica.</p>
+<div id="outline-container-headline-1" class="outline-3">
+<h3 id="headline-1">
+Que diaños é angr? E a execución simbólica?
+</h3>
+<div id="outline-text-headline-1" class="outline-text-3">
+<p>
+angr é unha ferramenta para análise dinámico de programas. Concretamente é un
+emulador que executa o programa aplicando execución simbólica. Deste xeito
+podemos só executar a parte do programa que nos interesa e non todo o programa.</p>
+<p>
+A execución simbólica ven sendo executar o programa ou unha parte del para
+coñecer que valor precisamos nun símbolo (algo parecido a unha variábel) para
+podermos chegar dunha parte ou estado do programa a outro.</p>
+<p>
+Por exemplo, se temos un programa que nos pide un contrasinal, pódenos
+interesar saber o valor do contrasinal que nos permite chegar dende o punto no
+que se nos pide o contrasinal ao estado no que obtemos aceso ao programa.</p>
+<p>
+Por tanto, na execución simbólica precisamos as seguintes cousas:</p>
+<ul>
+<li>
+<p>Algo que non coñecemos, que será a parte simbólica -&gt; O contrasinal</p>
+</li>
+<li>
+<p>Indicar de que estado partimos -&gt; Petición de contrasinal</p>
+</li>
+<li>
+<p>Indicar a que estado queremos chegar -&gt; Aceso permitido no programa</p>
+</li>
+</ul>
+<p>E angr tratará de averiguar que valor concreto da parte simbólica que non
+coñecemos nos leva do estado inicial ao estado desexado. Para iso irá pasando
+por vários estados ata chegar ao que nos interesa.</p>
+<p>
+É tamén posíbel que o programa chegue a un estado que nos queiramos a evitar,
+como no caso de que nos diga que o contrasinal foi rexeitado. Tamén lle podemos
+indicar a angr neste caso que unha vez chegado a dito estado, non siga por esa
+via, que xa sabemos que está mal.</p>
+<p>
+Deixo por aqui un exemplo gráfico de como seria esta execución por parte de
+angr, se temos en conta que o contrasinal se examina carácter a carácter (por
+exemplo con <a href="https://man7.org/linux/man-pages/man3/strcmp.3.html">strcmp</a>):</p>
+<pre class="example">
+                                           pass=p4ssX???
+                                           .-------.
+                                           | bad   |
+                                     .----&gt;| state |
+                                     |     &#39;-------&#39;
+                      pass=p4ss????  |  &#34;Access denied&#34;   
+                      .--------.     |  
+  pass=????????       | middle |&gt;----&#39;                    pass=p4ssw0rd
+  .---------.      .-&gt;| state  |&gt;--.                       .-------.
+  | initial |&gt;-----&#39;  &#39;--------&#39;   |                       | good  |
+  | state   |&gt;-----.               |    pass=p4ssw0?? .---&gt;| state |
+  &#39;---------&#39;      |               |    .--------.    |    &#39;-------&#39; 
+&#34;Enter password:&#34;  |               |    | middle |    |  &#34;Access allowed&#34;
+                   |               &#39;---&gt;| state  |----&#39;
+                   |                    &#39;--------&#39;
+                   |
+                   |   pass=Y???????
+                   |   .-------.
+                   |   | bad   |
+                   &#39;--&gt;| state |
+                       &#39;-------&#39;
+                     &#34;Access denied&#34;
+</pre>
+<p>
+Indicar o estado do que queres que parta o programa significa precisar en que
+instrución debe arrincar e que valor teñen os rexistros e a memoria. Non
+precisaremos indicar todos os rexistros, nen moito menos absolutamente todo o
+que aí na memoria (mimadriña, vaia choio), senón soamente as partes que nos
+interesan, especialmente a parte simbólica que queremos resolver, como veremos
+agora no exemplo deste artigo.</p>
+<p>
+Por outra parte, o estado ao que queremos chegar pódese indicar de diversas
+formas. Pode ser que o que nos interese e chegar a unha instrución en concreto
+ou un estado no que o programa, inda que non saibamos en que instrución está,
+faga algunha acción como indicarmos que o noso contrasinal é correcto.</p>
+<p>
+Isto resume un pouco a idea de execución simbólica na que se basea angr, pero
+dista moito de ser unha explicación exhaustiva. Para coñecer en máis detalle o
+tema, que é importante se queres entender como funciona angr, recoméndoche
+botarlle unha ollada á presentación <a href="https://github.com/jakespringer/angr_ctf/blob/master/SymbolicExecution.pptx">Understanding Symbolic Execution</a>.</p>
+<p>
+Para coñecer como funciona angr, tamén che recomendo seguir os exercicios
+propostos en <a href="https://github.com/jakespringer/angr_ctf">https://github.com/jakespringer/angr_ctf</a> (na carpeta <code class="verbatim">dist</code> tes os
+binarios xa compilados, que pode axudar bastante para traballar sobre os mesmos
+binarios que a solución proposta) </p>
+</div>
+</div>
+<div id="outline-container-headline-2" class="outline-3">
+<h3 id="headline-2">
+Si si, todo moi bonito… amósame o código
+</h3>
+<div id="outline-text-headline-2" class="outline-text-3">
+<p>
+Estes dias tamén estiven facendo alguns retos de reversing e tropecei me co reto
+<code>ircware</code>. Non vou a meterme en moitos detalles do reversing porque non é o
+obxectivo do artigo, pero tras un rato examinando o becho con <a href="https://ghidra-sre.org/">ghidra</a> e <a href="https://github.com/radareorg/radare2">radare2</a>
+decateime de que se conectaba ao porto 8000 e que lle podias pedir a flag, pero
+requeriache un contrasinal primeiro.</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$rlwrap nc -lvp 8000
+listening on [any] 8000 ...
+connect to [127.0.0.1] from localhost [127.0.0.1] 39486
+NICK ircware_7773
+USER ircware 0 * :ircware
+JOIN #secret
+PRIVMSG #secret :@pass cachelo
+PRIVMSG #secret :Rejected
+PRIVMSG #secret :@flag
+PRIVMSG #secret :Requires password</code></pre></div>
+</div>
+<p>
+Asi que seguin estudando o código a ver se daba saltado a comprobación da
+contrasinal ou descuberto cal era esta, pero atopeime con que o ofuscaba estas
+cousas cun algoritmo un pouco escuro.</p>
+<p>
+Podedes ver nas seguintes imaxes o código que nos leva dende o contrasinal ata a
+parte na que programa escupe se o contrasinal e correcto ou non.</p>
+<figure>
+<img src="./algoritmo-ghidra.png" alt="./algoritmo-ghidra.png" title="./algoritmo-ghidra.png" /><figcaption>
+Algoritmo de contrasinal en ghidra
+</figcaption>
+</figure>
+<figure>
+<img src="./algoritmo-r2.png" alt="./algoritmo-r2.png" title="./algoritmo-r2.png" /><figcaption>
+Algoritmo de contrasinal en radare2
+</figcaption>
+</figure>
+<p>
+Asi que ao ver este percal lembreime de angr e as suas virtudes, asi que no
+canto de resolver como funcionaba o algoritmo e descubrir cal é o contrasinal,
+fixen un pequeno script de angr para que o fixese por min.</p>
+<p>
+Aqui tedes o script completo, pero imos examinar cada unha das suas partes:</p>
+<div class="src src-python">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> angr
+<span style="color:#f92672">import</span> claripy
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">main</span>():
+    p <span style="color:#f92672">=</span> angr<span style="color:#f92672">.</span>Project(<span style="color:#e6db74">&#34;./ircware&#34;</span>)
+
+    base_addr <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span>loader<span style="color:#f92672">.</span>main_object<span style="color:#f92672">.</span>min_addr
+    start_addr <span style="color:#f92672">=</span> base_addr <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x3ed</span>
+
+    istate <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span>factory<span style="color:#f92672">.</span>blank_state(addr<span style="color:#f92672">=</span>start_addr)
+
+    pass_addr <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x7f0000</span>
+    password <span style="color:#f92672">=</span> claripy<span style="color:#f92672">.</span>BVS(<span style="color:#e6db74">&#34;password&#34;</span>, <span style="color:#ae81ff">9</span><span style="color:#f92672">*</span><span style="color:#ae81ff">8</span>)
+
+    istate<span style="color:#f92672">.</span>memory<span style="color:#f92672">.</span>store(pass_addr, password)
+
+    istate<span style="color:#f92672">.</span>regs<span style="color:#f92672">.</span>rsi <span style="color:#f92672">=</span> pass_addr
+
+    good_addr <span style="color:#f92672">=</span> base_addr <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x451</span>
+    bad_addr <span style="color:#f92672">=</span> base_addr <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x471</span>
+
+    sim <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span>factory<span style="color:#f92672">.</span>simgr(istate)
+    sim<span style="color:#f92672">.</span>explore(find<span style="color:#f92672">=</span>good_addr, avoid<span style="color:#f92672">=</span>bad_addr)
+
+    <span style="color:#66d9ef">if</span> sim<span style="color:#f92672">.</span>found:
+        sol_state <span style="color:#f92672">=</span> sim<span style="color:#f92672">.</span>found[<span style="color:#ae81ff">0</span>]
+        <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Password:&#34;</span>, sol_state<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</span>eval(password, cast_to<span style="color:#f92672">=</span>bytes))
+    <span style="color:#66d9ef">else</span>:
+        <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;No solution found&#34;</span>)
+
+
+<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+    exit(main())</code></pre></div>
+</div>
+<p>
+Para usar angr, empezamos indicando que ficheiro queremos examinar e creamos un
+proxecto:</p>
+<div class="src src-python">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">p <span style="color:#f92672">=</span> angr<span style="color:#f92672">.</span>Project(<span style="color:#e6db74">&#34;./ircware&#34;</span>)</code></pre></div>
+</div>
+<p>
+Os proxectos de angr garda a información do binario e permítennos crear o resto
+das clases que imos usar. </p>
+<p>
+Unha vez temos o proxecto, precisamos indicar como é o estado inicial do que
+partimos. Para iso precisamos en primeiro lugar xerar un estado en branco:</p>
+<div class="src src-python">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">base_addr <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span>loader<span style="color:#f92672">.</span>main_object<span style="color:#f92672">.</span>min_addr
+start_addr <span style="color:#f92672">=</span> base_addr <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x3ed</span>
+
+istate <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span>factory<span style="color:#f92672">.</span>blank_state(addr<span style="color:#f92672">=</span>start_addr)</code></pre></div>
+</div>
+<p>
+Neste anaco creamos o estado inicial indicándolle da instrución da que queremos
+partir, que será no comezo do código amosado por radare2. Aí que ter en conta
+que radare2 e angr poden cargar o binario en distintas direccións de memoria
+base.</p>
+<p>
+Polo tanto o que debemos de extraer será o offset da instrución dende a
+base, no noso caso radare2 carga o binario na base <code class="verbatim">0x400000</code> e a instrución da
+que queremos partir é <code class="verbatim">0x4003ed</code> (despois de que se cargue o contrasinal en
+rsi). Polo tanto temos que o offset é <code class="verbatim">0x3ed</code>.</p>
+<p>
+Base do binario en radare2:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">[0x00400210]&gt; i~baddr
+baddr    0x400000</code></pre></div>
+</div>
+<p>
+Agora que creamos o estado inicial, temos que indicarlle como van a estar os
+rexistros e a memoria que nos interesa, especialmente a parte do contrasinal.</p>
+<div class="src src-python">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">pass_addr <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x7f0000</span>
+password <span style="color:#f92672">=</span> claripy<span style="color:#f92672">.</span>BVS(<span style="color:#e6db74">&#34;password&#34;</span>, <span style="color:#ae81ff">9</span><span style="color:#f92672">*</span><span style="color:#ae81ff">8</span>)
+
+istate<span style="color:#f92672">.</span>memory<span style="color:#f92672">.</span>store(pass_addr, password)
+
+istate<span style="color:#f92672">.</span>regs<span style="color:#f92672">.</span>rsi <span style="color:#f92672">=</span> pass_addr</code></pre></div>
+</div>
+<p>
+Para almacenar o contrasinal en memoria, seleccionamos unha dirección de memoria
+ficticia (que saibamos que non vai ter nada máis) e gardamos o noso contrasinal
+simbólico no mesmo. Ademais, examinando o código, concretamente a instrución en
+<code class="verbatim">0x400441</code>, deducimos que o contrasinal terá 8 carácteres, e que precisaremos un
+máis como final da cadea. Seguindo isto, creamos un <a href="https://docs.angr.io/core-concepts/solver">bitvector</a> de 9 bytes (72
+bits). Por último, indicamos que o rexistro <code class="verbatim">rsi</code> ten que estar apuntando á
+dirección de memoria onde estará o contrasinal.</p>
+<p>
+Bota o freo, que é un bitvector?? Un <a href="https://docs.angr.io/core-concepts/solver">bitvector</a> é o tipo de dato que usa
+angr para almacenar os símbolos. A medida que angr faga a execución irá
+incorporando a este valor unha serie de restricións, como por exemplo, o
+primeiro carácter ten que ser &#34;p&#34;, o segundo ten que ser &#34;4&#34;, e asi
+sucesivamente ata que cheguemos ao estado que queiramos. Neste estado, coma
+veremos agora, pedirémoslle a angr que nos devolva un valor que cumpra con
+tódalas restricións impostas. </p>
+<p>
+Faltanos antes de arrincar a execución, indicar cal é o estado ao que queremos
+chegar. Neste caso sabemos que queremos chegar á rama que vai devolver
+<code class="verbatim">Accepted</code> (no <code class="verbatim">0x400451</code>). Ademais tamén sabemos que se chegamos á rama que
+indica <code class="verbatim">Rejected</code> (no <code class="verbatim">0x400471</code>), xa nos equivocamos e non debemos continuar.
+É moi recomendábel indicarlle a angr tamén os estados a evitar, de xeito que se
+minimice o tempo de execución.</p>
+<div class="src src-python">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">good_addr <span style="color:#f92672">=</span> base_addr <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x451</span>
+bad_addr <span style="color:#f92672">=</span> base_addr <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x471</span>
+
+sim <span style="color:#f92672">=</span> p<span style="color:#f92672">.</span>factory<span style="color:#f92672">.</span>simgr(istate)
+sim<span style="color:#f92672">.</span>explore(find<span style="color:#f92672">=</span>good_addr, avoid<span style="color:#f92672">=</span>bad_addr)</code></pre></div>
+</div>
+<p>
+Por último temos que ver se se atopa unha solución, e no caso de darse, resolver
+o bitvector <code class="verbatim">password</code> a un valor que cumpra cas condicións para chegar ao estado.</p>
+<div class="src src-python">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">if</span> sim<span style="color:#f92672">.</span>found:
+    sol_state <span style="color:#f92672">=</span> sim<span style="color:#f92672">.</span>found[<span style="color:#ae81ff">0</span>]
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;Password:&#34;</span>, sol_state<span style="color:#f92672">.</span>solver<span style="color:#f92672">.</span>eval(password, cast_to<span style="color:#f92672">=</span>bytes))
+<span style="color:#66d9ef">else</span>:
+    <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#34;No solution found&#34;</span>)</code></pre></div>
+</div>
+<p>
+É hora de executar o script e ver que sae…</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ python3 angrsol.py 
+WARNING | 2022-02-12 12:11:19,176 | angr.storage.memory_mixins.default_filler_mixin | The program is accessing memory or registers with an unspecified value. This could indicate unwanted behavior.
+WARNING | 2022-02-12 12:11:19,176 | angr.storage.memory_mixins.default_filler_mixin | angr will cope with this by generating an unconstrained symbolic variable and continuing. You can resolve this by:
+WARNING | 2022-02-12 12:11:19,176 | angr.storage.memory_mixins.default_filler_mixin | 1) setting a value to the initial state
+WARNING | 2022-02-12 12:11:19,176 | angr.storage.memory_mixins.default_filler_mixin | 2) adding the state option ZERO_FILL_UNCONSTRAINED_{MEMORY,REGISTERS}, to make unknown regions hold null
+WARNING | 2022-02-12 12:11:19,176 | angr.storage.memory_mixins.default_filler_mixin | 3) adding the state option SYMBOL_FILL_UNCONSTRAINED_{MEMORY,REGISTERS}, to suppress these messages.
+WARNING | 2022-02-12 12:11:19,176 | angr.storage.memory_mixins.default_filler_mixin | Filling register cc_ndep with 8 unconstrained bytes referenced from 0x400430 (offset 0x430 in ircware (0x400430))
+Password: b&#39;ASS3MBLY\x00&#39;</code></pre></div>
+</div>
+<p>
+Bingo!!!</p>
+<p>
+Probamos a introducir o contrasinal no programa e sacámola flag:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ rlwrap nc -lvp 8000
+listening on [any] 8000 ...
+connect to [127.0.0.1] from localhost [127.0.0.1] 39486
+NICK ircware_7773
+USER ircware 0 * :ircware
+JOIN #secret
+PRIVMSG #secret :@pass ASS3MBLY
+PRIVMSG #secret :Accepted
+PRIVMSG #secret :@flag
+PRIVMSG #secret :HTB{m1N1m411st1C_fL4g_pR0v1d3r_b0T}</code></pre></div>
+</div>
+</div>
+</div>
+
+
+        
+          <div class="blog-tags">
+            
+              <a href="https://hackliza.gal//tags/angr/">angr</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/radare2/">radare2</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/ghidra/">ghidra</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/reversing/">reversing</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="https://hackliza.gal/posts/contas_rapidas_no_terminal/" data-toggle="tooltip" data-placement="top" title="Contas rápidas no terminal">&larr; Artigo anterior</a>
+            </li>
+          
+          
+            <li class="next">
+              <a href="https://hackliza.gal/posts/python-visual-profiling/" data-toggle="tooltip" data-placement="top" title="Profiling visual para Python">Artigo siguiente &rarr;</a>
+            </li>
+          
+        </ul>
+      
+
+
+      
+        
+          
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hackliza" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+          
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://github.com/hackliza" title="GitHub">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/hackliza" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2024
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="https://hackliza.gal/">Hackliza</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.74.3</a> alimentada &nbsp;&bull;&nbsp; Tema <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adaptado de <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="https://hackliza.gal/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://hackliza.gal/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

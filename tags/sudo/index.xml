@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>sudo on Hackliza</title>
+    <link>https://hackliza.gal/tags/sudo/</link>
+    <description>Recent content in sudo on Hackliza</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>gl</language>
+    <lastBuildDate>Sun, 24 Mar 2024 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://hackliza.gal/tags/sudo/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Roubando sesións de sudo con ptrace</title>
+      <link>https://hackliza.gal/posts/stealing_sudo_sessions_with_ptrace/</link>
+      <pubDate>Sun, 24 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://hackliza.gal/posts/stealing_sudo_sessions_with_ptrace/</guid>
+      <description>Boas xentiña.
+ Hoxe traiovos unha vella técnica ca que estiven fuchicando estes días. Trátase dun ataque para obter sudo se outra persoa que estea conectada na mesma máquina ca mesma usuaria ca nos o ten desbloqueado. Esta técnica xa foi documentada por nongiach no seu repo sudo_inject. Sen embargo, na súa implementación requirense varios ficheiros e dependencias para o ataque, polo que para simplificalo, e tamén aprender sobre esta técnica, desenvolvín a ferramenta sudohunt.</description>
+    </item>
+    
+  </channel>
+</rss>

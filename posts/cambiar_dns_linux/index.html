@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="gl" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Que demo pasa co meu DNS? Descubrindo e configurando demos de rede - Hackliza</title>
+  <meta name="description" content="Boas xente, hoxe veño a falar dun problema que me teño atopado en varias ocasións. O tema é que configuro o equipo para usar un servidor DNS concreto, incluíndo este no /etc/resolv.conf, e dalí a un anaco me atopo que este se borrou e se volveu ao servidor DNS anterior.
+ Neste artigo vou ver porque acontece e quen me está tocando o /etc/resolv.conf e como solucionalo.
+ Este artigo vai dirixido a entornos onde se usa a consola, xa que cando temos unha interface gráfica, polo xeral nas opcións de rede podemos poñer o DNS que queiramos sen problema ningún."><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Hackliza",
+    
+    "url": "https:\/\/hackliza.gal\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "https:\/\/hackliza.gal\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "https:\/\/hackliza.gal\/posts\/cambiar_dns_linux\/",
+          "name": "Que demo pasa co meu d n s? descubrindo e configurando demos de rede"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Eloy Pérez González"
+  },
+  "headline": "Que demo pasa co meu DNS? Descubrindo e configurando demos de rede",
+  "description" : "Boas xente, hoxe veño a falar dun problema que me teño atopado en varias ocasións. O tema é que configuro o equipo para usar un servidor DNS concreto, incluíndo este no \/etc\/resolv.conf, e dalí a un anaco me atopo que este se borrou e se volveu ao servidor DNS anterior.\n Neste artigo vou ver porque acontece e quen me está tocando o \/etc\/resolv.conf e como solucionalo.\n Este artigo vai dirixido a entornos onde se usa a consola, xa que cando temos unha interface gráfica, polo xeral nas opcións de rede podemos poñer o DNS que queiramos sen problema ningún.",
+  "inLanguage" : "gl",
+  "wordCount":  2494 ,
+  "datePublished" : "2024-08-18T00:00:00",
+  "dateModified" : "2024-08-18T00:00:00",
+  "image" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+  "keywords" : [ "dns, bpf, dhclient, networkmanager, systemd, linux, gnu" ],
+  "mainEntityOfPage" : "https:\/\/hackliza.gal\/posts\/cambiar_dns_linux\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "https:\/\/hackliza.gal\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "https:\/\/hackliza.gal\/img\/hackliza.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="Que demo pasa co meu DNS? Descubrindo e configurando demos de rede" />
+<meta property="og:description" content="Boas xente, hoxe veño a falar dun problema que me teño atopado en varias ocasións. O tema é que configuro o equipo para usar un servidor DNS concreto, incluíndo este no /etc/resolv.conf, e dalí a un anaco me atopo que este se borrou e se volveu ao servidor DNS anterior.
+ Neste artigo vou ver porque acontece e quen me está tocando o /etc/resolv.conf e como solucionalo.
+ Este artigo vai dirixido a entornos onde se usa a consola, xa que cando temos unha interface gráfica, polo xeral nas opcións de rede podemos poñer o DNS que queiramos sen problema ningún.">
+<meta property="og:image" content="https://hackliza.gal/img/hackliza.png" />
+<meta property="og:url" content="https://hackliza.gal/posts/cambiar_dns_linux/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Hackliza" />
+
+  <meta name="twitter:title" content="Que demo pasa co meu DNS? Descubrindo e configurando demos de rede" />
+  <meta name="twitter:description" content="Boas xente, hoxe veño a falar dun problema que me teño atopado en varias ocasións. O tema é que configuro o equipo para usar un servidor DNS concreto, incluíndo este no /etc/resolv.conf, e dalí a un …">
+  <meta name="twitter:image" content="https://hackliza.gal/img/hackliza.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@hackliza" />
+  <meta name="twitter:creator" content="@hackliza" />
+  <link href='https://hackliza.gal/img/hackliza.png' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.74.3" />
+  <link rel="alternate" href="https://hackliza.gal/index.xml" type="application/rss+xml" title="Hackliza"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="https://hackliza.gal/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="https://hackliza.gal/css/syntax.css" /><link rel="stylesheet" href="https://hackliza.gal/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><style>
+ nav {
+     background: #0099CC !important;
+ }
+
+ .navbar-brand, #main-navbar ul li a, footer {
+     color: #fff !important;
+ }
+
+ .navbar-brand:hover, #main-navbar ul li a:hover {
+     color: #ccc !important;
+ }
+
+
+ figure {
+     margin-top: 1.5em; 
+     margin-bottom: 1.5em; 
+ }
+ 
+ figcaption {
+     text-align: center;
+     font-size: 85%;
+ }
+
+ pre {
+     overflow-x: auto !important;
+ }
+
+ .posts-heading {
+     text-align: center;
+ }
+ 
+</style>
+
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Conmuta navegación</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://hackliza.gal/">Hackliza</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blogue" href="/">Blogue</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Sobre nós" href="/about/">Sobre nós</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Charlas" href="/talks/">Charlas</a>
+            </li>
+          
+        
+
+        
+          
+            <li>
+              
+                
+                  <a href="/en" lang="en">en</a>
+                
+              
+                
+              
+            </li>
+          
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="Hackliza" href="https://hackliza.gal/">
+            <img class="avatar-img" src="https://hackliza.gal/img/hackliza.png" alt="Hackliza" />
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>Que demo pasa co meu DNS? Descubrindo e configurando demos de rede</h1>
+              
+              
+                <hr class="small">
+              
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        
+<p>
+Boas xente, hoxe veño a falar dun problema que me teño atopado en varias
+ocasións. O tema é que configuro o equipo para usar un servidor DNS
+concreto, incluíndo este no <a href="https://www.man7.org/linux/man-pages/man5/resolv.conf.5.html">/etc/resolv.conf</a>, e dalí a un anaco me atopo que
+este se borrou e se volveu ao servidor <a href="https://gl.wikipedia.org/wiki/Domain_Name_System">DNS</a> anterior.</p>
+<p>
+Neste artigo vou ver porque acontece e quen me está tocando o <code>/etc/resolv.conf</code>
+e como solucionalo.</p>
+<blockquote>
+<p>Este artigo vai dirixido a entornos onde se usa a consola, xa que cando temos
+unha interface gráfica, polo xeral nas opcións de rede podemos poñer o DNS que
+queiramos sen problema ningún.</p>
+</blockquote>
+<p>
+Imos ao tema.</p>
+<div id="outline-container-o-ficheiro-dns-etc-resolv-conf" class="outline-2">
+<h2 id="o-ficheiro-dns-etc-resolv-conf">
+O ficheiro DNS: /etc/resolv.conf
+</h2>
+<div id="outline-text-o-ficheiro-dns-etc-resolv-conf" class="outline-text-2">
+<p>
+Como comentaba antes, cambiar o servidor DNS parece sinxelo, xa que en GNU/Linux
+o ficheiro <a href="https://www.man7.org/linux/man-pages/man5/resolv.conf.5.html">/etc/resolv.conf</a> indica cales son os servidores DNS en uso.</p>
+<p>
+É sinxelo consultar dito ficheiro para descubrir os nosos servidores DNS:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /etc/resolv.conf
+nameserver 192.168.122.1</code></pre></div>
+</div>
+<p>
+E ademais, podemos mudar o servidor DNS a usar escribindo no ficheiro unha
+entrada <code>nameserver</code>:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ echo &#34;nameserver 192.168.122.135&#34; | sudo tee /etc/resolv.conf
+nameserver 192.168.122.135
+$ cat /etc/resolv.conf
+nameserver 192.168.122.135</code></pre></div>
+</div>
+<p>
+Ata aquí todo ben. Agora invítovos a reiniciar a máquina ou agardar uns
+minutos. Qué é o mais probable que pase? Que o noso ficheiro
+<code>/etc/resolv.conf</code> volva ao seu estado orixinal, perdendo os nosos cambios. Se
+non é o teu caso e o ficheiro se mantén inalterado, noraboa, non tes que tocar
+mais nada para cambiar o DNS da máquina, podes deixar de leer.</p>
+<p>
+Porque volve <code>/etc/resolv.conf</code> ao seu estado anterior? Pois porque en GNU/Linux
+xeralmente algún demo (proceso que corre en segundo plano) está modificando o
+ficheiro. E cál e dito demo? Depende.</p>
+<p>
+En GNU/Linux existen diferentes programas que se poden encargar da configuración
+do DNS, polo que temos que descubrir cál é o caso da nosa máquina.</p>
+</div>
+</div>
+<div id="outline-container-etc-resolv-inmutable" class="outline-2">
+<h2 id="etc-resolv-inmutable">
+O apaño: Facendo /etc/resolv.conf inmutable
+</h2>
+<div id="outline-text-etc-resolv-inmutable" class="outline-text-2">
+<p>
+Pero antes, vou mostrar un apaño xenérico que penso funciona contra calquera
+demo, inda que pode ter os efectos secundarios non desexados. Para que ningún
+demo nos ande a tocar <code>/etc/resolv.conf</code> podemos optar por modificalo e
+<a href="https://unix.stackexchange.com/a/249404">logo facelo inmutable</a>, de xeito que ningún proceso, nin sequera os que se
+executan como root, o poida alterar (ata que se lle quite a flag de
+inmutabilidade).</p>
+<p>
+Para isto podemos usar o comando <a href="https://www.man7.org/linux/man-pages/man1/chattr.1.html">chattr</a> coma no seguinte exemplo:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ echo &#34;nameserver 192.168.122.135&#34; | sudo tee /etc/resolv.conf
+nameserver 192.168.122.135
+$ sudo chattr +i /etc/resolv.conf</code></pre></div>
+</div>
+<p>
+Tras executar estes comandos, podemos reiniciar o sistema e verificar que o noso
+DNS segue estando configurando como o indicamos. Se o quixeramos volver a
+configurar teríamos que quitarlle a inmutabilidade con
+<code>sudo chattr -i /etc/resolv.conf</code>.</p>
+<p>
+Esta pode ser unha boa opción se so queremos configurar un servidor estático, e
+eu mesmo a teño usado para configurar <a href="https://www.dnscrypt.org/">dnscrypt</a>.</p>
+<p>
+Sen embargo, noutras situacións pode ter as súas desvantaxes se queremos usar
+tamén o DNS configurado polo demo de rede, por exemplo no caso de que so
+queramos engadir un DNS para resolver nomes dunha rede interna e usar o outro
+para resolucións en internet. Neste contexto se cambiasemos de rede, o demo de
+rede non podería actualizar o DNS (que soe ser a IP do router) e poderíamos
+perder a conexión a internet. E tampouco estou seguro de se funcionaría ben no
+caso de que quixéramos usar unha VPN.</p>
+<p>
+Polo tanto, xeralmente o axeitado é cambiar a configuración do noso demo de rede
+para engadir o DNS que nos queramos.</p>
+</div>
+</div>
+<div id="outline-container-descubrindo-quen-toca-etc-resolv-conf" class="outline-2">
+<h2 id="descubrindo-quen-toca-etc-resolv-conf">
+Demo de demos: Descubrindo quen toca /etc/resolv.conf
+</h2>
+<div id="outline-text-descubrindo-quen-toca-etc-resolv-conf" class="outline-text-2">
+<p>
+O problema cos demos de rede, como comentaba antes, é que cada un é de seu pai e
+súa nai e ademais non está claro moitas veces cál está usando o noso sistema
+GNU/Linux. Vou propor varios métodos para descubrir cal é o noso, pero antes,
+coñezamos aos sospeitosos habituais:</p>
+<ul>
+<li>
+<p><a href="https://linux.die.net/man/8/dhclient">dhclient</a>: Demo para a configuración por <a href="https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol">DHCP</a>.</p>
+</li>
+<li>
+<p><a href="https://networkmanager.dev/">NetworkManager</a>: O demo de rede usado polo xeral con GNOME.</p>
+</li>
+<li>
+<p><a href="https://www.man7.org/linux/man-pages/man8/systemd-resolved.service.8.html">systemd-resolved</a>: Demo de systemd que se encarga do DNS.</p>
+</li>
+<li>
+<p>etc: Igual hai algún mais, pero neste artigo centrareime nestes tres xa que
+son os mais comúns.</p>
+</li>
+</ul>
+<p>Sabendo que andamos buscando, imos ver que podemos facer para tentar descubrir
+quen anda tocando <code>/etc/resolv.conf</code>. Temos varias vías de acción.</p>
+<div id="outline-container-pista-1-contido-etc-resolv-conf" class="outline-3">
+<h3 id="pista-1-contido-etc-resolv-conf">
+Pista nº1: O contido de /etc/resolv.conf
+</h3>
+<div id="outline-text-pista-1-contido-etc-resolv-conf" class="outline-text-3">
+<p>
+O primeiro de todo é leer <code>/etc/resolv.conf</code>, xa que hai casos que o programa
+que modifica o DNS deixa unha mensaxe explicativa, xeralmente dicindo que non o
+modifiques porque o vai a sobreescribir.</p>
+<p>
+Por exemplo, este é o <code>/etc/resolv.conf</code> dunha das miñas máquinas, modificado
+por <code>systemd-resolved</code>:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /etc/resolv.conf
+# This is /run/systemd/resolve/stub-resolv.conf managed by man:systemd-resolved(8).
+# Do not edit.
+#
+# This file might be symlinked as /etc/resolv.conf. If you&#39;re looking at
+# /etc/resolv.conf and seeing this text, you have followed the symlink.
+#
+# This is a dynamic resolv.conf file for connecting local clients to the
+# internal DNS stub resolver of systemd-resolved. This file lists all
+# configured search domains.
+#
+# Run &#34;resolvectl status&#34; to see details about the uplink DNS servers
+# currently in use.
+#
+# Third party programs should typically not access this file directly, but only
+# through the symlink at /etc/resolv.conf. To manage man:resolv.conf(5) in a
+# different way, replace this symlink by a static file or a different symlink.
+#
+# See man:systemd-resolved.service(8) for details about the supported modes of
+# operation for /etc/resolv.conf.
+
+nameserver 127.0.0.53
+options edns0 trust-ad
+search .</code></pre></div>
+</div>
+<figcaption>
+/etc/resolv.conf modificado por systemd-resolved
+</figcaption>
+</figure>
+<p>
+E este é o contido que me teño atopado no caso de que estea manexado por
+NetworkManager:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /etc/resolv.conf
+# Generated by NetworkManager
+nameserver 192.168.122.1</code></pre></div>
+</div>
+<figcaption>
+/etc/resolv.conf administrado por NetworkManager
+</figcaption>
+</figure>
+<p>
+Pero tamén podemos atopar o <code>/etc/resolv.conf</code> &#34;pelao&#34;:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /etc/resolv.conf
+nameserver 192.168.122.1</code></pre></div>
+</div>
+<p>
+Neste último caso, ao atoparmo así descrubín que estaba sendo modificado por
+<code>dhclient</code>.</p>
+<p>
+Mais se quedamos en dúbidas podemos probar outras técnicas.</p>
+</div>
+</div>
+<div id="outline-container-pista-2-monitorizando-etc-resolv-conf" class="outline-3">
+<h3 id="pista-2-monitorizando-etc-resolv-conf">
+Pista nº2: Monitorizando /etc/resolv.conf
+</h3>
+<div id="outline-text-pista-2-monitorizando-etc-resolv-conf" class="outline-text-3">
+<p>
+Outra posibilidade é monitorizar que procesos están escribindo
+<code>/etc/resolv.conf</code>. Para isto podemos usar <a href="https://github.com/iovisor/bcc/blob/master/tools/opensnoop_example.txt">opensnoop</a>, unha utilidade que usa
+eBPF para monitorizar cando os procesos abren ficheiros. Mais para poder usala
+temos que instalar o paquete <code>bpfcc-tools</code> e as headers de Linux
+(en Debian con <code>sudo apt install linux-headers-$(uname -r)</code>).</p>
+<p>
+Unha vez instalada, podemos executar o seguinte comando e agardar uns minutos a
+ver se algún proceso modifica os ficheiros:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo opensnoop-bpfcc -f O_WRONLY -f O_RDWR | grep &#39;resolv.conf&#39;
+1857   dhclient-script     3   0 /etc/resolv.conf.dhclient-new.1857
+1857   dhclient-script     3   0 /etc/resolv.conf.dhclient-new.1857
+1857   dhclient-script     3   0 /etc/resolv.conf</code></pre></div>
+</div>
+<figcaption>
+Escrituras de dhclient sobre /etc/resolv.conf
+</figcaption>
+</figure>
+<p>
+O comando anterior indícalle a <code>opensnoop</code> que queremos que so se mostren os
+ficheiros abertos para escritura e filtramos con <code>grep</code> para amosar aqueles co
+nome <code>resolv.conf</code>. Como podes ver, non so buscamos <code>/etc/resolv.conf</code> senón
+calquera ficheiro que conteña o nome <code>resolv.conf</code>.</p>
+<blockquote>
+<p>Se queres aprender mais do marabilloso mundo de eBPF podes consultar
+<a href="https://www.brendangregg.com/blog/2019-01-01/learn-ebpf-tracing.html">Learn eBPF Tracing: Tutorial and Examples</a> de Brendan Gregg, que amosa un montón
+de ferramentas de monitorización basadas en eBPF, incluída  <a href="https://github.com/iovisor/bcc/blob/master/tools/tcpconnect_example.txt">tcpconnect</a>, unha das
+miñas favoritas, que permite ver en tempo real que conexións de rede fai cada
+proceso.</p>
+</blockquote>
+<p>
+É interesante non so monitorizar <code>/etc/resolv.conf</code>, xa que varios programas
+usan ficheiros de caché cun nome similar para gardar temporalmente a
+configuración. Por exemplo <code>dhclient</code> escribe en ficheiros de cache como
+<code>/etc/resolv.conf.dhclient-new.590</code> e logo comproba se ten que volcar os cambios
+en <code>/etc/resolv.conf</code>, pero pode que non o faga.</p>
+<p>
+Tamén pode suceder que o que fagan para modificar <code>/etc/resolv.conf</code> sexa mover
+un archivo de caché a este (algo similar a
+<code>mv /etc/resolv.conf.HOIHS2 /etc/resolv.conf</code>, que é o que fai NetworkManager) e
+polo tanto <code>/etc/resolv.conf</code> non aparecerá na lista de ficherios abertos (xa
+que non se usa unha syscall <a href="https://www.man7.org/linux/man-pages/man2/open.2.html">open</a> senón <a href="https://www.man7.org/linux/man-pages/man2/rename.2.html">rename</a> e <code>opensnoop</code> non a vai pillar).</p>
+<p>
+Pero bueno, entre o contido de <code>/etc/resolv.conf</code> e a súa monitorización xa
+deberíamos ter unha idea de que demo de rede o está a modificar, mais se inda
+non estamos seguros, imos explorar agora todos os demos e ver cales están
+activos e como se modifica o DNS en cada un.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-demos-de-rede" class="outline-2">
+<h2 id="demos-de-rede">
+Demos de rede
+</h2>
+<div id="outline-text-demos-de-rede" class="outline-text-2">
+<div id="outline-container-dhclient" class="outline-3">
+<h3 id="dhclient">
+dhclient
+</h3>
+<div id="outline-text-dhclient" class="outline-text-3">
+<p>
+Imos ver como engadir un servidor DNS no caso de que sexa <a href="https://linux.die.net/man/8/dhclient">dhclient</a> o demo que se
+encarga diso, pero primeiro temos que estar seguros de que se está
+executando:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ps -ef | grep dhclient
+root         469       1  0 21:14 ?        00:00:00 dhclient -4 -v -i -pf /run/dhclient.enp1s0.pid -lf /var/lib/dhcp/dhclient.enp1s0.leases -I -df /var/lib/dhcp/dhclient6.enp1s0.leases enp1s0
+root         585       1  0 21:18 ?        00:00:00 dhclient
+user         611     554  0 21:25 pts/0    00:00:00 grep dhclient</code></pre></div>
+</div>
+<figcaption>
+Procesos de dhclient
+</figcaption>
+</figure>
+<p>
+Unha vez o temos confirmado que <code>dhclient</code> está correndo, para incluir un servidor
+DNS temos que indicarllo no ficheiro de configuración <a href="https://linux.die.net/man/5/dhclient.conf">/etc/dhcp/dhclient.conf</a>,
+no que temos varias opcións relativas ao DNS. En concreto para indicarlle un
+servidor DNS podemos engadir algunha destas liñas:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">prepend domain-name-servers 127.0.0.1;
+append domain-name-servers 192.168.122.13;</code></pre></div>
+</div>
+<figcaption>
+Configuración de DNS en /etc/dhcp/dhclient.conf
+</figcaption>
+</figure>
+<p>
+Deste xeito indicamos que engada o noso DNS antes ou despois, respectivamente,
+do DNS resolto por DHCP. E falando disto, tamén podemos indicarlle que <span style="text-decoration: underline;">non</span>
+obteña os DNS por DHCP quitando o item <code>domain-name-servers</code> da cláusula
+<code>request</code> que hai no ficheiro.</p>
+<p>
+<code>dhclient</code> tamén permite crear configuracións específicas para as diferentes
+interfaces de rede e ahí tamén lle podemos indicar un DNS específico para esa
+interface, inda que agora non me vou meter niso. Se queres mais información
+podes consultar <a href="https://linux.die.net/man/5/dhclient.conf">dhclient.conf(5)</a>.</p>
+<p>
+Polo tanto, se lle engadimos a <a href="https://linux.die.net/man/5/dhclient.conf">/etc/dhcp/dhclient.conf</a> as liñas indicadas previamente e
+reiniciamos o servizo <code>ifup</code> que executa <code>dhclient</code> deberíamos ver os cambios no
+noso <code>/etc/resolv.conf</code>:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo systemctl restart ifup@enp1s0.service
+$ cat /etc/resolv.conf
+nameserver 127.0.0.1
+nameserver 192.168.122.1
+nameserver 192.168.122.13;</code></pre></div>
+</div>
+<p>
+Ten en conta que o servizo <code>ifup</code> que se encarga de executar <code>dhclient</code> recibe
+como parámetro unha interface de rede, no meu caso <code>enp1s0</code>, pero pode ser
+diferente na túa máquina.</p>
+<p>
+E se reiniciamos a máquina o cambios deberían permanecer.</p>
+</div>
+</div>
+<div id="outline-container-networkmanager" class="outline-3">
+<h3 id="networkmanager">
+NetworkManager
+</h3>
+<div id="outline-text-networkmanager" class="outline-text-3">
+<p>
+Como indicamos antes, polo xeral NetworkManager é o encargado de configurar os
+servidores DNS cando nos atopamos un <code>/etc/resolv.conf</code> similar ao seguinte:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /etc/resolv.conf
+# Generated by NetworkManager
+nameserver 192.168.122.1</code></pre></div>
+</div>
+<figcaption>
+/etc/resolv.conf manexado por NetworkManager
+</figcaption>
+</figure>
+<p>
+Ademais podemos comprobar se NetworkManager se está a executar verificando que o
+servicio está correndo:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ systemctl status NetworkManager
+● NetworkManager.service - Network Manager
+     Loaded: loaded (/lib/systemd/system/NetworkManager.service; enabled; vendo&gt;
+     Active: active (running) since Sun 2024-08-11 10:36:47 CEST; 9h ago
+       Docs: man:NetworkManager(8)
+   Main PID: 1270 (NetworkManager)
+      Tasks: 3 (limit: 37642)
+     Memory: 14.4M
+        CPU: 5.143s
+     CGroup: /system.slice/NetworkManager.service
+             └─1270 /usr/sbin/NetworkManager --no-daemon</code></pre></div>
+</div>
+<figcaption>
+NetworkManager executándose coma servicio de systemd
+</figcaption>
+</figure>
+<p>
+NetworkManager e mais complicado que outros xestores de rede, xa que ten varias
+posibilidades para o manexo do DNS, permitindo executar él mesmo esta tarefa
+ou delegala en terceiros como <a href="#systemd-resolved">systemd-resolved</a> ou <a href="#dhclient">dhclient</a>. Tes mais información
+a este respecto na sección <em>dns</em> de <a href="https://man.archlinux.org/man/NetworkManager.conf.5">NetworkManager.conf(5)</a>. Nesta sección imos
+supoñer que o DNS vaise manexar polo propio NetworkManager, xa que os outros se
+explican nas súas respectivas seccións.</p>
+<p>
+Para o manexo de NetworkManager podemos usar <a href="https://linux.die.net/man/1/nmcli">nmcli</a>. Con esta ferramenta podemos
+indicarlle que use un <a href="https://serverfault.com/a/810639">novo servidor DNS na conexión que lle especifiquemos</a> (non
+atopei o modo de polo para calqueira conexión). Primeiro, podemos listar as
+conexións (interfaces de rede) con <code>nmcli connection show</code>:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ nmcli connection show
+NAME                UUID                                  TYPE      DEVICE
+Wired connection 1  56d704b3-e21d-4fba-93b8-c89870296a94  ethernet  eth0
+lo                  28786bc1-47ab-4264-bdca-3e25b38361b3  loopback  lo</code></pre></div>
+</div>
+<figcaption>
+Conexións de rede activas
+</figcaption>
+</figure>
+<p>
+E logo engadir o un servidor DNS con <code>nmcli connection modify</code>:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ network_connection=&#34;Wired connection 1&#34;
+$ sudo nmcli connection modify &#34;$network_connection&#34; ipv4.dns &#34;192.168.122.135&#34;
+$ sudo systemctl restart NetworkManager
+$ cat /etc/resolv.conf
+# Generated by NetworkManager
+nameserver 192.168.122.135
+nameserver 192.168.122.1</code></pre></div>
+</div>
+<figcaption>
+Modificando o DNS de NetworkManager
+</figcaption>
+</figure>
+<p>
+Como vemos, os servidores DNS foron modificados tras o noso comando, e se
+reiniciamos a máquina os cambios deberían persistir. Lémbrate que o nome da túa
+conexión de rede pode ser diferente da miña e terías que axustar o comando.</p>
+<p>
+Se ademais queres evitar que se use o servidor DNS especificado por DHCP, podes
+usar o seguinte comando:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo nmcli con mod &#34;$network_connection&#34; ipv4.ignore-auto-dns yes</code></pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-systemd-resolved" class="outline-3">
+<h3 id="systemd-resolved">
+systemd-resolved
+</h3>
+<div id="outline-text-systemd-resolved" class="outline-text-3">
+<p>
+Por último, imos ver o caso de <a href="https://www.man7.org/linux/man-pages/man8/systemd-resolved.service.8.html">systemd-resolved</a>. Podemos confirmar que
+systemd-resolved está sendo usado se o <code>/etc/resolv.conf</code> ten unha pinta similar
+a esta:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /etc/resolv.conf
+# This is /run/systemd/resolve/stub-resolv.conf managed by man:systemd-resolved(8).
+# Do not edit.
+#
+# This file might be symlinked as /etc/resolv.conf. If you&#39;re looking at
+# /etc/resolv.conf and seeing this text, you have followed the symlink.
+#
+# This is a dynamic resolv.conf file for connecting local clients to the
+# internal DNS stub resolver of systemd-resolved. This file lists all
+# configured search domains.
+#
+# Run &#34;resolvectl status&#34; to see details about the uplink DNS servers
+# currently in use.
+#
+# Third party programs should typically not access this file directly, but only
+# through the symlink at /etc/resolv.conf. To manage man:resolv.conf(5) in a
+# different way, replace this symlink by a static file or a different symlink.
+#
+# See man:systemd-resolved.service(8) for details about the supported modes of
+# operation for /etc/resolv.conf.
+
+nameserver 127.0.0.53
+options edns0 trust-ad
+search .</code></pre></div>
+</div>
+<figcaption>
+/etc/resolv.conf controlado por systemd-resolved
+</figcaption>
+</figure>
+<p>
+Se nos fixamos no contido, podemos observar que realmente se configura un
+servidor DNS na propia máquina (<code>nameserver 127.0.0.53</code>), isto xa nos da unha
+pista do xeito no que funciona <code>systemd-resolved</code>.</p>
+<p>
+Por outra banda <code>/etc/resolv.conf</code> será unha ligazón a
+<code>/run/systemd/resolve/stub-resolv.conf</code>:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ ls -l /etc/resolv.conf
+lrwxrwxrwx 1 root root 39 ago 19  2022 /etc/resolv.conf -&gt; ../run/systemd/resolve/stub-resolv.conf</code></pre></div>
+</div>
+<p>
+E non nos esquezamos de verificar que <code>systemd-resolved</code> se está executando:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ sudo systemctl status systemd-resolved.service
+● systemd-resolved.service - Network Name Resolution
+     Loaded: loaded (/lib/systemd/system/systemd-resolved.service; enabled; vendor preset: enabled)
+     Active: active (running) since Tue 2024-08-13 20:04:55 CEST; 29min ago
+...</code></pre></div>
+</div>
+<figcaption>
+systemd-resolved executándose coma servicio de systemd
+</figcaption>
+</figure>
+<p>
+Unha vez temos comprobado que é <code>systemd-resolved</code> o encargado das resolucións
+DNS podemos proceder a engadir un servidor DNS. Para isto podemos engadir
+unha entrada <code>DNS</code> no ficheiro <code>/etc/systemd/resolved.conf</code>, como a que se
+mostra a continuación:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /etc/systemd/resolved.conf | grep DNS=
+# Some examples of DNS servers which may be used for DNS= and FallbackDNS=:
+DNS=192.168.122.135
+#FallbackDNS=
+#MulticastDNS=no</code></pre></div>
+</div>
+<figcaption>
+Configuración do servidor DNS en /etc/systemd/resolved.conf
+</figcaption>
+</figure>
+<p>
+Despois reiniciamos o servizo <code>systemd-resolved</code>:</p>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">sudo systemctl restart systemd-resolved.service</code></pre></div>
+</div>
+<p>
+E podemos confirmar con <code>resolvectl</code> que o noso DNS está configurado:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ resolvectl status
+Global
+         Protocols: -LLMNR -mDNS -DNSOverTLS DNSSEC=no/unsupported
+  resolv.conf mode: stub
+Current DNS Server: 192.168.122.135
+       DNS Servers: 192.168.122.135
+
+Link 2 (enp1s0)
+    Current Scopes: DNS
+         Protocols: +DefaultRoute +LLMNR -mDNS -DNSOverTLS DNSSEC=no/unsupported
+Current DNS Server: 192.168.122.1
+       DNS Servers: 192.168.122.1</code></pre></div>
+</div>
+<figcaption>
+Servidores DNS de systemd-resolved
+</figcaption>
+</figure>
+<p>
+Tamén o podemos confirmar lendo <code>/run/systemd/resolve/resolv.conf</code>:</p>
+<figure>
+<div class="src src-text">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$ cat /run/systemd/resolve/resolv.conf | grep nameserver
+nameserver 192.168.122.135
+nameserver 192.168.122.1</code></pre></div>
+</div>
+<figcaption>
+Servidores DNS en /etc/systemd/resolve/resolv.conf
+</figcaption>
+</figure>
+<p>
+Nesta ocasión hai que apreciar que non confirmarmos os cambios lendo
+<code>/etc/resolv.conf</code>, senon con <code>resolvectl</code> ou
+<code>/run/systemd/resolve/resolv.conf</code>. Isto débese a que <code>systemd-resolved</code>
+realmente non modifica <code>/etc/resolv.conf</code>, senon que introduce o seu propio
+servidor DNS local en <code>127.0.0.53</code> e logo redirixe ás peticións DNS ao servidor
+que lle indiquemos.</p>
+<p>
+Sexa como sexa, unha vez feito isto a configuración debería manterse tras
+reiniciar.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-conclusion" class="outline-2">
+<h2 id="conclusion">
+Conclusión
+</h2>
+<div id="outline-text-conclusion" class="outline-text-2">
+<p>
+Neste artigo repasamos como modificar o noso servidor DNS en diferentes
+ferramentas despois de descubrir cal delas é o que se encarga de manexalo. Isto
+é o bonito de GNU/Linux, que existen varias posibilidades para manexar
+diferentes partes do sistema operativo, inda que de cando en vez nos de dores de
+cabeza.</p>
+<p>
+Agardo que isto vos servira para solucionar algún problema e aprender un pouco
+mais sobre o ecosistema GNU/Linux.</p>
+<p>
+Veña xente,</p>
+<p>
+Fe en Tux e ferro a fondo!!</p>
+</div>
+</div>
+
+
+        
+          <div class="blog-tags">
+            
+              <a href="https://hackliza.gal//tags/dns/">dns</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/bpf/">bpf</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/dhclient/">dhclient</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/networkmanager/">networkmanager</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/systemd/">systemd</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/linux/">linux</a>&nbsp;
+            
+              <a href="https://hackliza.gal//tags/gnu/">gnu</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="https://hackliza.gal/posts/stealing_sudo_sessions_with_ptrace/" data-toggle="tooltip" data-placement="top" title="Roubando sesións de sudo con ptrace">&larr; Artigo anterior</a>
+            </li>
+          
+          
+            <li class="next">
+              <a href="https://hackliza.gal/posts/linux-en-ad/" data-toggle="tooltip" data-placement="top" title="Como unir Debian a Active Directory">Artigo siguiente &rarr;</a>
+            </li>
+          
+        </ul>
+      
+
+
+      
+        
+          
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hackliza" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+          
+        
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="https://github.com/hackliza" title="GitHub">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/hackliza" title="Twitter">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2024
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="https://hackliza.gal/">Hackliza</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.74.3</a> alimentada &nbsp;&bull;&nbsp; Tema <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adaptado de <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="https://hackliza.gal/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://hackliza.gal/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+
