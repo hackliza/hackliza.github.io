@@ -6,6 +6,13 @@ En Hackliza de cando en cando damos algunha charla nalgún faladoiro ou conferen
 
 - [[ODP]](https://github.com/hackliza/presentacions/raw/refs/heads/main/introducion_as_inxeccions_de_codigo_en_python/introducion_as_inxeccions_de_codigo_en_python.odp) [[PDF]](https://github.com/hackliza/presentacions/raw/refs/heads/main/introducion_as_inxeccions_de_codigo_en_python/introducion_as_inxeccions_de_codigo_en_python.pdf)
  Introdución as inxeccións de código en Python -&nbsp;por&nbsp;@doncaralludo&nbsp;e&nbsp;@[zer1t0](https://defcon.social/@zer1t0)
+
+## EsLibre - Maio 2024
+
+- [[ODP]](https://github.com/hackliza/presentacions/raw/refs/heads/main/un-paseo-pola-seguridade-de-gnu-linux/un-paseo-pola-seguridade-de-gnu-linux.odp)
+  [[PDF]](https://raw.githubusercontent.com/hackliza/presentacions/refs/heads/main/un-paseo-pola-seguridade-de-gnu-linux/un-paseo-pola-seguridade-de-gnu-linux.pdf)
+  Un paseo pola seguridade de GNU/Linux - por @[zer1t0](https://defcon.social/@zer1t0)
+
 ## Faladoiro Hackliza - Marzo 2024
 
 - [[ODP]](https://github.com/hackliza/presentacions/raw/refs/heads/main/opsec_no_dia_a_dia/hackliza_opsec.odp) [[PDF]](https://github.com/hackliza/presentacions/raw/refs/heads/main/opsec_no_dia_a_dia/hackliza_opsec.pdf) Opsec no día a día - por @hacklego
